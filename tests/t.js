@@ -1,0 +1,38 @@
+const {chromium}=require('/tmp/pw/node_modules/playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});
+const errs=[];pg.on('pageerror',e=>errs.push(e.message));pg.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
+await pg.goto('http://127.0.0.1:8812/index.html?'+Date.now());await pg.waitForSelector('#preview canvas',{timeout:30000});
+const dl=async(id,tag)=>{const [d]=await Promise.all([pg.waitForEvent('download'),pg.click('#'+id)]);const f=`${tag}_${d.suggestedFilename()}`;await d.saveAs(f);console.log('  saved',f);};
+const ev=(f,...a)=>pg.evaluate(f,...a);
+const run=async(tag,setup)=>{console.log(tag, await setup());await dl('dlpptx',tag);await dl('dlpdf',tag);};
+await run('rr',()=>ev(()=>APP.select('ou (as in out)')));
+await ev(()=>APP.product('rollsolve'));
+await run('rs',()=>ev(()=>APP.select('Making 10')));
+await run('rs2',()=>ev(()=>APP.select('Two-digit addition with regrouping (43 + 28)')));
+await ev(()=>APP.product('taskcards'));
+await run('tc',()=>ev(()=>APP.select('Making 10')));
+await ev(()=>APP.product('bingo','reading'));
+await run('bgr',()=>ev(()=>APP.select('ou (as in out)')));
+await pg.check('#mix');await run('bgmix',()=>ev(()=>APP.select(['sh','ch','th (unvoiced, as in thin)'])));
+await pg.selectOption('#size','3');await pg.fill('#boards','4');await pg.uncheck('#same');await pg.dispatchEvent('#same','change');
+await run('bgrand',()=>ev(()=>APP.cur.secs[0].info));
+await ev(()=>APP.product('bingo','math'));await pg.selectOption('#size','4');await pg.check('#same');await pg.fill('#boards','6');
+await run('bgm',()=>ev(()=>APP.select('Making 10')));
+await ev(()=>APP.product('mystery','reading'));
+await pg.screenshot({path:'ui_mystery.png'});
+await run('myr',()=>ev(()=>APP.cur.secs[0].info));
+// pixel editor: paint, recolor, undo
+console.log('edit', await ev(()=>{const before=APP.MY.rows.join('|');APP.paintAt(0,0,'N');const a=APP.MY.rows[0][0];APP.recolor('N','#6B4226','Brown');APP.undo();return [a,APP.MY.rows.join('|')===before];}));
+await ev(()=>{APP.paintAt(0,0,'N');});await pg.screenshot({path:'ui_editor.png'});
+await ev(()=>APP.product('mystery','math'));
+await run('mym',()=>ev(()=>{APP.pickImage('Nature & Weather','butterfly');return APP.select('Add & subtract within 10');}));
+// bundle: roll and read 3 sets (2 skills + same skill twice)
+await ev(()=>APP.product('rollread','reading'));
+console.log('bundle', await ev(()=>{APP.select('sh');APP.addSet();APP.select('ch');APP.addSet();APP.select('ch');return APP.addSet();}));
+await pg.click('#showBundle');await pg.screenshot({path:'ui_bundle.png'});
+await dl('bpptx','bun');await dl('bpdf','bun');
+await ev(()=>APP.product('taskcards'));
+console.log('tc bundle', await ev(()=>{APP.select('Doubles');APP.addSet();APP.select('Multiply by 7 (×7)');return APP.addSet();}));
+await dl('bpdf','tcbun');await dl('bpptx','tcbun');
+await ev(()=>APP.product('rollread','reading'));await pg.screenshot({path:'ui.png'});
+console.log('errors',errs);await b.close();})();

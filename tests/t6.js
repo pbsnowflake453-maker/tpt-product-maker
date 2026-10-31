@@ -1,0 +1,12 @@
+const {chromium}=require('/tmp/pw/node_modules/playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1100}});
+pg.on('pageerror',e=>console.log('E',e.message));
+await pg.goto('http://127.0.0.1:8812/index.html?'+Date.now());await pg.waitForSelector('#preview canvas');
+await pg.evaluate(()=>APP.product('mystery','reading'));
+console.log(await pg.locator('#colors .pk-btn').allTextContents());
+await pg.locator('#colors .pk-btn').first().click();await pg.fill('#colors .picker.open .pk-q','G1 Unit 3');
+console.log(await pg.locator('#colors .picker.open .sk').allTextContents());
+await pg.locator('#colors .picker.open .sk',{hasText:'G1 Unit 3'}).first().click();await pg.waitForTimeout(300);
+console.log(await pg.locator('#colors .pk-btn').allTextContents(), await pg.evaluate(()=>APP.cur.secs[0].label));
+await pg.evaluate(()=>scrollTo(0,0));await pg.locator('#colors .pk-btn').nth(1).click();await pg.screenshot({path:'u_mystery.png'});
+await b.close();})();

@@ -1,0 +1,1764 @@
+{
+ "palette": {
+  "K": "#222222",
+  "W": "#FFFFFF",
+  "S": "#A0A0A0",
+  "s": "#5A5A5A",
+  "R": "#E53935",
+  "r": "#9B1B1B",
+  "p": "#F8A5C2",
+  "M": "#D81B60",
+  "O": "#FB8C00",
+  "Y": "#FDD835",
+  "T": "#F1D3A1",
+  "N": "#8D5524",
+  "n": "#5D3A1A",
+  "L": "#8BC34A",
+  "G": "#43A047",
+  "g": "#1B5E20",
+  "C": "#81D4FA",
+  "B": "#1E88E5",
+  "b": "#0D3C8C",
+  "P": "#8E44AD",
+  "v": "#C39BD3"
+ },
+ "themes": {
+  "Animals": [
+   {
+    "name": "cat",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "K.....K.",
+     "KK...KK.",
+     "KKKKKKK.",
+     "KYKKKYK.",
+     "KKKpKKK.",
+     "KKKKKKK.",
+     ".KKKKK..",
+     "........"
+    ]
+   },
+   {
+    "name": "pig",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "..p..p..",
+     ".pppppp.",
+     "pKppppKp",
+     "pppMMppp",
+     "ppMKKMpp",
+     "pppMMppp",
+     ".pppppp.",
+     "........"
+    ]
+   },
+   {
+    "name": "frog",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     ".WW..WW.",
+     "WKWGGWKW",
+     "GGGGGGGG",
+     "GRRRRRRG",
+     "GGRRRRGG",
+     ".GGGGGG.",
+     "GG....GG",
+     "........"
+    ]
+   },
+   {
+    "name": "ladybug",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "...KK...",
+     "..KKKK..",
+     ".RRKKRR.",
+     "RKRKKRKR",
+     "RRRKKRRR",
+     "RKRKKRKR",
+     ".RRKKRR.",
+     "..RRRR.."
+    ]
+   },
+   {
+    "name": "bee",
+    "width": 7,
+    "height": 10,
+    "size": "7x10",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "CC...CC",
+     "CWC.CWC",
+     ".CCKCC.",
+     ".YKYKY.",
+     "YYYYYYY",
+     "YKKKKKY",
+     "YYYYYYY",
+     "YKKKKKY",
+     ".YYYYY.",
+     "...K..."
+    ]
+   },
+   {
+    "name": "snail",
+    "width": 10,
+    "height": 8,
+    "size": "10x8",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     ".......K.K",
+     ".......K.K",
+     ".NNN...YYY",
+     "NTTTN..YKY",
+     "NTNNTN.YYY",
+     "NTNTTN.YYY",
+     "NTNNNNYYYY",
+     "YYYYYYYYY."
+    ]
+   },
+   {
+    "name": "owl",
+    "width": 8,
+    "height": 9,
+    "size": "8x9",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "N......N",
+     "NN....NN",
+     "NNNNNNNN",
+     "NWWNNWWN",
+     "NWKNNKWN",
+     "NNNOONNN",
+     "NTTTTTTN",
+     ".NTTTTN.",
+     "..O..O.."
+    ]
+   },
+   {
+    "name": "chick",
+    "width": 7,
+    "height": 7,
+    "size": "7x7",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "...Y...",
+     "..YYY..",
+     ".YKYKY.",
+     ".YYOYY.",
+     "YYYYYYY",
+     ".YYYYY.",
+     "..O.O.."
+    ]
+   },
+   {
+    "name": "bunny",
+    "width": 7,
+    "height": 8,
+    "size": "7x8",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     ".S...S.",
+     "SpS.SpS",
+     "SpS.SpS",
+     ".SSSSS.",
+     "SSKSKSS",
+     "SSSpSSS",
+     ".SSSSS.",
+     "..SSS.."
+    ]
+   },
+   {
+    "name": "turtle",
+    "width": 7,
+    "height": 9,
+    "size": "7x9",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "..LLL..",
+     "..LLL..",
+     "L.gGg.L",
+     "LgGgGgL",
+     ".gGgGg.",
+     ".gGgGg.",
+     "LgGgGgL",
+     "L.gGg.L",
+     "...L..."
+    ]
+   },
+   {
+    "name": "dog",
+    "width": 9,
+    "height": 7,
+    "size": "9x7",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     ".NNNNNNN.",
+     "nNNNNNNNn",
+     "nNKNNNKNn",
+     "nNNNNNNNn",
+     ".nNTKTNn.",
+     "..NTTTN..",
+     "...TpT..."
+    ]
+   },
+   {
+    "name": "mouse",
+    "width": 9,
+    "height": 7,
+    "size": "9x7",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     ".SS...SS.",
+     "SppS.SppS",
+     "SSSSSSSSS",
+     ".SKSSSKS.",
+     ".SSSSSSS.",
+     "..SSpSS..",
+     "...SSS..."
+    ]
+   },
+   {
+    "name": "bear",
+    "width": 10,
+    "height": 10,
+    "size": "10x10",
+    "batch": 1,
+    "rows": [
+     "..........",
+     ".NN....NN.",
+     ".NNNNNNNN.",
+     "..NNNNNN..",
+     "..NKNNKN..",
+     "..NTTTTN..",
+     "..NTKKTN..",
+     "...NTTN...",
+     "..........",
+     ".........."
+    ]
+   },
+   {
+    "name": "penguin",
+    "width": 10,
+    "height": 10,
+    "size": "10x10",
+    "batch": 1,
+    "rows": [
+     "...KKKK...",
+     "..KKKKKK..",
+     "..KWKKWK..",
+     "..KKOOKK..",
+     ".KKWWWWKK.",
+     ".KKWWWWKK.",
+     "KK.WWWW.KK",
+     "...WWWW...",
+     "...WWWW...",
+     "..OO..OO.."
+    ]
+   },
+   {
+    "name": "fox",
+    "width": 10,
+    "height": 10,
+    "size": "10x10",
+    "batch": 1,
+    "rows": [
+     "..........",
+     "O........O",
+     "OO......OO",
+     "OOOOOOOOOO",
+     ".OKOOOOKO.",
+     ".WOOOOOOW.",
+     "..WWOOWW..",
+     "...WKKW...",
+     "....WW....",
+     ".........."
+    ]
+   },
+   {
+    "name": "snake",
+    "width": 10,
+    "height": 5,
+    "size": "10x5",
+    "batch": 2,
+    "redo": true,
+    "rows": [
+     ".......GGG",
+     "......GGKG",
+     "..GGG.GG.R",
+     ".GG.GGG...",
+     "GG........"
+    ]
+   },
+   {
+    "name": "giraffe",
+    "width": 7,
+    "height": 8,
+    "size": "7x8",
+    "batch": 2,
+    "rows": [
+     "....YN.",
+     "....YYK",
+     "....Y..",
+     "....Y..",
+     "YNYNY..",
+     "YYYYY..",
+     "Y.Y.Y..",
+     "N.N.N.."
+    ]
+   },
+   {
+    "name": "elephant",
+    "width": 9,
+    "height": 7,
+    "size": "9x7",
+    "batch": 2,
+    "redo": true,
+    "rows": [
+     ".....SSS.",
+     ".SSSSsSSS",
+     "SSSSSsSKS",
+     "SSSSSsSSS",
+     "SSSSSSS.S",
+     "SS.SS...S",
+     "SS.SS..SS"
+    ]
+   },
+   {
+    "name": "spider",
+    "width": 9,
+    "height": 7,
+    "size": "9x7",
+    "batch": 2,
+    "redo": true,
+    "rows": [
+     "K.......K",
+     ".K.KKK.K.",
+     "..KKKKK..",
+     "KKKRKRKKK",
+     "..KKKKK..",
+     ".K.KKK.K.",
+     "K.......K"
+    ]
+   }
+  ],
+  "Food": [
+   {
+    "name": "pizza slice",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "OOOOOOOO",
+     "YYYYYYYY",
+     ".YRYYRY.",
+     ".YYYYYY.",
+     "..YRYY..",
+     "..YYYY..",
+     "...YY...",
+     "........"
+    ]
+   },
+   {
+    "name": "donut",
+    "width": 8,
+    "height": 7,
+    "size": "8x7",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "..pppp..",
+     ".pBppBp.",
+     "ppp..ppp",
+     "pYp..pYp",
+     "NNppppNN",
+     ".NNNNNN.",
+     "..NNNN.."
+    ]
+   },
+   {
+    "name": "ice cream cone",
+    "width": 6,
+    "height": 8,
+    "size": "6x8",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "..RR..",
+     ".pppp.",
+     "pppppp",
+     "pppppp",
+     "TNTTNT",
+     ".NTTN.",
+     ".TNNT.",
+     "..NN.."
+    ]
+   },
+   {
+    "name": "cupcake",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "....R...",
+     "..pppp..",
+     ".pppppp.",
+     "pppppppp",
+     ".NTNTNT.",
+     ".NTNTNT.",
+     "..NTNT..",
+     "........"
+    ]
+   },
+   {
+    "name": "hamburger",
+    "width": 8,
+    "height": 7,
+    "size": "8x7",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "..TTTT..",
+     ".TWTTWT.",
+     "TTTTTTTT",
+     "GGGGGGGG",
+     "nnnnnnnn",
+     "YYYYYYYY",
+     ".TTTTTT."
+    ]
+   },
+   {
+    "name": "taco",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "........",
+     "..YYYY..",
+     ".YGRGGY.",
+     "YGRGRGGY",
+     "YYYYYYYY",
+     "YYYYYYYY",
+     "........",
+     "........"
+    ]
+   },
+   {
+    "name": "sandwich",
+    "width": 8,
+    "height": 6,
+    "size": "8x6",
+    "batch": 2,
+    "rows": [
+     "..TTTT..",
+     ".TTTTTT.",
+     "GGGGGGGG",
+     "RRRRRRRR",
+     "YYYYYYYY",
+     ".TTTTTT."
+    ]
+   },
+   {
+    "name": "water bottle",
+    "width": 4,
+    "height": 7,
+    "size": "4x7",
+    "batch": 2,
+    "rows": [
+     ".BB.",
+     "CCCC",
+     "CWCC",
+     "BBBB",
+     "CCCC",
+     "CCCC",
+     "CCCC"
+    ]
+   }
+  ],
+  "Fruits & Veggies": [
+   {
+    "name": "apple",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "....N...",
+     "...NG...",
+     ".RRRRRR.",
+     "RRWRRRRR",
+     "RWRRRRRR",
+     "RRRRRRRR",
+     ".RRRRRR.",
+     "..R..R.."
+    ]
+   },
+   {
+    "name": "cherries",
+    "width": 10,
+    "height": 9,
+    "size": "10x9",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     ".....NGG..",
+     ".....N....",
+     "....N.N...",
+     "...N...N..",
+     "..N....N..",
+     ".RRR..RRR.",
+     "RWRR..RWRR",
+     "RRRR..RRRR",
+     ".RR....RR."
+    ]
+   },
+   {
+    "name": "strawberry",
+    "width": 9,
+    "height": 9,
+    "size": "9x9",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "..G.G.G..",
+     ".GGGGGGG.",
+     "RRRRRRRRR",
+     "RYRRYRRYR",
+     "RRRRRRRRR",
+     ".RRYRYRR.",
+     ".RRRRRRR.",
+     "..RRYRR..",
+     "...RRR..."
+    ]
+   },
+   {
+    "name": "orange",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...Gg...",
+     "..OOOO..",
+     ".OOWOOO.",
+     "OOWOOOOO",
+     "OOOOOOOO",
+     "OOOOOOOO",
+     ".OOOOOO.",
+     "..OOOO.."
+    ]
+   },
+   {
+    "name": "watermelon",
+    "width": 11,
+    "height": 6,
+    "size": "11x6",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "GWRRRRRRRWG",
+     "GWRKRKRKRWG",
+     ".GWRKRKRWG.",
+     ".GGWRRRWGG.",
+     "..GGWWWGG..",
+     "...GGGGG..."
+    ]
+   },
+   {
+    "name": "pineapple",
+    "width": 9,
+    "height": 10,
+    "size": "9x10",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "....g....",
+     "..g.g.g..",
+     "...ggg...",
+     "..YYYYY..",
+     ".YOYOYOY.",
+     ".YYOYOYY.",
+     ".YOYOYOY.",
+     ".YYOYOYY.",
+     ".YOYOYOY.",
+     "..YYYYY.."
+    ]
+   },
+   {
+    "name": "lemon",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "........",
+     "..YYYY..",
+     ".YYWYYY.",
+     "YYYYYYYY",
+     ".YYYYYY.",
+     "..YYYY..",
+     "........",
+     "........"
+    ]
+   },
+   {
+    "name": "tomato",
+    "width": 5,
+    "height": 6,
+    "size": "5x6",
+    "batch": 2,
+    "rows": [
+     "..G..",
+     ".GGG.",
+     "RRRRR",
+     "RWRRR",
+     "RRRRR",
+     ".RRR."
+    ]
+   }
+  ],
+  "Seasons": [
+   {
+    "name": "acorn",
+    "width": 8,
+    "height": 7,
+    "size": "8x7",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "...nn...",
+     ".nnnnnn.",
+     "nnnnnnnn",
+     ".NNNNNN.",
+     ".NNNNNN.",
+     "..NNNN..",
+     "...NN..."
+    ]
+   },
+   {
+    "name": "snowman",
+    "width": 7,
+    "height": 10,
+    "size": "7x10",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "..KKK..",
+     "..KKK..",
+     ".KKKKK.",
+     ".SWWWS.",
+     ".SKWKS.",
+     ".SWOWS.",
+     ".RRRRR.",
+     "SWWKWWS",
+     "SWWKWWS",
+     ".SSSSS."
+    ]
+   },
+   {
+    "name": "tulip",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "........",
+     ".R.R.R..",
+     ".RRRRR..",
+     ".RRRRR..",
+     "..RRR...",
+     "...G.G..",
+     "...GG...",
+     "...G...."
+    ]
+   },
+   {
+    "name": "umbrella",
+    "width": 9,
+    "height": 9,
+    "size": "9x9",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "....K....",
+     "..BBBBB..",
+     ".BBBBBBB.",
+     "BBBBBBBBB",
+     "B.B.K.B.B",
+     "....K....",
+     "....K....",
+     "..K.K....",
+     "...K....."
+    ]
+   },
+   {
+    "name": "sun",
+    "width": 9,
+    "height": 9,
+    "size": "9x9",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "....Y....",
+     ".Y.....Y.",
+     "...YYY...",
+     "..YYYYY..",
+     "Y.YYYYY.Y",
+     "..YYYYY..",
+     "...YYY...",
+     ".Y.....Y.",
+     "....Y...."
+    ]
+   },
+   {
+    "name": "beach ball",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "..RYYR..",
+     ".BRYYRB.",
+     "BBRYYRBB",
+     "BBRYYRBB",
+     "BBRYYRBB",
+     "BBRYYRBB",
+     ".BRYYRB.",
+     "..RYYR.."
+    ]
+   },
+   {
+    "name": "pine tree",
+    "width": 7,
+    "height": 8,
+    "size": "7x8",
+    "batch": 2,
+    "redo": true,
+    "rows": [
+     "...G...",
+     "..GGG..",
+     ".GGGGG.",
+     "..GGG..",
+     ".GGGGG.",
+     "GGGGGGG",
+     "...N...",
+     "...N..."
+    ]
+   }
+  ],
+  "Holidays": [
+   {
+    "name": "jack-o-lantern",
+    "width": 9,
+    "height": 8,
+    "size": "9x8",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "....g....",
+     ".OOOgOOO.",
+     "OOOOOOOOO",
+     "OKKOOOKKO",
+     "OOOOKOOOO",
+     "OKKKKKKKO",
+     "OOKOKOKOO",
+     ".OOOOOOO."
+    ]
+   },
+   {
+    "name": "candy",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "........",
+     "P......P",
+     "PP.OO.PP",
+     "PPOOOOPP",
+     "PPOOOOPP",
+     "PP.OO.PP",
+     "P......P",
+     "........"
+    ]
+   },
+   {
+    "name": "witch hat",
+    "width": 9,
+    "height": 7,
+    "size": "9x7",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "....P....",
+     "...PPP...",
+     "...PPP...",
+     "..PPPPP..",
+     "..OOOOO..",
+     "..PPPPP..",
+     "PPPPPPPPP"
+    ]
+   },
+   {
+    "name": "christmas tree",
+    "width": 9,
+    "height": 9,
+    "size": "9x9",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "....Y....",
+     "...GGG...",
+     "..GRGRG..",
+     "...GGG...",
+     "..GGGGG..",
+     ".GBGYGBG.",
+     "GGGGGGGGG",
+     "....N....",
+     "...NNN..."
+    ]
+   },
+   {
+    "name": "gift",
+    "width": 9,
+    "height": 8,
+    "size": "9x8",
+    "batch": 1,
+    "redo": true,
+    "rows": [
+     "..RR.RR..",
+     "...RRR...",
+     "GGGGRGGGG",
+     "GGGGRGGGG",
+     "RRRRRRRRR",
+     "GGGGRGGGG",
+     "GGGGRGGGG",
+     "GGGGRGGGG"
+    ]
+   },
+   {
+    "name": "heart",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "........",
+     ".RR.RR..",
+     "RWRRRRR.",
+     "RRRRRRR.",
+     ".RRRRR..",
+     "..RRR...",
+     "...R....",
+     "........"
+    ]
+   },
+   {
+    "name": "easter egg",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...pp...",
+     "..pppp..",
+     ".YYYYYY.",
+     ".pPpPpP.",
+     ".PpPpPp.",
+     ".CCCCCC.",
+     "..pppp..",
+     "........"
+    ]
+   },
+   {
+    "name": "pot of gold",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "..Y.Y...",
+     ".YYYYY..",
+     "KKKKKKK.",
+     ".KKKKK..",
+     "KKKKKKK.",
+     "KKKKKKK.",
+     ".KKKKK..",
+     "........"
+    ]
+   },
+   {
+    "name": "heart",
+    "width": 7,
+    "height": 6,
+    "size": "7x6",
+    "batch": 2,
+    "redo": true,
+    "rows": [
+     ".RR.RR.",
+     "RRRRRRR",
+     "RRRRRRR",
+     ".RRRRR.",
+     "..RRR..",
+     "...R..."
+    ]
+   },
+   {
+    "name": "ornament",
+    "width": 6,
+    "height": 8,
+    "size": "6x8",
+    "batch": 2,
+    "rows": [
+     "..YY..",
+     "..SS..",
+     ".RRRR.",
+     "RWRRRR",
+     "RRRRRR",
+     "YYYYYY",
+     "RRRRRR",
+     ".RRRR."
+    ]
+   },
+   {
+    "name": "bunny face",
+    "width": 9,
+    "height": 9,
+    "size": "9x9",
+    "batch": 2,
+    "redo": true,
+    "rows": [
+     ".SS...SS.",
+     ".SpS.SpS.",
+     ".SpS.SpS.",
+     ".SSSSSSS.",
+     "SWWWWWWWS",
+     "SWKWWWKWS",
+     "SpWWpWWpS",
+     "SWWWWWWWS",
+     ".SSSSSSS."
+    ]
+   }
+  ],
+  "Nature & Weather": [
+   {
+    "name": "flower",
+    "width": 9,
+    "height": 10,
+    "size": "9x10",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "..MM.MM..",
+     ".MMMMMMM.",
+     "MMMYYYMMM",
+     ".MYYYYYM.",
+     "MMMYYYMMM",
+     ".MMMMMMM.",
+     "..MMGMM..",
+     ".GG.G.GG.",
+     "..GGGGG..",
+     "....G...."
+    ]
+   },
+   {
+    "name": "tree",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "..GGGG..",
+     ".GGGGGG.",
+     "GGgGGGGG",
+     "GGGGGgGG",
+     ".GGGGGG.",
+     "...NN...",
+     "...NN...",
+     "..NNNN.."
+    ]
+   },
+   {
+    "name": "cactus",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...G....",
+     "..GGG...",
+     "G.GGG...",
+     "G.GGG.G.",
+     "GGGGG.G.",
+     "..GGGGG.",
+     "..GGG...",
+     "..GGG..."
+    ]
+   },
+   {
+    "name": "rain cloud",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...SS...",
+     "..SSSS..",
+     ".SSSSSS.",
+     "SSSSSSSS",
+     "........",
+     ".B..B..B",
+     "B..B..B.",
+     "........"
+    ]
+   },
+   {
+    "name": "rainbow",
+    "width": 10,
+    "height": 10,
+    "size": "10x10",
+    "batch": 1,
+    "rows": [
+     "..........",
+     "...RRRR...",
+     "..ROOOOR..",
+     ".ROYYYYOR.",
+     "ROYGGGGYOR",
+     "OYGBBBBGYO",
+     "YGB....BGY",
+     "GB......BG",
+     "..........",
+     ".........."
+    ]
+   },
+   {
+    "name": "moon",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...YYY..",
+     "..YYY...",
+     ".YYY....",
+     ".YYY....",
+     ".YYY....",
+     "..YYY...",
+     "...YYY..",
+     "........"
+    ]
+   },
+   {
+    "name": "butterfly",
+    "width": 11,
+    "height": 9,
+    "size": "11x9",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "...K...K...",
+     ".PP.K.K.PP.",
+     "PvvP.K.PvvP",
+     "PvYvPKPvYvP",
+     "PvvvPKPvvvP",
+     ".PPPPKPPPP.",
+     ".PvvPKPvvP.",
+     ".PvvPKPvvP.",
+     "..PP.K.PP.."
+    ]
+   },
+   {
+    "name": "mushroom",
+    "width": 10,
+    "height": 10,
+    "size": "10x10",
+    "batch": 1,
+    "rows": [
+     "..........",
+     "...RRRR...",
+     "..RRWRRR..",
+     ".RWRRRRWR.",
+     ".RRRRRRRR.",
+     "...TTTT...",
+     "...TTTT...",
+     "..GGGGGG..",
+     "..........",
+     ".........."
+    ]
+   },
+   {
+    "name": "sun",
+    "width": 5,
+    "height": 5,
+    "size": "5x5",
+    "batch": 2,
+    "rows": [
+     "Y.Y.Y",
+     ".YYY.",
+     "YYYYY",
+     ".YYY.",
+     "Y.Y.Y"
+    ]
+   },
+   {
+    "name": "tall tree",
+    "width": 7,
+    "height": 9,
+    "size": "7x9",
+    "batch": 2,
+    "redo": true,
+    "rows": [
+     "..GGG..",
+     ".GGGGG.",
+     "GGGGGGG",
+     "GGgGgGG",
+     "GGGGGGG",
+     ".GGGGG.",
+     "...N...",
+     "...N...",
+     "..NNN.."
+    ]
+   },
+   {
+    "name": "snowflake",
+    "width": 5,
+    "height": 5,
+    "size": "5x5",
+    "batch": 2,
+    "rows": [
+     "C.C.C",
+     ".CCC.",
+     "CCWCC",
+     ".CCC.",
+     "C.C.C"
+    ]
+   }
+  ],
+  "School": [
+   {
+    "name": "pencil",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "......pp",
+     ".....YYp",
+     "....YYY.",
+     "...YYY..",
+     "..YYY...",
+     ".TYY....",
+     ".TT.....",
+     "K......."
+    ]
+   },
+   {
+    "name": "apple",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "....N...",
+     "...NG...",
+     ".RRRRRR.",
+     "RRWRRRRR",
+     "RWRRRRRR",
+     "RRRRRRRR",
+     ".RRRRRR.",
+     "..R..R.."
+    ]
+   },
+   {
+    "name": "backpack",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "..RRRR..",
+     ".R....R.",
+     "RRRRRRRR",
+     "RRRRRRRR",
+     "RYYYYYYR",
+     "RRRRRRRR",
+     "RRRRRRRR",
+     ".RRRRRR."
+    ]
+   },
+   {
+    "name": "bell",
+    "width": 5,
+    "height": 5,
+    "size": "5x5",
+    "batch": 2,
+    "rows": [
+     "..Y..",
+     ".YYY.",
+     ".YYY.",
+     "YYYYY",
+     "..N.."
+    ]
+   }
+  ],
+  "Transportation": [
+   {
+    "name": "car",
+    "width": 10,
+    "height": 6,
+    "size": "10x6",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "..RRRRR...",
+     ".RCCRCCR..",
+     "RRRRRRRRRR",
+     "RRRRRRRRRY",
+     "RRKKRRKKRR",
+     "..KK..KK.."
+    ]
+   },
+   {
+    "name": "truck",
+    "width": 10,
+    "height": 6,
+    "size": "10x6",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "BBBBBB....",
+     "BBBBBBRRR.",
+     "BBBBBBRCCR",
+     "BBBBBBRRRR",
+     "SSSSSSSSSS",
+     ".KK....KK."
+    ]
+   },
+   {
+    "name": "sailboat",
+    "width": 10,
+    "height": 10,
+    "size": "10x10",
+    "batch": 1,
+    "rows": [
+     "....R.....",
+     "....RW....",
+     "....RWW...",
+     "....RWWW..",
+     "....RWWWW.",
+     "....R.....",
+     "NNNNNNNNNN",
+     ".NNNNNNNN.",
+     "BBBBBBBBBB",
+     ".........."
+    ]
+   },
+   {
+    "name": "rocket",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...R....",
+     "..WWW...",
+     "..WCW...",
+     "..WWW...",
+     "..WWW...",
+     ".RWWWR..",
+     "RR.O.RR.",
+     "...O...."
+    ]
+   },
+   {
+    "name": "train",
+    "width": 10,
+    "height": 6,
+    "size": "10x6",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     ".KK.......",
+     ".KK..rrrrr",
+     "RRRRRrCCr.",
+     "YRRRRrrrr.",
+     "RRRRRRRRRR",
+     ".KK.KK.KK."
+    ]
+   },
+   {
+    "name": "helicopter",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "........",
+     "KKKKKKKK",
+     "...K....",
+     "..BBBB..",
+     "BCCBBBBB",
+     "BBBBB...",
+     ".K..K...",
+     "KKKKK..."
+    ]
+   },
+   {
+    "name": "traffic light",
+    "width": 6,
+    "height": 12,
+    "size": "6x12",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     ".KKKK.",
+     ".KRRK.",
+     ".KRRK.",
+     ".KKKK.",
+     ".KYYK.",
+     ".KYYK.",
+     ".KKKK.",
+     ".KGGK.",
+     ".KGGK.",
+     ".KKKK.",
+     "..SS..",
+     "..SS.."
+    ]
+   },
+   {
+    "name": "bus",
+    "width": 10,
+    "height": 6,
+    "size": "10x6",
+    "batch": 2,
+    "rows": [
+     "YYYYYYYYY.",
+     "YCCYCCYCCY",
+     "YCCYCCYCCY",
+     "YYYYYYYYYY",
+     "YKKYYYYKKY",
+     ".KK....KK."
+    ]
+   },
+   {
+    "name": "tractor",
+    "width": 10,
+    "height": 9,
+    "size": "10x9",
+    "batch": 2,
+    "redo": 3,
+    "rows": [
+     ".GGGG.....",
+     ".GCCG..K..",
+     ".GCCG..K..",
+     ".GGGGGGGGG",
+     ".KKKGGGGGG",
+     "KSSSKGGGGG",
+     "KSYSK..KKK",
+     "KSSSK..KYK",
+     ".KKK...KKK"
+    ]
+   }
+  ],
+  "Household": [
+   {
+    "name": "house",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "....R...",
+     "...RRR..",
+     "..RRRRR.",
+     ".RRRRRRR",
+     "..TTTTT.",
+     "..TCTNT.",
+     "..TTTNT.",
+     "........"
+    ]
+   },
+   {
+    "name": "mug",
+    "width": 9,
+    "height": 7,
+    "size": "9x7",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "BBBBBBB..",
+     "BnnnnnB..",
+     "BBBBBBBBB",
+     "BBBBBBB.B",
+     "BBBBBBBBB",
+     "BBBBBBB..",
+     ".BBBBB..."
+    ]
+   },
+   {
+    "name": "light bulb",
+    "width": 7,
+    "height": 10,
+    "size": "7x10",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "..YYY..",
+     ".YYYYY.",
+     "YYYYYYY",
+     "YYOYOYY",
+     ".YYOYY.",
+     "..YYY..",
+     "..SSS..",
+     "..sss..",
+     "..SSS..",
+     "...s..."
+    ]
+   },
+   {
+    "name": "teddy bear",
+    "width": 9,
+    "height": 9,
+    "size": "9x9",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "NN.....NN",
+     "NTNNNNNTN",
+     ".NNNNNNN.",
+     ".NKNNNKN.",
+     ".NNTTTNN.",
+     "..NTKTN..",
+     "NNTTTTTNN",
+     ".NTTTTTN.",
+     ".NN...NN."
+    ]
+   },
+   {
+    "name": "crown",
+    "width": 9,
+    "height": 6,
+    "size": "9x6",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "Y...Y...Y",
+     "YY.YYY.YY",
+     "YYYYYYYYY",
+     "YRYYBYYRY",
+     "YYYYYYYYY",
+     "OOOOOOOOO"
+    ]
+   },
+   {
+    "name": "tv",
+    "width": 7,
+    "height": 8,
+    "size": "7x8",
+    "batch": 2,
+    "rows": [
+     "..K.K..",
+     "...K...",
+     "KKKKKKK",
+     "KCCCCCK",
+     "KCWCCCK",
+     "KCCCCCK",
+     "KKKKKKK",
+     ".K...K."
+    ]
+   }
+  ],
+  "Space": [
+   {
+    "name": "rocket",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...R....",
+     "..WWW...",
+     "..WCW...",
+     "..WWW...",
+     "..WWW...",
+     ".RWWWR..",
+     "RR.O.RR.",
+     "...O...."
+    ]
+   },
+   {
+    "name": "alien",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     ".G....G.",
+     "..G..G..",
+     "..GGGG..",
+     ".GKGGKG.",
+     ".GGGGGG.",
+     "..GKKG..",
+     "..GGGG..",
+     ".G....G."
+    ]
+   },
+   {
+    "name": "ufo",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...CC...",
+     "..CCCC..",
+     "..CCCC..",
+     ".SSSSSS.",
+     "SYSYSYSS",
+     ".SSSSSS.",
+     "..Y..Y..",
+     "........"
+    ]
+   },
+   {
+    "name": "moon",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...YYY..",
+     "..YYY...",
+     ".YYY....",
+     ".YYY....",
+     ".YYY....",
+     "..YYY...",
+     "...YYY..",
+     "........"
+    ]
+   },
+   {
+    "name": "astronaut helmet",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "..SSSS..",
+     ".SWWWWS.",
+     "SWbbbbWS",
+     "SWbCbbWS",
+     "SWbbbbWS",
+     ".SWWWWS.",
+     "..SSSS..",
+     ".SSSSSS."
+    ]
+   },
+   {
+    "name": "earth",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "..BBBB..",
+     ".BGGBBB.",
+     "BGGGBBGB",
+     "BBGBBGGB",
+     "BBBBGGBB",
+     ".BBBBBB.",
+     "..BBBB..",
+     "........"
+    ]
+   }
+  ],
+  "Ocean": [
+   {
+    "name": "fish",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "........",
+     "...OO...",
+     "O.OOOO..",
+     "OOOOOWO.",
+     "OOOOOKOO",
+     "O.OOOOO.",
+     "...OO...",
+     "........"
+    ]
+   },
+   {
+    "name": "anchor",
+    "width": 9,
+    "height": 10,
+    "size": "9x10",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "...KKK...",
+     "...K.K...",
+     "...KKK...",
+     "....K....",
+     ".KKKKKKK.",
+     "....K....",
+     "K...K...K",
+     "KK..K..KK",
+     ".KK.K.KK.",
+     "..KKKKK.."
+    ]
+   }
+  ],
+  "Fun & Characters": [
+   {
+    "name": "smiley",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "..YYYY..",
+     ".YYYYYY.",
+     "YYKYYKYY",
+     "YYYYYYYY",
+     "YKYYYYKY",
+     "YYKKKKYY",
+     ".YYYYYY.",
+     "..YYYY.."
+    ]
+   },
+   {
+    "name": "robot",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...R....",
+     "...S....",
+     ".SSSSSS.",
+     ".SCSSCS.",
+     ".SSKKSS.",
+     "..SSSS..",
+     ".SSSSSS.",
+     ".S.SS.S."
+    ]
+   },
+   {
+    "name": "monster",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "G.....G.",
+     "GG...GG.",
+     "GGGGGGG.",
+     "GWKGWKG.",
+     "GGGGGGG.",
+     "GWKWKWG.",
+     "GGGGGGG.",
+     "G.G.G.G."
+    ]
+   },
+   {
+    "name": "cat face",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "K.....K.",
+     "KK...KK.",
+     "KKKKKKK.",
+     "KGKKKGK.",
+     "KKKpKKK.",
+     "KKKKKKK.",
+     ".KKKKK..",
+     "........"
+    ]
+   },
+   {
+    "name": "sword",
+    "width": 7,
+    "height": 10,
+    "size": "7x10",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     "...S...",
+     "..SWS..",
+     "..SWS..",
+     "..SWS..",
+     "..SWS..",
+     "..SWS..",
+     "YYYYYYY",
+     "...N...",
+     "...N...",
+     "..YYY.."
+    ]
+   },
+   {
+    "name": "potion",
+    "width": 8,
+    "height": 8,
+    "size": "8x8",
+    "batch": 1,
+    "rows": [
+     "...NN...",
+     "...WW...",
+     "..WvvW..",
+     ".WPPPPW.",
+     ".WPvPPW.",
+     ".WPPPPW.",
+     "..WWWW..",
+     "........"
+    ]
+   },
+   {
+    "name": "treasure chest",
+    "width": 10,
+    "height": 8,
+    "size": "10x8",
+    "batch": 1,
+    "redo": 3,
+    "rows": [
+     ".nnnnnnnn.",
+     "nNYNNNNYNn",
+     "nNYNNNNYNn",
+     "nnnnYYnnnn",
+     "nNYNYYNYNn",
+     "nNYNNNNYNn",
+     "nNYNNNNYNn",
+     "nnnnnnnnnn"
+    ]
+   }
+  ]
+ }
+}

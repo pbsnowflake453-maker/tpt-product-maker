@@ -1,0 +1,12 @@
+const {chromium}=require('/tmp/pw/node_modules/playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://127.0.0.1:8812/index.html?'+Date.now());await pg.waitForSelector('#preview canvas');
+const dl=async t=>{const [d]=await Promise.all([pg.waitForEvent('download'),pg.click('#dlpdf')]);await d.saveAs('f_'+t+'.pdf');};
+await pg.evaluate(()=>APP.product('bingo','reading'));await pg.selectOption('#size','3');
+console.log(await pg.evaluate(()=>APP.select('th (unvoiced, as in thin)')), await pg.evaluate(()=>APP.cur.secs[0].label));await dl('b3');
+await pg.selectOption('#size','5');console.log(await pg.evaluate(()=>APP.cur.secs[0].info));
+await pg.evaluate(()=>APP.product('mystery','reading'));
+console.log(await pg.evaluate(()=>{APP.assign('N','oo (as in zoo)');APP.assign('T','-ed (says /t/)');APP.assign('K','ou (as in out)');return APP.cur.secs[0].label;}));await dl('my');
+await pg.click('#skillSec .pk-btn').catch(()=>{});
+await pg.evaluate(()=>APP.product('rollread','reading'));await pg.click('#skillPick .pk-btn');await pg.fill('#skillPick .pk-q','th');await pg.screenshot({path:'f_picker.png'});
+console.log(errs);await b.close();})();

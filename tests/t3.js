@@ -1,0 +1,14 @@
+const {chromium}=require('/tmp/pw/node_modules/playwright');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1300},acceptDownloads:true});
+const errs=[];pg.on('pageerror',e=>errs.push(e.message));pg.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
+await pg.goto('http://127.0.0.1:8812/index.html?'+Date.now());await pg.waitForSelector('#preview canvas');
+const dl=async(id,tag)=>{const [d]=await Promise.all([pg.waitForEvent('download'),pg.click('#'+id)]);const f=`c_${tag}_${d.suggestedFilename()}`;await d.saveAs(f);console.log(' ',f);};
+const ev=(f)=>pg.evaluate(f);
+console.log(await ev(()=>APP.select('Short Vowel CVC')));await dl('dlpdf','rrcat');await dl('dlpptx','rrcat');
+console.log(await ev(()=>{APP.select('Magic e (VCe)');APP.addSet();APP.select('FLOSS (ff, ll, ss, zz)');return APP.addSet();}));await dl('bpdf','rrbun');
+await ev(()=>APP.product('bingo','reading'));console.log(await ev(()=>APP.select('R-Controlled Vowels')));await dl('dlpdf','bgcat');
+await ev(()=>APP.product('mystery','reading'));await ev(()=>scrollTo(0,0));await pg.screenshot({path:'c_ui_mystery.png'});
+console.log(await ev(()=>{APP.assign('N','Consonant Digraphs');return APP.cur.secs[0].label}));await dl('dlpdf','mybg');await dl('dlpptx','mybg');
+await ev(()=>APP.bgOff(false));await dl('dlpdf','mywhite');
+await ev(()=>APP.product('mystery','math'));await ev(()=>{APP.pickImage('Nature & Weather','butterfly');APP.select('Add & subtract within 10');});await dl('dlpdf','mymath');
+console.log('errors',errs);await b.close();})();
