@@ -1,5 +1,6 @@
 (function(){
 const T=TPT, PW=T.PH, PH=T.PW;
+const SK=T.SKILLS||window.SKILLS||[];
 function display(sk){
   const n=sk.name, d=sk.disp||n;
   if(sk.category) return d;
@@ -141,10 +142,10 @@ T.products.push({
     const matchList=pools(sk).reg;
     let otherList=[];
     if(cfg.opts&&cfg.opts.otherSkill){
-      const os=T.SKILLS.find(s=>s.name===cfg.opts.otherSkill);
+      const os=SK.find(s=>s.name===cfg.opts.otherSkill);
       if(os) otherList=pools(os).reg;
     }
-    if(!otherList.length) otherList=priorWords(T.SKILLS||[], sk.pos||9999);
+    if(!otherList.length) otherList=priorWords(SK, sk.pos||9999);
     if(!otherList.length) otherList=['the','and','for','was','you','are'];
     const path=randomSimplePath(rows,cols,r);
     const grid=fillWords(path,rows,cols,matchList,otherList,r);
