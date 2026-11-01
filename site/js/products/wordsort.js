@@ -114,4 +114,37 @@ function cover(label, sub){
   const p=new T.Page('P');
   p.rect(0.25,0.25,PW-0.5,PH-0.5,{r:0.28,lw:4,fill:'FFFFFF'});
   p.text(0,0.8,PW,1.0,'Word Sort',{font:'Pacifico',size:48});
-  const bw=Math.min(7.5,Math.max(3,T.textW(label,'Andika',28
+  const bw=Math.min(7.5,Math.max(3,T.textW(label,'Andika',28,true)+0.6));
+  T.bubble(p,PW/2-bw/2,2.0,bw,0.75,label,{size:28});
+  p.text(0.6,3.1,PW-1.2,1.2,sub,{size:16});
+  p.text(0,PH-0.8,PW,0.3,T.STORE,{size:13});
+  return p;
+}
+// A single category skill (e.g. Short Vowel CVC) expands to its member skills as columns.
+function columns(skills){
+  if(skills.length===1&&skills[0].category&&skills[0].members){
+    const m=skills[0].members.map(n=>SKILLS.find(s=>s.name===n)).filter(Boolean);
+    if(m.length>1) return m.slice(0,4);
+  }
+  return skills.slice(0,4);
+}
+T.products.push({id:'wordsort',name:'Word Sort',title:'Word Sort',orient:'P',kinds:['reading'],multiSkill:true,
+  section(cfg,seed){
+    const o=cfg.opts||{}, write=!!o.write||o.cut===false, cut=!write, r=T.rng(seed);
+    const skills=columns(cfg.skills);
+    const label=cfg.label||cfg.skills.map(T.readLabel).join(' • ');
+    const n=skills.length, per=Math.max(1,Math.min(7,Math.floor(16/Math.max(n,1))));
+    const used=new Set(), lists=skills.map(sk=>{
+      const out=[]; for(const w of T.shuffle(pools(sk).reg,r)){if(out.length>=per)break; if(!used.has(w)){used.add(w);out.push(w);}}
+      return out;});
+    const words=T.shuffle(lists.flat(),r);
+    let warn='';
+    if(n<2) warn='Pick at least 2 skills (turn on "Mix several skills") so there is something to sort.';
+    else if(lists.some(l=>l.length<per)) warn='Some skills have fewer words, so columns are uneven.';
+    const pages=[cut?cutPastePage(skills,words,label):writeInPage(skills,words,label), answerKey(skills,lists,label)];
+    return {label,pages,cut,info:`${cut?'Cut-and-paste':'Write-in'} · ${n} columns · ${words.length} words`+(warn?'<br>'+warn:'')};
+  },
+  directions(cfgs){const o=(cfgs[0]&&cfgs[0].opts)||{}; return [howTo(!(o.write||o.cut===false))];},
+  cover(secs){return cover(T.skillsText(secs),secs.length+' word sort'+(secs.length>1?'s':'')+' with answer keys');}
+});
+})();
