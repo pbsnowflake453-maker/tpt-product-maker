@@ -20,6 +20,9 @@
   <label class="blk"><input type="radio" name="ws" id="wsCut" checked> Cut-and-paste (word cards to glue)</label>
   <label class="blk"><input type="radio" name="ws" id="wsWrite"> Write-in (word bank + writing boxes)</label>
   </section>
+  <section id="mazeOpt" hidden><h2>Maze size</h2>
+  <label>Grid <select id="mazeSize"><option>5x5</option><option>5x6</option><option>6x6</option><option>6x7</option><option>6x8</option></select></label>
+</section>
   <section id="optSec" hidden><h2>Options</h2>
     <label>Boards <input type="number" id="boards" min="1" max="40" value="6"></label>
     <label>Size <select id="size"><option value="3">3 x 3 (9)</option><option value="4">4 x 4 (16)</option><option value="5" selected>5 x 5 (25)</option></select></label>
@@ -43,6 +46,6 @@
 </main>
 <script src="vendor/jspdf.umd.min.js"></script><script src="vendor/pptxgen.bundle.js"></script>
 <script src="data/skills.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
-<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script>
+<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script>
 <script src="js/app.js"></script>
 </body></html>
