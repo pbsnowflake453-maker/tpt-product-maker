@@ -15,7 +15,7 @@ function crayon(p,x,y,w,h,fill,label){const tw=h*.6;
   p.shape('triR',q(x+w-tw-h*.15),q(y+h*.2),q(tw),q(h*.6),{fill:fill.replace('#',''),lw:1.5});
   p.rect(q(x),q(y),q(w-tw),q(h),{r:q(h)*.3,lw:1.5,fill:fill.replace('#','')});
   tb(p,x+2,y,w-tw-4,h,label,{size:T.fit(label,'Andika',11,true,q(w-tw-6)),bold:true,m:0,nowrap:true,color:sum(fill)<380?'FFFFFF':'000000'});}
-function bubble(p,x,y,w,h,sz,text){p.rect(q(x),q(y),q(w),q(h),{r:q(h)/2,lw:2.5,fill:'FFFFFF'});tb(p,x+4,y,w-8,h,text,{size:T.fit(text,'Andika',sz,true,q(w-16)),bold:true,m:0,nowrap:true});}
+function bubble(p,x,y,w,h,sz,text){if(/^Skills?:/.test(text)){T.skillTag(p,q(x+w),q(y+h/2),text,Math.min(11,sz));return;}p.rect(q(x),q(y),q(w),q(h),{r:q(h)/2,lw:2.5,fill:'FFFFFF'});tb(p,x+4,y,w-8,h,text,{size:T.fit(text,'Andika',sz,true,q(w-16)),bold:true,m:0,nowrap:true});}
 function puzzle(s,key){const {rows,order,col,cname,klabel,grid,label}=s, R=rows.length, C=rows[0].length;
   const p=new T.Page('P');
   tb(p,40,26,W-80,22,'Name: ______________________________   Date: ____________',{size:13,align:'left',m:0});

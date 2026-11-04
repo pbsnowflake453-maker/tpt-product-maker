@@ -4,7 +4,7 @@ const T=TPT, W=792, H=612, q=v=>v/72, tb=T.tb, L=[...'ABCDEFGHIJKLMNOPQRSTUVWX']
 function rr(p,x,y,w,h,lw,adj,o={}){p.rect(q(x),q(y),q(w),q(h),Object.assign({r:q(Math.min(w,h))*adj,lw,fill:'FFFFFF'},o));}
 function frame(p){rr(p,18,18,W-36,H-36,3,.04);}
 function footer(p){tb(p,0,H-34,W,14,'© '+T.STORE,{size:9});}
-function bubble(p,x,y,w,h,size,text){rr(p,x,y,w,h,1.5,.5);tb(p,x,y,w,h,text,{size:T.fit(text,'Andika',size,true,q(w)-0.15),bold:true,nowrap:true,m:2});}
+function bubble(p,x,y,w,h,size,text){if(/^Skills?:/.test(text)){T.skillTag(p,q(x+w),q(y+h/2),text,size<=9?8:11);return;}rr(p,x,y,w,h,1.5,.5);tb(p,x,y,w,h,text,{size:T.fit(text,'Andika',size,true,q(w)-0.15),bold:true,nowrap:true,m:2});}
 function card(p,x,y,w,h,letter,prob,label){
   rr(p,x,y,w,h,3,.1); rr(p,x+8,y+8,w-16,h-16,1.25,.08,{dash:'dash'});
   for(const [cx,cy] of [[x+8,y+8],[x+w-8,y+8],[x+8,y+h-8],[x+w-8,y+h-8]]) p.shape('heart',q(cx-8),q(cy-8),q(16),q(16),{fill:'000000',lw:1.25});

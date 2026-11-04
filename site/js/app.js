@@ -15,7 +15,7 @@ function renderProducts(){$('products').innerHTML='';for(const p of T.products){
   $('kinds').innerHTML='';if(prod.kinds.length>1)for(const k of prod.kinds){const b=document.createElement('button');b.textContent=k==='math'?'Math':'Reading';b.className=k===kind?'on':'';
     b.onclick=()=>{if(k===kind)return;kind=k;sel=[];defaultSkill();if(prod.id==='mystery')defaultAssign();renderAll();};$('kinds').appendChild(b);}}
 function defaultSkill(){const L=skillsFor(kind);sel=[kind==='math'?(L.find(s=>s.name==='Making 10')):(L.find(s=>s.name.startsWith('ou (')))];}
-function labelFor(){if(prod.id==='mystery'&&kind==='reading')return MY.rows.length?[...new Set(MP().colorsByCount(MY.rows).filter(([c])=>!(MY.bgOff&&c==='.')).map(([c])=>T.readLabel(MY.assign[c])))].join(' • '):'';
+function labelFor(){if(prod.id==='coldread')return '';if(prod.id==='mystery'&&kind==='reading')return MY.rows.length?[...new Set(MP().colorsByCount(MY.rows).filter(([c])=>!(MY.bgOff&&c==='.')).map(([c])=>T.readLabel(MY.assign[c])))].join(' • '):'';
   return sel.map(s=>kind==='math'?s.label:T.readLabel(s)).join(' • ');}
 // ---------- skills list
 let mainPick=null;
@@ -72,23 +72,24 @@ function renderColors(){const counts=Object.fromEntries(MP().colorsByCount(MY.ro
   $('label').value=labelFor();}
 function renderMystery(){drawEditor();renderColors();build();}
 // ---------- config + build
-function cfg(){const c={kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked}};
+function cfg(){const c={text:$('crText').value,kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked,cut:$('wsCut')&&$('wsCut').checked,write:$('wsWrite')&&$('wsWrite').checked,mazeSize:$('mazeSize')&&$('mazeSize').value,nameLine:$('crName').checked,wordBank:$('pwBank').checked}};
   if(prod.id==='mystery'){const order=MP().colorsByCount(MY.rows).map(x=>x[0]);c.image={name:MY.name,rows:MY.rows.slice()};c.colors=JSON.parse(JSON.stringify(MY.colors));c.assign=Object.fromEntries(order.map(k=>[k,MY.assign[k]]));c.bgOff=MY.bgOff;}
   return c;}
-function desc(c){return prod.id==='mystery'?`${c.image.name} — ${c.label||labelFor()}`:(c.label||labelFor())+(prod.id==='bingo'?` (${c.opts.boards} boards, ${c.opts.size}x${c.opts.size})`:'');}
+function desc(c){if(prod.id==='coldread')return (c.label||'Cold Reads')+` (${T.products.find(p=>p.id==='coldread').parse(c.text).length} passages)`;return prod.id==='mystery'?`${c.image.name} — ${c.label||labelFor()}`:(c.label||labelFor())+(prod.id==='bingo'?` (${c.opts.boards} boards, ${c.opts.size}x${c.opts.size})`:'');}
 function preview(pages){const pv=$('preview');pv.innerHTML='';const N=Math.min(pages.length,24);for(let i=0;i<N;i++){const c=document.createElement('canvas');T.drawCanvas(pages[i],c,110);pv.appendChild(c);}
   $('status').textContent=`${pages.length} pages`+(pages.length>N?` (showing the first ${N})`:'')+(showBundle?' · bundle preview':'');}
-function build(){if(!sel.length&&!(prod.id==='mystery'&&kind==='reading'))return;
-  const c=cfg();cur=T.assemble(prod,[{cfg:c,seed}]);cur.fileBase=T.fileName(prod,cur.secs);
+function build(){if(!sel.length&&!(prod.id==='mystery'&&kind==='reading')&&prod.id!=='coldread')return;
+  const c=cfg();if(prod.needs){const nd=prod.needs(c,seed).filter(w=>(window.IMAGE_MAP||{})[w]&&!T.icons[w]);if(nd.length){window.APP&&(APP.loading=true);T.loadIcons(nd).then(()=>{window.APP&&(APP.loading=false);build();});return;}}cur=T.assemble(prod,[{cfg:c,seed}]);cur.fileBase=T.fileName(prod,cur.secs);
   $('info').innerHTML=cur.secs[0].info||'';showBundle=false;preview(cur.pages);}
 function renderBundle(){const b=bundle();$('bundle').innerHTML=b.map((x,i)=>`<li>${x.desc}<button data-i="${i}">✕</button></li>`).join('');
   $('bundle').querySelectorAll('button').forEach(e=>e.onclick=()=>{b.splice(+e.dataset.i,1);renderBundle();});
-  ['bpptx','bpdf','showBundle'].forEach(id=>$(id).disabled=b.length<1);}
+  ['bpptx','bpdf','blist','showBundle'].forEach(id=>$(id).disabled=b.length<1);}
 function bundleDoc(){const b=bundle();const d=T.assemble(prod,b);d.fileBase=T.fileName(prod,d.secs);return d;}
-function renderAll(){renderProducts();const my=prod.id==='mystery';$('mysterySec').hidden=!my;$('optSec').hidden=prod.id!=='bingo';
-  $('label').value=labelFor();renderSkills();renderBundle();if(my){if(!MY.name){$('theme').value='Animals';pickImage('Animals','bear');}else defaultAssignNew();renderThumbs();renderMystery();}else build();}
+function renderAll(){renderProducts();const my=prod.id==='mystery';$('mysterySec').hidden=!my;$('optSec').hidden=prod.id!=='bingo';$('wsOpt').hidden=prod.id!=='wordsort';$('mazeOpt').hidden=prod.id!=='wordmaze';$('pwOpt').hidden=prod.id!=='picturewrite';const cr=prod.id==='coldread';$('crSec').hidden=!cr;if(cr&&!$('crText').value.trim())$('crText').value=prod.sample;$('skillSec').hidden=cr;$('shuffle').hidden=cr;
+  $('label').value=labelFor();if(!cr)renderSkills();renderBundle();if(my){if(!MY.name){$('theme').value='Animals';pickImage('Animals','bear');}else defaultAssignNew();renderThumbs();renderMystery();}else build();}
 // ---------- events
-$('label').onchange=build;['boards','size','same','cards'].forEach(id=>$(id).onchange=build);
+$('label').onchange=build;['boards','size','same','cards','wsCut','wsWrite','mazeSize'].forEach(id=>$(id).onchange=build);
+let crT;$('crText').oninput=()=>{clearTimeout(crT);crT=setTimeout(build,400);};$('crName').onchange=build;$('pwBank').onchange=build;$('dllist').onclick=()=>cur&&LISTING.zip(prod,cur,cur.secs.map(s=>s.label).filter(Boolean).join(' • '),cur.fileBase);$('crSample').onclick=()=>{$('crText').value=T.products.find(p=>p.id==='coldread').sample;build();};
 $('shuffle').onclick=()=>{seed=(seed*7919+13)%1000003;build();};
 $('dlpdf').onclick=()=>cur&&T.pdf(cur.pages,cur.fileBase);
 $('dlpptx').onclick=()=>cur&&T.pptx(cur.pages,cur.fileBase);
@@ -96,12 +97,13 @@ $('addSet').onclick=()=>{const c=cfg();bundle().push({cfg:c,seed,desc:desc(c)});
 $('clearBundle').onclick=()=>{bundle().length=0;renderBundle();build();};
 $('showBundle').onclick=()=>{const d=bundleDoc();showBundle=true;preview(d.pages);};
 $('bpdf').onclick=()=>{const d=bundleDoc();T.pdf(d.pages,d.fileBase);};
+$('blist').onclick=()=>{const d=bundleDoc();LISTING.zip(prod,d,T.skillsText(d.secs).replace(/^Skills?: /,''),d.fileBase,true);};
 $('bpptx').onclick=()=>{const d=bundleDoc();T.pptx(d.pages,d.fileBase);};
 $('bgOff').onchange=()=>{MY.bgOff=$('bgOff').checked;renderColors();build();};
 $('theme').innerHTML=Object.keys(PIXELS.themes).map(t=>`<option>${t}</option>`).join('');$('theme').onchange=renderThumbs;
 await T.init();defaultSkill();renderAll();
 // ---------- test hooks
-window.APP={T,MY,get cur(){return cur;},
+window.APP={loading:false,T,MY,get cur(){return cur;},
   product(id,k){$('products').querySelectorAll('button')[T.products.findIndex(p=>p.id===id)].click();if(k&&k!==kind){[...$('kinds').children].find(b=>b.textContent.toLowerCase()===k).click();}return prod.id+'/'+kind;},
   select(names){names=[].concat(names);sel=names.map(n=>skillsFor(kind).find(s=>s.name===n));if(prod.id==='mystery')defaultAssign();$('label').value=labelFor();renderSkills();if(prod.id==='mystery')renderColors();build();return cur.secs[0].info;},
   addSet(){$('addSet').click();return bundle().length;},bundleDoc,pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},
