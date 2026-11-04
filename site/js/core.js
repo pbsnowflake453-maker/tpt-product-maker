@@ -162,7 +162,7 @@ window.TPT = (function(){
     const pages=[prod.cover(secs),...prod.directions(sets.map(s=>s.cfg))];
     secs.forEach((sec,i)=>{ if(secs.length>1) pages.push(divider(prod.orient,prod.title,sec.label,i+1,secs.length)); pages.push(...sec.pages); });
     pages.push(termsPage(prod.orient)); return {pages,secs};}
-  function fileName(prod,secs){const u=[...new Set(secs.map(s=>s.label))];const lab=secs.length>1?(u.length>3?`Bundle of ${secs.length}`:'Bundle - '+u.join(', ')):u[0];
+  function fileName(prod,secs){const u=[...new Set(secs.map(s=>s.label))];const lab=!u.filter(Boolean).length?'Pack':secs.length>1?(u.length>3?`Bundle of ${secs.length}`:'Bundle - '+u.join(', ')):u[0];
     return `${prod.title} - ${lab} - ${STORE}`.replace(/[\/\\:*?"<>|]/g,'');}
   return {tb,skillsText,assemble,fileName,PW,PH,STORE,init,Page,frame,footer,bubble,die,termsPage,divider,textW,fit,wrapRuns,rng,shuffle,fillGrid,drawCanvas,pdf,pdfDoc,pptx,pptxDoc,products:[]};
 })();

@@ -9,3 +9,4 @@ Static site, no server or sign-in. Open index.html through any static host.
 - Each module exposes section(cfg, seed), directions(cfgs), cover(sections). core.assemble() builds a single set or a bundle (one cover, one directions page, a divider per set, one Terms of Use).
 - js/math.js: math skill menu + problem banks. data/pixels.js: pixel art library (from /workspace/pixel-library/library.json).
 - fonts/Fredoka-Bold.ttf is a static instance of Google's Fredoka variable font (wght 700) for the Bingo title.
+- coldread.js (Cold Read, portrait): paste passages in a plain-text format (Title:, Key Words:, Passage:, Questions:, --- between passages; *b. marks the right answer, Answer: under a writing question). Auto-wraps, running word counts, bolds key words, cold/hot score lines, answer key if answers are marked.

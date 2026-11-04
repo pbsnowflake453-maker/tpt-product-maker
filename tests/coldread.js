@@ -1,0 +1,14 @@
+const {chromium}=require('/tmp/pw/node_modules/playwright');const fs=require('fs');
+(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+await pg.goto('http://127.0.0.1:8813/index.html?'+Date.now());await pg.waitForSelector('#preview canvas');
+await pg.evaluate(()=>APP.product('coldread'));await pg.waitForTimeout(300);
+const txt=fs.readFileSync('/workspace/l2.txt','utf8');
+await pg.evaluate(t=>{document.getElementById('crText').value=t+'\n'+TPT.products.find(p=>p.id==='coldread').sample;document.getElementById('label').value='Level 2';document.getElementById('label').onchange();},txt);
+await pg.waitForTimeout(500);
+console.log(await pg.evaluate(()=>APP.cur.secs[0].info), await pg.evaluate(()=>APP.cur.pages.length));
+const urls=await pg.evaluate(()=>APP.cur.pages.map(p=>{const c=document.createElement('canvas');APP.T.drawCanvas(p,c,150);return c.toDataURL();}));
+urls.forEach((u,i)=>fs.writeFileSync(`previews/page-${String(i+1).padStart(2,'0')}.png`,Buffer.from(u.split(',')[1],'base64')));
+const [d]=await Promise.all([pg.waitForEvent('download'),pg.click('#dlpdf')]);await d.saveAs('previews/cold-read-test.pdf');
+const [e]=await Promise.all([pg.waitForEvent('download'),pg.click('#dlpptx')]);await e.saveAs('previews/cold-read-test.pptx');
+await pg.screenshot({path:'previews/app-ui.png'});
+console.log(errs);await b.close();})();
