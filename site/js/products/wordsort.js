@@ -34,12 +34,12 @@ function howTo(cut){
 }
 function cutPastePage(skills, words, label){
   const p=new T.Page('P'); T.frame(p);
-  p.text(0.5,0.4,2.0,0.32,'Name:',{size:14,align:'left'}); p.line(1.4,0.68,3.8,0.68,{lw:1});
+  p.text(0.5,0.4,2.0,0.32,'Name:',{size:14,align:'left'}); p.line(1.05,0.68,3.8,0.68,{lw:1});
   const bw=Math.min(5.2,Math.max(2.2,T.textW('Skill: '+label,'Andika',16,true)+0.45));
   T.bubble(p,PW-0.5-bw,0.38,bw,0.5,'Skill: '+label,{size:16});
   p.text(0,0.95,PW,0.5,'Word Sort',{font:'Pacifico',size:30});
 
-  const n=skills.length, top=1.5, headerH=0.5, glueH=5.4, left=0.45, totalW=PW-0.9, cW=totalW/n;
+  const n=skills.length, top=1.5, headerH=0.5, cardsH=Math.min(3.0,Math.ceil(words.length/4)*0.7), glueH=PH-0.75-cardsH-0.3-top-headerH, left=0.45, totalW=PW-0.9, cW=totalW/n;
   skills.forEach((sk,i)=>{
     const x=left+i*cW;
     p.rect(x,top,cW,headerH,{r:0,lw:2,fill:'FFFFFF'});
@@ -50,7 +50,7 @@ function cutPastePage(skills, words, label){
 
   const cardTop=top+headerH+glueH+0.3;
   const rows=Math.ceil(words.length/4), cols=4;
-  const tableW=totalW, tableH=Math.min(3.1, rows*0.85);
+  const tableW=totalW, tableH=cardsH;
   const cellW=tableW/cols, cellH=tableH/rows;
   p.rect(left,cardTop,tableW,tableH,{lw:1.8,dash:'dash',fill:'FFFFFF'});
   for(let c=1;c<cols;c++) p.line(left+c*cellW,cardTop,left+c*cellW,cardTop+tableH,{lw:1.8,dash:'dash'});
@@ -64,7 +64,7 @@ function cutPastePage(skills, words, label){
 }
 function writeInPage(skills, words, label){
   const p=new T.Page('P'); T.frame(p);
-  p.text(0.5,0.4,2.0,0.32,'Name:',{size:14,align:'left'}); p.line(1.4,0.68,3.8,0.68,{lw:1});
+  p.text(0.5,0.4,2.0,0.32,'Name:',{size:14,align:'left'}); p.line(1.05,0.68,3.8,0.68,{lw:1});
   const bw=Math.min(5.2,Math.max(2.2,T.textW('Skill: '+label,'Andika',16,true)+0.45));
   T.bubble(p,PW-0.5-bw,0.38,bw,0.5,'Skill: '+label,{size:16});
   p.text(0,0.95,PW,0.5,'Word Sort',{font:'Pacifico',size:30});
