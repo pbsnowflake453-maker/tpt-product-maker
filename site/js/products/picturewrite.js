@@ -56,6 +56,7 @@ function cover(label,n){
   p.text(0.6,3.6,PW-1.2,0.5,n+' page'+(n===1?'':'s')+' with answer keys',{size:16});
   p.image(PW/2-1.25,PH-3.6,2.5,2.5); p.text(0,PH-0.85,PW,0.3,T.STORE,{size:13}); return p;
 }
+T._pwAvail=availableWords;
 function pick(cfg,seed){const pool=availableWords(cfg.skills||[]); return {pool,words:T.shuffle(pool,T.rng(seed)).slice(0,9)};}
 T.products.push({id:'picturewrite',needs(cfg,seed){return pick(cfg,seed).words;},name:'Picture Write',title:'Picture Write',orient:'P',kinds:['reading'],multiSkill:true,
   section(cfg,seed){

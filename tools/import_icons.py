@@ -48,6 +48,18 @@ def normalize(im,size,bg):
     canvas.alpha_composite(im if bg=='transparent' else Image.alpha_composite(Image.new('RGBA',im.size,(255,255,255,255)),im),((side-im.size[0])//2,(side-im.size[1])//2))
     return canvas.resize((size,size),Image.LANCZOS)
 
+def enhance(im):
+    # Bolder, darker lines for thin or faint drawings (mostly the JPG line art): darken grays, then thicken thin strokes.
+    from PIL import ImageFilter
+    rgb=im.convert('RGB'); g=rgb.convert('L')
+    ink=g.point(lambda v:255 if v<170 else 0); n=sum(1 for v in ink.getdata() if v)
+    if not n: return im
+    kept=sum(1 for v in ink.filter(ImageFilter.MinFilter(5)).getdata() if v)
+    out=rgb.point(lambda v:255 if v>235 else int(v*0.55))  # faint gray lines -> dark
+    if kept/n<0.08: out=out.filter(ImageFilter.MinFilter(3))  # strokes thinner than ~2px: thicken by 1px each side
+    if im.mode=='RGBA': out=out.convert('RGBA'); out.putalpha(im.getchannel('A'))
+    return out
+
 def skill_words():
     s=open(os.path.join(SITE,'data','skills.js'),encoding='utf8').read(); L=json.loads(s[s.index('['):s.rindex(']')+1])
     return {w for sk in L for w,_ in sk.get('decodable',[])}
@@ -70,7 +82,7 @@ def write_map(keep_placeholders,wanted):
 
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('src',nargs='?'); ap.add_argument('--size',type=int,default=400)
-    ap.add_argument('--bg',choices=['white','transparent'],default='white'); ap.add_argument('--keep-placeholders',action='store_true'); ap.add_argument('--dry-run',action='store_true'); ap.add_argument('--colors',type=int,default=64,help='palette colors for smaller PNGs (0 = full color)')
+    ap.add_argument('--bg',choices=['white','transparent'],default='white'); ap.add_argument('--keep-placeholders',action='store_true'); ap.add_argument('--dry-run',action='store_true'); ap.add_argument('--no-enhance',action='store_true',help='skip darkening/thickening thin lines'); ap.add_argument('--colors',type=int,default=64,help='palette colors for smaller PNGs (0 = full color)')
     a=ap.parse_args(); os.makedirs(OUT,exist_ok=True)
     wanted=[w for w,v in old_map().items()]  # words previously listed (placeholders + icons)
     found={}; skipped=[]; dups=[]; bad=[]
@@ -91,6 +103,7 @@ def main():
         for w,(p,_,im) in sorted(found.items()):
             n=normalize(im,a.size,a.bg)
             if n is None: bad.append(f'{w} (blank image)'); continue
+            if not a.no_enhance: n=enhance(n)
             if a.colors: n=(n.convert('RGB').quantize(colors=a.colors,method=Image.Quantize.MEDIANCUT,dither=Image.Dither.NONE) if a.bg=='white' else n.quantize(colors=a.colors,method=Image.Quantize.FASTOCTREE,dither=Image.Dither.NONE))
             if not a.dry_run: n.save(os.path.join(OUT,w+'.png'),optimize=True)
     m=old_map() if a.dry_run else write_map(a.keep_placeholders,wanted)
