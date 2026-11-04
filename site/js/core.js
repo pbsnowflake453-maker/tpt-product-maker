@@ -12,11 +12,11 @@ window.TPT = (function(){
     }
     logoData='data:image/png;base64,'+await b64('assets/logo.png');
     logoImg=new Image(); logoImg.src=logoData; await logoImg.decode();
-    // Picture icons: window.IMAGE_MAP word -> path (null = placeholder until her real icons are added)
-    const M=window.IMAGE_MAP||{};
-    for(const [w,u] of Object.entries(M)){ if(!u) continue; try{const d='data:image/png;base64,'+await b64(u); const im=new Image(); im.src=d; await im.decode(); icons[w]={src:d,img:im,w:im.naturalWidth,h:im.naturalHeight};}catch(e){console.warn('icon missing',w,u);} }
   }
   const icons={};
+  // Load only the icons a page needs (word list from window.IMAGE_MAP); cached after the first load.
+  async function loadIcons(words){ const M=window.IMAGE_MAP||{};
+    await Promise.all(words.filter(w=>M[w]&&!icons[w]).map(async w=>{ try{const d='data:image/png;base64,'+await b64(M[w]); const im=new Image(); im.src=d; await im.decode(); icons[w]={src:d,img:im,w:im.naturalWidth,h:im.naturalHeight};}catch(e){console.warn('icon missing',w,M[w]);} })); }
   // ---- measuring
   const mc=document.createElement('canvas').getContext('2d');
   function cssFont(f,sizePt,bold){return `${bold?'700':'400'} ${sizePt}px ${f}`;}
@@ -52,7 +52,10 @@ window.TPT = (function(){
   // ---- shared pieces
   function frame(p){p.rect(0.25,0.25,p.w-0.5,p.h-0.5,{r:0.25,lw:3,fill:'FFFFFF'});}
   function footer(p){p.text(0,p.h-0.48,p.w,0.2,'© '+STORE,{size:9});}
-  function bubble(p,x,y,w,h,text,o={}){p.rect(x,y,w,h,{r:h/2,lw:o.lw||2.5,fill:o.dark?'000000':'FFFFFF'});p.text(x,y,w,h,text,{font:'Andika',bold:true,size:fit(text,'Andika',o.size||22,true,w-Math.min(0.3,h*0.6)),color:o.dark?'FFFFFF':'000000'});}
+  // Compact page skill tag: right-aligned to xr, centered on yc. Regular weight, thin border, small padding.
+  function skillTag(p,xr,yc,text,size){size=size||11; let w=textW(text,'Andika',size,false)+size*1.6/72; const maxW=4.2; if(w>maxW){size=fit(text,'Andika',size,false,maxW-size*1.6/72); w=maxW;}
+    const h=size*2.0/72; p.rect(xr-w,yc-h/2,w,h,{r:h/2,lw:1,fill:'FFFFFF'}); p.text(xr-w,yc-h/2,w,h,text,{font:'Andika',size}); }
+  function bubble(p,x,y,w,h,text,o={}){ if(/^Skills?:/.test(text)&&(o.size||22)<=22&&!o.dark){ skillTag(p,x+w,y+h/2,text,Math.min(11,Math.round((o.size||22)*0.7))); return; }p.rect(x,y,w,h,{r:h/2,lw:o.lw||2.5,fill:o.dark?'000000':'FFFFFF'});p.text(x,y,w,h,text,{font:'Andika',bold:true,size:fit(text,'Andika',o.size||22,true,w-Math.min(0.3,h*0.6)),color:o.dark?'FFFFFF':'000000'});}
   function die(p,x,y,s,n){p.rect(x,y,s,s,{r:s*0.18,lw:1.6,fill:'FFFFFF'});
     const pos={1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[0,2],[2,0],[2,2]],5:[[0,0],[0,2],[1,1],[2,0],[2,2]],6:[[0,0],[0,1],[0,2],[2,0],[2,1],[2,2]]}[n];
     const d=s*0.16; for(const [a,b] of pos) p.oval(x+s*(0.25+0.25*a)-d/2,y+s*(0.25+0.25*b)-d/2,d,d);}
@@ -170,5 +173,5 @@ window.TPT = (function(){
     pages.push(termsPage(prod.orient)); return {pages,secs};}
   function fileName(prod,secs){const u=[...new Set(secs.map(s=>s.label))];const lab=!u.filter(Boolean).length?'Pack':secs.length>1?(u.length>3?`Bundle of ${secs.length}`:'Bundle - '+u.join(', ')):u[0];
     return `${prod.title} - ${lab} - ${STORE}`.replace(/[\/\\:*?"<>|]/g,'');}
-  return {icons,tb,skillsText,assemble,fileName,PW,PH,STORE,init,Page,frame,footer,bubble,die,termsPage,divider,textW,fit,wrapRuns,rng,shuffle,fillGrid,drawCanvas,pdf,pdfDoc,pptx,pptxDoc,products:[]};
+  return {skillTag,icons,loadIcons,tb,skillsText,assemble,fileName,PW,PH,STORE,init,Page,frame,footer,bubble,die,termsPage,divider,textW,fit,wrapRuns,rng,shuffle,fillGrid,drawCanvas,pdf,pdfDoc,pptx,pptxDoc,products:[]};
 })();

@@ -2,9 +2,12 @@
 // Pictures come from window.IMAGE_MAP (data/images.js). Words mapped to null get a plain placeholder box until real icons are added.
 (function(){
 const T=TPT, PW=T.PH, PH=T.PW;
+// Picture words that are decodable for a skill but missing from the audited word lists (checked by hand: every pattern is taught by that skill).
+const EXTRA={'CVCC (ending blends)':['ant'],'Closed two-syllable words':['cabin','wagon','lemon','melon','planet','bucket','jacket','locket','pocket','rocket','ticket','radish','blanket'],
+  'Compound words':['birdhouse','campfire','flagpole','footprint','goldfish','pinecone','teapot','windmill'],'a_e':['bathe'],'er':['hammer','ladder']};
 function availableWords(skills){
   const M=window.IMAGE_MAP||{}, set=new Set();
-  skills.forEach(sk=>{(sk.decodable||[]).forEach(x=>set.add(x[0]));});
+  skills.forEach(sk=>{(sk.decodable||[]).forEach(x=>set.add(x[0])); [sk.name].concat(sk.members||[]).forEach(n=>(EXTRA[n]||[]).forEach(w=>set.add(w)));});
   return [...set].filter(w=>w in M);
 }
 function pic(p,x,y,w,h,word,num){
@@ -53,12 +56,13 @@ function cover(label,n){
   p.text(0.6,3.6,PW-1.2,0.5,n+' page'+(n===1?'':'s')+' with answer keys',{size:16});
   p.image(PW/2-1.25,PH-3.6,2.5,2.5); p.text(0,PH-0.85,PW,0.3,T.STORE,{size:13}); return p;
 }
-T.products.push({id:'picturewrite',name:'Picture Write',title:'Picture Write',orient:'P',kinds:['reading'],multiSkill:true,
+function pick(cfg,seed){const pool=availableWords(cfg.skills||[]); return {pool,words:T.shuffle(pool,T.rng(seed)).slice(0,9)};}
+T.products.push({id:'picturewrite',needs(cfg,seed){return pick(cfg,seed).words;},name:'Picture Write',title:'Picture Write',orient:'P',kinds:['reading'],multiSkill:true,
   section(cfg,seed){
     const r=T.rng(seed), skills=cfg.skills||[], label=cfg.label||skills.map(T.readLabel).join(' • ');
-    const pool=availableWords(skills), withBank=!(cfg.opts&&cfg.opts.wordBank===false);
+    const {pool,words}=pick(cfg,seed), withBank=!(cfg.opts&&cfg.opts.wordBank===false);
     if(!pool.length) return {label,pages:[],n:0,info:'<span class="warn">No pictures match this skill yet. Pick a skill with picture words (for example short vowels or digraphs), or add icons in data/images.js.</span>'};
-    const words=T.shuffle(pool,r).slice(0,9);
+    T.shuffle(pool,r); // keep the rng sequence the same as before for the word bank
     const ph=words.filter(w=>!T.icons[w]).length;
     return {label,n:1,pages:[studentPage(words,label,withBank,r),answerKey(words,label)],
       info:`${words.length} pictures${withBank?' · word bank':''} · answer key`+(words.length<9?`<br>Only ${pool.length} picture words for this skill.`:'')+(ph?`<br>${ph} placeholder pictures (real icons not added yet).`:'')};

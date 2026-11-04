@@ -3,7 +3,7 @@
 const T=TPT, W=612, H=792, q=v=>v/72, tb=T.tb;
 function frame(p){p.rect(q(18),q(18),q(W-36),q(H-36),{r:q(W-36)*0.04,lw:3,fill:'FFFFFF'});}
 function footer(p){tb(p,0,H-36,W,14,'© '+T.STORE,{size:9});}
-function bubble(p,x,y,w,h,size,text){p.rect(q(x),q(y),q(w),q(h),{r:q(h)/2,lw:2.5,fill:'FFFFFF'});tb(p,x,y,w,h,text,{size:T.fit(text,'Andika',size,true,q(w)-0.25),bold:true,nowrap:true});}
+function bubble(p,x,y,w,h,size,text){if(/^Skills?:/.test(text)&&size<=22){T.skillTag(p,q(x+w),q(y+h/2),text,Math.min(11,Math.round(size*0.7)));return;}p.rect(q(x),q(y),q(w),q(h),{r:q(h)/2,lw:2.5,fill:'FFFFFF'});tb(p,x,y,w,h,text,{size:T.fit(text,'Andika',size,true,q(w)-0.25),bold:true,nowrap:true});}
 const callTxt=pr=>MATH.txt(pr).replace(MATH.BLANK,'__');
 function howTo(cfg){const math=cfg.kind==='math', same=cfg.opts.same, free=+cfg.opts.size===5, it=math?'answer':'word';
   const steps=math?['The teacher calls a problem from the calling sheet and checks it off.','Students solve the problem and find the answer on their board.',

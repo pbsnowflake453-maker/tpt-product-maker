@@ -3,7 +3,7 @@
 const T=TPT, W=792, H=612, q=v=>v/72, tb=T.tb;
 function frame(p){p.rect(q(18),q(18),q(W-36),q(H-36),{r:q(H-36)*0.04,lw:3,fill:'FFFFFF'});}
 function footer(p){tb(p,0,H-34,W,14,'© '+T.STORE,{size:9});}
-function bubble(p,x,y,w,h,text,size,lw=2.5){p.rect(q(x),q(y),q(w),q(h),{r:q(h)/2,lw,fill:'FFFFFF'});tb(p,x,y,w,h,text,{size:T.fit(text,'Andika',size,true,q(w)-0.3),bold:true,nowrap:true});}
+function bubble(p,x,y,w,h,text,size,lw=2.5){if(/^Skills?:/.test(text)&&size<=22){T.skillTag(p,q(x+w),q(y+h/2),text,Math.min(11,Math.round(size*0.7)));return;}p.rect(q(x),q(y),q(w),q(h),{r:q(h)/2,lw,fill:'FFFFFF'});tb(p,x,y,w,h,text,{size:T.fit(text,'Andika',size,true,q(w)-0.3),bold:true,nowrap:true});}
 function cellRuns(pr,key){return [pr.parts.map(x=>x===null?(key?{t:String(pr.ans),b:true,u:true}:{t:MATH.BLANK,b:false}):{t:x,b:false})];}
 function grid(p,probs,key){
   const gx=60,gy=142,gw=W-120,cw=gw/6,hh=56,rh=(H-142-44-hh)/6;

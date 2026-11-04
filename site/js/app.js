@@ -79,7 +79,7 @@ function desc(c){if(prod.id==='coldread')return (c.label||'Cold Reads')+` (${T.p
 function preview(pages){const pv=$('preview');pv.innerHTML='';const N=Math.min(pages.length,24);for(let i=0;i<N;i++){const c=document.createElement('canvas');T.drawCanvas(pages[i],c,110);pv.appendChild(c);}
   $('status').textContent=`${pages.length} pages`+(pages.length>N?` (showing the first ${N})`:'')+(showBundle?' · bundle preview':'');}
 function build(){if(!sel.length&&!(prod.id==='mystery'&&kind==='reading')&&prod.id!=='coldread')return;
-  const c=cfg();cur=T.assemble(prod,[{cfg:c,seed}]);cur.fileBase=T.fileName(prod,cur.secs);
+  const c=cfg();if(prod.needs){const nd=prod.needs(c,seed).filter(w=>(window.IMAGE_MAP||{})[w]&&!T.icons[w]);if(nd.length){window.APP&&(APP.loading=true);T.loadIcons(nd).then(()=>{window.APP&&(APP.loading=false);build();});return;}}cur=T.assemble(prod,[{cfg:c,seed}]);cur.fileBase=T.fileName(prod,cur.secs);
   $('info').innerHTML=cur.secs[0].info||'';showBundle=false;preview(cur.pages);}
 function renderBundle(){const b=bundle();$('bundle').innerHTML=b.map((x,i)=>`<li>${x.desc}<button data-i="${i}">✕</button></li>`).join('');
   $('bundle').querySelectorAll('button').forEach(e=>e.onclick=()=>{b.splice(+e.dataset.i,1);renderBundle();});
@@ -103,7 +103,7 @@ $('bgOff').onchange=()=>{MY.bgOff=$('bgOff').checked;renderColors();build();};
 $('theme').innerHTML=Object.keys(PIXELS.themes).map(t=>`<option>${t}</option>`).join('');$('theme').onchange=renderThumbs;
 await T.init();defaultSkill();renderAll();
 // ---------- test hooks
-window.APP={T,MY,get cur(){return cur;},
+window.APP={loading:false,T,MY,get cur(){return cur;},
   product(id,k){$('products').querySelectorAll('button')[T.products.findIndex(p=>p.id===id)].click();if(k&&k!==kind){[...$('kinds').children].find(b=>b.textContent.toLowerCase()===k).click();}return prod.id+'/'+kind;},
   select(names){names=[].concat(names);sel=names.map(n=>skillsFor(kind).find(s=>s.name===n));if(prod.id==='mystery')defaultAssign();$('label').value=labelFor();renderSkills();if(prod.id==='mystery')renderColors();build();return cur.secs[0].info;},
   addSet(){$('addSet').click();return bundle().length;},bundleDoc,pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},
