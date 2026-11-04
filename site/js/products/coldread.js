@@ -73,9 +73,10 @@ function scoreBox(p,y){ const s=10, lw=0.8, y1=y+0.15, y2=y+0.47;
   for(let i=0;i<n;i++) bl(x0+i*(w+g),x0+i*(w+g)+w,y2); }
 function passagePage(P,o){
   const p=new T.Page('P'); titleBar(p,P.title||'Untitled',0.55,o);
-  let y=o.name?1.75:1.45; p.text(M,y,3,0.3,'Key Words:',{size:14,bold:true,align:'left'}); y+=0.33;
+  let y=o.name?1.75:1.45; const y0=y; p.text(M,y,3,0.3,'Key Words:',{size:14,bold:true,align:'left'}); y+=0.33;
   for(const k of P.keys){ p.shape('star5',M+0.3,y+0.06,0.17,0.17,{fill:'000000',line:null}); p.text(M+0.53,y,4,0.3,k,{size:13,align:'left'}); y+=0.3; }
   y=y+0.3;
+  if(o.pic&&o.pic.src){ const bw=2.6,bh=1.5; p.image(PW-M-bw,y0,bw,bh,o.pic); y=Math.max(y,y0+bh+0.25); } // optional picture, right of Key Words, contain-fit
   const bottom=PH-1.75; const X=M+0.95, W=4.8, ind=0.3; // passage block narrower than the page so it fills more lines
   let size=13, L, pitch;
   for(;size>=9;size-=0.5){ L=layoutPassage(P,size,W,ind); pitch=Math.min(0.42,(bottom-y)/(L.lines.length+1)); if(pitch>=size*1.55/72) break; }
@@ -136,7 +137,7 @@ T.products.push({id:'coldread',name:'Cold Read',title:'Cold Read',orient:'P',kin
   section(cfg){
     const ps=parse(cfg.text!=null?cfg.text:SAMPLE), o={name:!!(cfg.opts&&cfg.opts.nameLine),lines:4};
     const pages=[], info=[];
-    ps.forEach(P=>{ const r=passagePage(P,o); pages.push(r.p); if(P.qs.length) pages.push(questionPage(P,o));
+    ps.forEach((P,i)=>{ const pics=cfg.pics||{}; const r=passagePage(P,Object.assign({},o,{pic:pics[i]})); pages.push(r.p); if(P.qs.length) pages.push(questionPage(P,o));
       info.push(`${P.title||'Untitled'}: ${r.total} words, ${P.qs.length} questions`+(P.keys.length?'':' (no key words)')); });
     const hasKey=ps.some(P=>P.qs.some(q=>q.correct>=0||q.answer)); if(hasKey) pages.push(...answerKey(ps));
     return {label:cfg.label||'',pages,n:ps.length,info:info.join('<br>')||'Paste a passage to start.'};
