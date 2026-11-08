@@ -46,16 +46,23 @@
     <p class="small">PowerPoint opens in Google Slides: upload to Drive, then Open with Slides.</p>
   </section>
   <section><h2>4. Bundle <span class="small">(optional)</span></h2>
-    <p class="small">Add sets one at a time (different skills, or the same skill again after a shuffle). The bundle gets one cover, one directions page, a divider before each set, and one Terms of Use.</p>
+    <p class="small">Add sets one at a time, from any product type (or the same skill again after a shuffle). You get a zip with a cover and contents file plus a separate file for each set.</p>
     <div class="btns"><button id="addSet">+ Add this set</button><button id="showBundle">Preview bundle</button><button id="clearBundle">Clear</button></div>
     <ol id="bundle"></ol>
-    <div class="btns"><button id="bpptx" class="primary">Bundle PowerPoint</button><button id="bpdf">Bundle PDF</button><button id="blist">Bundle listing pack</button></div>
+    <label>Bundle title (cover page and listing kit) <input id="bundleTitle" placeholder="Type your bundle title"></label>
+    <div class="btns"><button id="bpptx" class="primary">Bundle PowerPoints (zip)</button><button id="bpdf">Bundle PDFs (zip)</button></div>
+    <h2 style="margin-top:16px">Listing thumbnails</h2>
+    <p class="small">Tick the sets you want thumbnails from, then tap the pages to use. The first two pages you pick go on the cover image, and every picked page also gets its own preview image. Pick none and the first page of each set is used.</p>
+    <div id="pickSets"></div><div id="pickPages"></div>
+    <div class="row small"><span id="pickInfo"></span><button id="pickClear">Clear picks</button></div>
+    <label class="blk small" style="display:block;margin-top:10px"><input type="checkbox" id="eachKits"> Also make a listing kit for each set</label>
+    <div class="btns"><button id="blist">Bundle listing pack</button></div>
   </section>
 </aside>
 <div><p id="status">Loading fonts…</p><div id="preview"></div></div>
 </main>
 <script src="vendor/jspdf.umd.min.js"></script><script src="vendor/pptxgen.bundle.js"></script>
 <script src="data/skills.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
-<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script><script src="js/products/coldread.js"></script><script src="data/images.js"></script><script src="js/products/picturewrite.js"></script><script src="vendor/jszip.min.js"></script><script src="js/listing.js"></script>
+<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script><script src="js/products/coldread.js"></script><script src="data/images.js"></script><script src="js/products/picturewrite.js"></script><script src="vendor/jszip.min.js"></script><script src="js/listing.js"></script><script src="js/bundle.js"></script>
 <script src="js/app.js"></script>
 </body></html>

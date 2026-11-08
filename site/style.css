@@ -5,7 +5,7 @@ main{display:flex;gap:18px;padding:18px}aside{width:330px;flex:none;display:flex
 section{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px #0001}h2{font-size:15px;margin:0 0 8px}
 #products button{display:block;width:100%;text-align:left;margin:4px 0;padding:8px 10px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font:inherit}
 #products button.on{border:2px solid #000;font-weight:700}#products button:disabled{color:#999;cursor:default}#products small{float:right;color:#999}
-#search,#label{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
+#search,#label,#bundleTitle{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
 #skills{max-height:300px;overflow:auto;margin-top:8px;border:1px solid #eee;border-radius:8px}
 .sk{padding:5px 8px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:14px}.sk:hover{background:#f6f6f6}.sk.on{background:#000;color:#fff}.sk span{float:right;opacity:.6;font-size:12px}
 .grp{padding:4px 8px;background:#fafafa;font-size:12px;color:#888;font-weight:700}
@@ -25,6 +25,10 @@ section{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 3p
 .crow select{flex:1;min-width:0;font:inherit;padding:3px}.crow .ct{width:28px;color:#888;text-align:right}
 .crow button{padding:2px 6px;font-size:12px}
 #bundle{font-size:13px;padding-left:20px}#bundle li button{margin-left:6px;padding:0 6px;font-size:12px}
+#pickSets label{display:block;font-size:13px;margin:3px 0}#pickPages .pset{margin-top:8px}#pickPages .pset b{display:block;font-size:12px;margin-bottom:4px}
+.pgrid{display:flex;flex-wrap:wrap;gap:8px;max-height:320px;overflow:auto;padding:6px;border:1px solid #eee;border-radius:8px}
+.pg{position:relative;width:92px;cursor:pointer;border:3px solid transparent;border-radius:6px;line-height:0}.pg canvas{width:100%;background:#fff;box-shadow:0 1px 3px #0003}.pg.on{border-color:#000}
+.pg i{position:absolute;top:-8px;right:-8px;width:22px;height:22px;line-height:22px;border-radius:50%;background:#000;color:#fff;font:700 12px Andika,sans-serif;text-align:center;font-style:normal}
 #status{margin:0 0 8px;color:#666}.warn{color:#b00}
 main>div{flex:1;min-width:0}
 button:disabled{opacity:.4;cursor:default}

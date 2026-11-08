@@ -2,13 +2,16 @@
 const T=TPT, $=id=>document.getElementById(id);
 const READ=SKILLS, MATHS=MATH.skills;
 let prod=T.products[0], kind='reading', sel=[], seed=Date.now()%100000, cur=null, showBundle=false;
-const bundles={}; // per product id: [{cfg,seed,desc}]
+const bundleSets=[]; // one list for every product type: [{id,pid,cfg,seed,desc}]
+let setId=0, titleTouched=false, picks=[]; // picks: [{id,page}] pages chosen for the listing thumbnails, in the order picked
+const openSets=new Set(), docCache=new Map(); // openSets: set ids whose pages are shown in the picker; docCache: each set's built file
 // ---------- mystery state
 const MY={theme:null,name:null,rows:[],orig:[],colors:{},assign:{},undo:[],brush:null};
 const PAL=PIXELS.palette, MP=()=>T.products.find(p=>p.id==='mystery');
 const DEFAULT_READ=['sh','ch','th (unvoiced, as in thin)','wh','ck','ng','nk','qu','tch','ff','ll','ss'];
 function skillsFor(k){const L=k==='math'?MATHS:READ;return (typeof prod!=='undefined'&&prod&&prod.id==='picturewrite'&&T._pwAvail)?L.filter(s=>T._pwAvail([s]).length>=9):L;} // Picture Write hides skills with fewer than 9 pictures
-function bundle(){return bundles[prod.id]||(bundles[prod.id]=[]);}
+function bundle(){return bundleSets;}
+function prodOf(x){return T.products.find(p=>p.id===x.pid);}
 // ---------- product + kind
 function renderProducts(){$('products').innerHTML='';for(const p of T.products){const b=document.createElement('button');b.textContent=p.name;b.className=p===prod?'on':'';
   b.onclick=()=>{if(p===prod)return;prod=p;if(!p.kinds.includes(kind))kind=p.kinds[0];sel=[];defaultSkill();renderAll();};$('products').appendChild(b);}
@@ -82,9 +85,34 @@ function build(){if(!sel.length&&!(prod.id==='mystery'&&kind==='reading')&&prod.
   const c=cfg();if(prod.needs){const nd=prod.needs(c,seed).filter(w=>(window.IMAGE_MAP||{})[w]&&!T.icons[w]);if(nd.length){window.APP&&(APP.loading=true);T.loadIcons(nd).then(()=>{window.APP&&(APP.loading=false);build();});return;}}cur=T.assemble(prod,[{cfg:c,seed}]);cur.fileBase=T.fileName(prod,cur.secs);
   $('info').innerHTML=cur.secs[0].info||'';showBundle=false;preview(cur.pages);}
 function renderBundle(){const b=bundle();$('bundle').innerHTML=b.map((x,i)=>`<li>${x.desc}<button data-i="${i}">✕</button></li>`).join('');
-  $('bundle').querySelectorAll('button').forEach(e=>e.onclick=()=>{b.splice(+e.dataset.i,1);renderBundle();});
-  ['bpptx','bpdf','blist','showBundle'].forEach(id=>$(id).disabled=b.length<1);}
-function bundleDoc(){const b=bundle();const d=T.assemble(prod,b);d.fileBase=T.fileName(prod,d.secs);return d;}
+  $('bundle').querySelectorAll('button').forEach(e=>e.onclick=()=>{const x=b.splice(+e.dataset.i,1)[0];docCache.delete(x.id);openSets.delete(x.id);picks=picks.filter(p=>p.id!==x.id);renderBundle();});
+  ['bpptx','bpdf','blist','showBundle'].forEach(id=>$(id).disabled=b.length<1);
+  if(!titleTouched)$('bundleTitle').value=BUNDLE.suggestTitle(b.map(prodOf)); // suggestion until you type your own
+  renderPicks();}
+// ---------- bundle files: every set is its own file, plus a cover/contents file
+async function getSetDoc(x){if(docCache.has(x.id))return docCache.get(x.id);const p=prodOf(x);
+  if(p.needs){const nd=p.needs(x.cfg,x.seed).filter(w=>(window.IMAGE_MAP||{})[w]&&!T.icons[w]);if(nd.length)await T.loadIcons(nd);}
+  const doc=T.assemble(p,[{cfg:x.cfg,seed:x.seed}]);docCache.set(x.id,doc);return doc;}
+async function bundleMake(){const sets=[];for(const x of bundle()){const doc=await getSetDoc(x);sets.push({id:x.id,prod:prodOf(x),doc,label:doc.secs[0].label});}
+  return {sets,made:BUNDLE.make($('bundleTitle').value,sets)};}
+// pages for the listing thumbnails: the ones you picked, in order; if none, the first product page of each set
+function pickedPages(sets){const byId=new Map(sets.map(s=>[s.id,s]));
+  let pg=picks.map(p=>byId.get(p.id)&&byId.get(p.id).doc.pages[p.page]).filter(Boolean);
+  if(!pg.length)pg=sets.map(s=>s.doc.pages[Math.min(2,s.doc.pages.length-2)]).filter(Boolean);
+  return pg.slice(0,9);}
+function refreshBadges(){document.querySelectorAll('#pickPages .pg').forEach(d=>{const k=picks.findIndex(p=>p.id==d.dataset.id&&p.page==d.dataset.page);d.classList.toggle('on',k>=0);let i=d.querySelector('i');
+    if(k>=0){if(!i){i=document.createElement('i');d.appendChild(i);}i.textContent=k+1;}else if(i)i.remove();});
+  $('pickInfo').textContent=picks.length?`${picks.length} page${picks.length>1?'s':''} picked (up to 9)`:'None picked: the first page of each set is used';}
+function renderPicks(){const b=bundle(),ps=$('pickSets'),pp=$('pickPages');ps.innerHTML='';pp.innerHTML='';
+  b.forEach((x,i)=>{const l=document.createElement('label'),c=document.createElement('input');c.type='checkbox';c.checked=openSets.has(x.id);
+    c.onchange=()=>{c.checked?openSets.add(x.id):openSets.delete(x.id);renderPicks();};l.append(c,` ${i+1}. ${x.desc}`);ps.appendChild(l);});
+  b.forEach((x,i)=>{if(!openSets.has(x.id))return;const w=document.createElement('div');w.className='pset';const t=document.createElement('b');t.textContent=`${i+1}. ${x.desc}`;const g=document.createElement('div');g.className='pgrid';g.textContent='Loading pages…';w.append(t,g);pp.appendChild(w);
+    getSetDoc(x).then(doc=>{g.textContent='';doc.pages.slice(0,-1).forEach((pg,pi)=>{const d=document.createElement('div');d.className='pg';d.dataset.id=x.id;d.dataset.page=pi;d.title='Page '+(pi+1);
+      const cv=document.createElement('canvas');T.drawCanvas(pg,cv,30);d.appendChild(cv);
+      d.onclick=()=>{const k=picks.findIndex(p=>p.id===x.id&&p.page===pi);if(k>=0)picks.splice(k,1);else if(picks.length<9)picks.push({id:x.id,page:pi});else{refreshBadges();$('pickInfo').textContent='That is the most you can pick (9). Tap a picked page to remove it.';return;}refreshBadges();};
+      g.appendChild(d);});refreshBadges();});});
+  refreshBadges();}
+async function busy(btn,txt,fn){const o=btn.textContent;btn.disabled=true;btn.textContent=txt;try{await fn();}catch(e){console.error(e);$('status').textContent='Something went wrong building the bundle: '+e.message;}finally{btn.textContent=o;btn.disabled=bundle().length<1;}}
 function renderAll(){renderProducts();const my=prod.id==='mystery';$('mysterySec').hidden=!my;$('optSec').hidden=prod.id!=='bingo';$('wsOpt').hidden=prod.id!=='wordsort';$('mazeOpt').hidden=prod.id!=='wordmaze';$('pwOpt').hidden=prod.id!=='picturewrite';const cr=prod.id==='coldread';$('crSec').hidden=!cr;if(cr&&!$('crText').value.trim())$('crText').value=prod.sample;if(cr)crSlots();$('skillSec').hidden=cr;$('shuffle').hidden=cr;
   $('label').value=labelFor();if(!cr)renderSkills();renderBundle();if(my){if(!MY.name){$('theme').value='Animals';pickImage('Animals','bear');}else defaultAssignNew();renderThumbs();renderMystery();}else build();}
 // ---------- events
@@ -93,12 +121,16 @@ let crT;$('crText').oninput=()=>{clearTimeout(crT);crT=setTimeout(()=>{crSlots()
 $('shuffle').onclick=()=>{seed=(seed*7919+13)%1000003;build();};
 $('dlpdf').onclick=()=>cur&&T.pdf(cur.pages,cur.fileBase);
 $('dlpptx').onclick=()=>cur&&T.pptx(cur.pages,cur.fileBase);
-$('addSet').onclick=()=>{const c=cfg();bundle().push({cfg:c,seed,desc:desc(c)});seed=(seed*7919+13)%1000003;renderBundle();build();};
-$('clearBundle').onclick=()=>{bundle().length=0;renderBundle();build();};
-$('showBundle').onclick=()=>{const d=bundleDoc();showBundle=true;preview(d.pages);};
-$('bpdf').onclick=()=>{const d=bundleDoc();T.pdf(d.pages,d.fileBase);};
-$('blist').onclick=()=>{const d=bundleDoc();LISTING.zip(prod,d,T.skillsText(d.secs).replace(/^Skills?: /,''),d.fileBase,true);};
-$('bpptx').onclick=()=>{const d=bundleDoc();T.pptx(d.pages,d.fileBase);};
+$('addSet').onclick=()=>{const c=cfg();bundle().push({id:++setId,pid:prod.id,cfg:c,seed,desc:prod.name+' — '+desc(c)});seed=(seed*7919+13)%1000003;renderBundle();build();};
+$('clearBundle').onclick=()=>{bundle().length=0;docCache.clear();openSets.clear();picks=[];renderBundle();build();};
+$('bundleTitle').oninput=()=>{titleTouched=$('bundleTitle').value.trim()!=='';};
+$('pickClear').onclick=()=>{picks=[];refreshBadges();};
+$('showBundle').onclick=()=>busy($('showBundle'),'Building…',async()=>{const {sets,made}=await bundleMake();const pg=[...made.files[0].doc.pages];sets.forEach(s=>pg.push(s.doc.pages[0]));showBundle=true;preview(pg);
+  $('status').textContent=`Bundle preview: the cover and contents file, then the first page of each of the ${sets.length} set files`;});
+$('bpptx').onclick=()=>busy($('bpptx'),'Building…',async()=>{const {made}=await bundleMake();BUNDLE.saveBlob(await BUNDLE.buildZip(made.files,'pptx'),made.base+' - PowerPoints.zip');});
+$('bpdf').onclick=()=>busy($('bpdf'),'Building…',async()=>{const {made}=await bundleMake();BUNDLE.saveBlob(await BUNDLE.buildZip(made.files,'pdf'),made.base+' - PDFs.zip');});
+$('blist').onclick=()=>busy($('blist'),'Building…',async()=>{const {sets,made}=await bundleMake();
+  await LISTING.zipBundle({title:made.title,skills:made.skills,sets:made.files.slice(1).map(f=>({prod:f.prod,doc:f.doc,label:f.label,name:f.name})),picks:pickedPages(sets)},$('eachKits').checked,made.base);});
 $('bgOff').onchange=()=>{MY.bgOff=$('bgOff').checked;renderColors();build();};
 $('theme').innerHTML=Object.keys(PIXELS.themes).map(t=>`<option>${t}</option>`).join('');$('theme').onchange=renderThumbs;
 await T.init();defaultSkill();renderAll();
@@ -106,7 +138,7 @@ await T.init();defaultSkill();renderAll();
 window.APP={loading:false,T,MY,get cur(){return cur;},
   product(id,k){$('products').querySelectorAll('button')[T.products.findIndex(p=>p.id===id)].click();if(k&&k!==kind){[...$('kinds').children].find(b=>b.textContent.toLowerCase()===k).click();}return prod.id+'/'+kind;},
   select(names){names=[].concat(names);sel=names.map(n=>skillsFor(kind).find(s=>s.name===n));if(prod.id==='mystery')defaultAssign();$('label').value=labelFor();renderSkills();if(prod.id==='mystery')renderColors();build();return cur.secs[0].info;},
-  addSet(){$('addSet').click();return bundle().length;},bundleDoc,pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},
+  addSet(){$('addSet').click();return bundle().length;},bundleMake,pickedPages,getSetDoc,get picks(){return picks;},pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},
   paintAt(i,j,ch){MY.brush=ch;MY.undo.push(MY.rows.slice());paint(i,j);defaultAssignNew();renderColors();drawEditor();build();},
   undo(){$('undo').click();},recolor(ch,hex,name){MY.colors[ch].hex=hex;if(name)MY.colors[ch].name=name;renderColors();drawEditor();build();},
   bgOff(v){$('bgOff').checked=v;$('bgOff').onchange();},

@@ -48,5 +48,46 @@ async function zip(prod,doc,label,fname,isBundle){
   z.file('listing.txt',r.txt); const blob=await z.generateAsync({type:'blob'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname+' - TpT listing pack.zip'; document.body.appendChild(a); a.click(); a.remove(); return r;
 }
-return {build,zip};
+// ---- Bundle listing kit: the cover shows the title you typed and the pages you picked; each picked page also gets its own preview image.
+// splits on plain spaces only, so a non-breaking space keeps words together
+function wrapCanvas(g,text,font,size,w){const lines=[]; let cur=''; g.font=font.replace('%',size);
+  for(const wd of String(text).split(/ +/).filter(Boolean)){const t=cur?cur+' '+wd:wd; if(g.measureText(t).width>w&&cur){lines.push(cur);cur=wd;} else cur=t;}
+  if(cur) lines.push(cur); return lines;}
+function textFit(g,text,font,max,min,w,maxLines){let s=max,L; for(;;){L=wrapCanvas(g,text,font,s,w); if((L.length<=maxLines&&L.every(l=>g.measureText(l).width<=w))||s<=min) break; s-=6;} return {L,s};}
+const pad2=n=>String(n).padStart(2,'0');
+// b: {title, skills:[...], sets:[{prod,doc,label}], picks:[page,...]}  (picks are page objects; first two go on the cover image)
+async function buildBundle(b){
+  const L=await getLogo(), out=[], n=b.sets.length, picks=b.picks.slice(0,9);
+  {const [c,g]=base(); g.lineWidth=14; g.textAlign='center'; g.textBaseline='middle';
+    g.save();g.fillStyle='#000';g.beginPath();g.roundRect(S/2-260,S-330,520,110,55);g.fill();g.fillStyle='#fff';g.font='700 64px Andika';g.fillText('Bundle of '+n,S/2,S-275);g.restore();
+    g.strokeStyle='#000'; g.beginPath(); g.roundRect(40,40,S-80,S-80,60); g.stroke();
+    g.fillStyle='#000'; g.textAlign='center'; g.textBaseline='middle';
+    const tf=textFit(g,b.title,'400 %px Pacifico',190,70,S-300,2), tlh=tf.s*1.15; g.font=`400 ${tf.s}px Pacifico`;
+    tf.L.forEach((l,i)=>g.fillText(l,S/2,110+tlh*(i+.5)));
+    const titleBottom=110+tlh*tf.L.length; let bottom=titleBottom;
+    if(b.skills.length){const sf=textFit(g,b.skills.map(s=>s.replace(/ /g,'\u00a0')).join('\u00a0\u2022 '),'700 %px Andika',110,56,S-560,3), slh=sf.s*1.2, ph=slh*sf.L.length+70, py=Math.max(360,titleBottom+20);
+      g.font=`700 ${sf.s}px Andika`; const tw=Math.max(...sf.L.map(l=>g.measureText(l).width))+120; g.lineWidth=8; g.beginPath(); g.roundRect(S/2-tw/2,py,tw,ph,Math.min(75,ph/2)); g.stroke();
+      sf.L.forEach((l,i)=>g.fillText(l,S/2,py+35+slh*(i+.5))); bottom=py+ph;}
+    const top=bottom+90, avail=1580-top, pics=picks.slice(0,2), two=pics.length>1, maxH=Math.min(two?900:950,avail);
+    pics.forEach((pg,i)=>{const im=pageImg(pg,two?700:900,maxH); const x=two?(i?S/2+40:S/2-40-im.width):S/2-im.width/2; shadowPage(g,im,x,top+(i?40:0),two?(i?0.04:-0.04):0);});
+    g.drawImage(L,S-420,S-420,330,330); g.fillStyle='#000'; g.textAlign='center'; g.font='400 48px Andika'; g.fillText(T.STORE,S/2,S-110);
+    out.push(['01-cover.png',c]);}
+  picks.forEach((pg,i)=>{const [c,g]=base(); const im=pageImg(pg,S-360,S-420); shadowPage(g,im,S/2-im.width/2,120+(S-420-im.height)/2);
+    g.fillStyle='#000'; g.textAlign='center'; g.font='700 64px Andika'; g.fillText('PREVIEW',S/2,S-150); g.drawImage(L,S-260,S-260,200,200); out.push([`${pad2(i+2)}-preview.png`,c]);});
+  const title=b.title.replace(/\u2014/g,'-'), types=[...new Map(b.sets.map(s=>[s.prod.id,s.prod])).values()];
+  const tags=[...new Set(types.flatMap(p=>(TAGS[p.id]||[]).slice(0,3)).concat(['bundle'],b.skills))].slice(0,20); // a few tags per product type so the skills still fit under 20
+  const inc=b.sets.map(s=>`- ${s.prod.title}${s.label?' - '+s.label:''} (${s.doc.pages.length} pages)`).join('\n');
+  const txt=`TITLE\n${title}\n\nDESCRIPTION\nBundle of ${n} resources. Each resource is its own file, plus a cover and contents file.\n\n${types.map(p=>`${p.title}: ${BLURB[p.id]||''}`).join('\n')}\n\nWhat's included:\n- Cover and contents file\n${inc}\n- Every file has its own directions and Terms of Use\n- Black and white, easy to print\n- Editable PowerPoint files (open in Google Slides) and PDF files\n${b.skills.length?'\nSkills: '+b.skills.join(' • ')+'\n':''}\nTAGS\n${tags.join(', ')}\n`;
+  return {images:out,txt,title};
+}
+// One zip: the bundle kit, plus (optional) a kit for each set in its own folder.
+async function zipBundle(b,eachKits,fname){
+  const z=new JSZip(), add=async(f,r)=>{for(const [nm,c] of r.images){const bl=await new Promise(res=>c.toBlob(res,'image/png')); f.file(nm,bl);} f.file('listing.txt',r.txt);};
+  const main=await buildBundle(b);
+  if(!eachKits) await add(z,main);
+  else{await add(z.folder('Bundle'),main); const sf=z.folder('Individual sets');
+    for(let i=0;i<b.sets.length;i++){const s=b.sets[i]; await add(sf.folder(s.name||(pad2(i+1)+' - '+s.prod.title)),await build(s.prod,s.doc,s.label,false));}}
+  const blob=await z.generateAsync({type:'blob'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname+' - TpT listing pack.zip'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),15000); return main;
+}
+return {build,zip,buildBundle,zipBundle};
 })();
