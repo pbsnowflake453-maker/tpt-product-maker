@@ -41,28 +41,32 @@ function logoBadge(g,L,cx,cy,r){g.save(); g.beginPath(); g.arc(cx,cy,r,0,7); g.f
 function textStroke(g,t,x,y,fill,stroke,lw){g.lineJoin='round'; g.lineWidth=lw; g.strokeStyle=stroke; g.strokeText(t,x,y); g.fillStyle=fill; g.fillText(t,x,y);}
 // ---- page roles
 function roles(doc){
-  const n=doc.pages.length, txt=p=>p.items.filter(i=>i.t==='text').map(i=>i.text).join(' | ');
-  return doc.pages.map((p,i)=>{const t=txt(p);
-    if(i===0) return 'cover'; if(i===n-1) return 'terms';
-    if(/^Set \d+ of \d+$/m.test(p.items.filter(x=>x.t==='text').map(x=>x.text).join('\n'))||p.items.some(x=>x.t==='text'&&/^Set \d+ of \d+$/.test(x.text))) return 'divider';
-    if(p.items.some(x=>x.t==='text'&&/^(How to Play|How to Use|What's Included|What's Included \(continued\))$/.test(x.text))) return 'info';
-    if(p.items.some(x=>x.t==='text'&&/^Answer Key/.test(x.text))) return 'key';
+  const n=doc.pages.length, T0=p=>p.items.some.bind(p.items);
+  const has=(p,re)=>p.items.some(x=>x.t==='text'&&re.test(x.text));
+  const files=doc.files||[{from:0,to:n,kind:'set'}];
+  return doc.pages.map((p,i)=>{const f=files.find(f=>i>=f.from&&i<f.to)||files[0];
+    if(f.kind==='cover') return i===f.from?'cover':'info';
+    if(i===f.from) return 'cover'; if(i===f.to-1) return 'terms';
+    if(has(p,/^(How to Play|How to Use|What's Included|What's Included \(continued\))$/)) return 'info';
+    if(has(p,/^Answer Key/)) return 'key';
     return 'student';});
 }
 // ---- drawing pieces
 function titleBanner(g,th,title,skillsTxt,{big}){
-  const bx=90,by=80,bw=S-180,bh=big?560:420;
+  const bx=90,by=80,bw=S-180, tw=bw-(big?380:200);
+  g.textAlign='center'; g.textBaseline='middle';
+  let L=[title], size=fitFont(g,title,'400','Pacifico',big?250:150,tw,60), two=false;
+  if(big&&size<150&&title.includes(' ')){ // long titles: two balanced lines in a taller banner
+    g.font=FONT(400,100,'Pacifico'); const w=title.split(' '); let best=null;
+    for(let i=1;i<w.length;i++){const a=w.slice(0,i).join(' '),c=w.slice(i).join(' '),m=Math.max(g.measureText(a).width,g.measureText(c).width); if(!best||m<best.m)best={a,c,m};}
+    if(best){L=[best.a,best.c]; size=Math.min(160,fitFont(g,best.a,'400','Pacifico',200,tw,60),fitFont(g,best.c,'400','Pacifico',200,tw,60)); two=true;}}
+  const bh=big?(two?(skillsTxt?660:520):560):420;
   g.save(); g.shadowColor='rgba(0,0,0,.35)'; g.shadowBlur=30; g.shadowOffsetY=14; rr(g,bx,by,bw,bh,90); g.fillStyle='#fff'; g.fill(); g.restore();
   rr(g,bx,by,bw,bh,90); g.lineWidth=12; g.strokeStyle='#000'; g.stroke();
-  g.fillStyle='#000'; g.textAlign='center'; g.textBaseline='middle';
-  const tw=bw-(big?380:200); let L=[title], size=fitFont(g,title,'400','Pacifico',big?250:150,tw,60);
-  if(big&&size<150&&title.includes(' ')){ // long titles: two lines
-    const half=title.split(' '), best=(()=>{let b=null;for(let i=1;i<half.length;i++){const a=half.slice(0,i).join(' '),c=half.slice(i).join(' '),m=Math.max(g.measureText(a).width,g.measureText(c).width);if(!b||m<b.m)b={a,c,m};}return b;})();
-    if(best){L=[best.a,best.c]; size=Math.min(fitFont(g,best.a,'400','Pacifico',200,tw,60),fitFont(g,best.c,'400','Pacifico',200,tw,60));}}
-  g.font=FONT(400,size,'Pacifico');
-  const lh=size*1.05, ty=by+(big?(skillsTxt?250:bh/2):bh/2)-((L.length-1)*lh)/2;
+  g.fillStyle='#000'; g.font=FONT(400,size,'Pacifico');
+  const lh=size*1.08, mid=two?(skillsTxt?by+235:by+bh/2):(big?(skillsTxt?by+250:by+bh/2):by+bh/2), ty=mid-((L.length-1)*lh)/2;
   L.forEach((l,i)=>g.fillText(l,S/2-(big?90:0),ty+i*lh));
-  return {bx,by,bw,bh};
+  return {bx,by,bw,bh,two};
 }
 function skillPill(g,th,txt,cx,cy,maxW,size){
   g.textAlign='center'; g.textBaseline='middle'; const s=fitFont(g,txt,'700','Andika',size,maxW-120,40); g.font=FONT(700,s,'Andika'); const w=Math.min(maxW,g.measureText(txt).width+130), h=s*1.7;
@@ -83,12 +87,12 @@ async function cover(spec,th,L,st){
   const [c,g]=newCanvas(); dots(g,th.dot,th.p,150,26);
   const skillsTxt=skillsLine(spec.skills);
   const bn=titleBanner(g,th,spec.title,skillsTxt,{big:true});
-  if(skillsTxt) skillPill(g,th,skillsTxt,S/2-90,bn.by+bn.bh-135,bn.bw-380,118);
+  if(skillsTxt) skillPill(g,th,skillsTxt,S/2-90,bn.by+bn.bh-(bn.two?105:135),bn.bw-380,bn.two?92:118);
   gradeBadge(g,th,spec.opts.grade,S-185,195,175);
   // tilted, stacked page mockups
   const pics=(spec.picks.length?spec.picks:st.defaultPicks).slice(0,3);
-  const box=pics.length===1?[1300,1150]:[1120,1030]; const ims=pics.map(p=>pageImg(p,box[0],box[1]));
-  const cy=1250;
+  const box=bn.two?(pics.length===1?[1200,1000]:[1060,960]):(pics.length===1?[1300,1150]:[1120,1030]); const ims=pics.map(p=>pageImg(p,box[0],box[1]));
+  const cy=bn.two?1310:1250;
   if(ims.length===1) paper(g,ims[0],S/2,cy,0);
   else if(ims.length===2){paper(g,ims[0],S/2-300,cy+10,-0.1); paper(g,ims[1],S/2+300,cy-10,0.07);}
   else {paper(g,ims[2],S/2-360,cy+30,-0.13); paper(g,ims[1],S/2+360,cy+10,0.1); paper(g,ims[0],S/2,cy-20,-0.015);}

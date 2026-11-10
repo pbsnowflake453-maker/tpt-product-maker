@@ -44,18 +44,29 @@ let fails=0,passes=0; const ok=(c,m)=>{if(c){passes++;}else{fails++;console.log(
  // pages option
  const pgs=await pg.evaluate(()=>{APP.product('readdraw','reading');APP.select('Unit 1');document.getElementById('rdPages').value=4;document.getElementById('rdPages').onchange&&document.getElementById('rdPages').onchange();document.getElementById('rdPages').dispatchEvent(new Event('input'));return new Promise(r=>setTimeout(()=>r(APP.cur.pages.length),400));});
  ok(pgs===7,'Read and Draw with 4 pages -> 7 total pages (got '+pgs+')');
- // ---- mixed bundle (portrait mix incl. Read and Draw), typed title, divider before each set, picker, one file
- const bd=await pg.evaluate(()=>{APP.product('readdraw','reading');APP.select('Unit 2');APP.addSet();APP.product('wordsort','reading');APP.select('ch');APP.addSet();APP.product('picturewrite','reading');APP.select('Short a CVC');APP.addSet();
+ // ---- mixed bundle = ZIP of separate files; landscape (Roll and Read) + portrait (Read and Draw, Word Sort, Picture Write)
+ const bd=await pg.evaluate(()=>{document.getElementById('clearBundle').click();
+   APP.product('rollread','reading');APP.select('sh');APP.addSet();APP.product('readdraw','reading');APP.select('Unit 2');APP.addSet();APP.product('wordsort','reading');APP.select('ch');APP.addSet();APP.product('picturewrite','reading');APP.select('Short a CVC');const n=APP.addSet();
    document.getElementById('bundleTitle').value='Test Mix Bundle';document.getElementById('bundleTitle').dispatchEvent(new Event('input'));const d=APP.bundleDoc();
-   const txt=p=>p.items.filter(i=>i.t==='text').map(i=>i.text).join('|');
-   return {title:d.title,mixed:d.mixed,sets:d.sets.map(s=>s.prod.id),divs:d.sets.map(s=>/Set \d of 3/.test(txt(d.pages[s.from-1]))),terms:d.pages.filter(p=>/Terms of Use/.test(txt(p))).length,n:d.pages.length,warn:document.getElementById('bundleWarn').textContent};});
- ok(bd.title==='Test Mix Bundle','typed bundle title used');ok(bd.mixed&&bd.sets.join()==='readdraw,wordsort,picturewrite','mixed bundle sets '+bd.sets);
- ok(bd.divs.every(Boolean),'divider before every set');ok(bd.terms===1,'one Terms page in bundle');ok(bd.warn==='','no orientation warning for portrait mix: '+bd.warn);
- // download a single PDF + PPTX for the bundle
- const dl=async(sel,name)=>{const [d]=await Promise.all([pg.waitForEvent('download',{timeout:120000}),pg.click(sel)]);await d.saveAs(OUT+name);return OUT+name;};
- const bpdf=await dl('#bpdf','suite-bundle.pdf'),bpptx=await dl('#bpptx','suite-bundle.pptx');
- ok(fs.statSync(bpdf).size>20000&&fs.statSync(bpptx).size>20000,'bundle PDF + PPTX downloaded (single files)');
- const pi=sh(`pdfinfo "${bpdf}" | grep Pages`).stdout; ok(new RegExp('Pages:\\s+'+bd.n).test(pi),'bundle PDF page count matches doc: '+pi.trim()+' vs '+bd.n);
+   return {n,title:d.title,mixed:d.mixed,names:d.files.map(f=>f.name),orients:d.files.map(f=>f.orient),sets:d.sets.map(s=>s.prod.id),warn:document.getElementById('bundleWarn').textContent,pages:d.pages.length};});
+ ok(bd.n===4,'landscape + portrait sets can all be added ('+bd.n+')');
+ ok(bd.title==='Test Mix Bundle','typed bundle title used');ok(bd.mixed&&bd.sets.join()==='rollread,readdraw,wordsort,picturewrite','mixed bundle sets '+bd.sets);
+ ok(bd.warn==='','no orientation warning: '+bd.warn);
+ ok(bd.names[0]==='01 Cover and Contents'&&/^02 Roll and Read - /.test(bd.names[1])&&/^03 Read and Draw - Unit 2/.test(bd.names[2]),'numbered file names: '+bd.names.join(' | '));
+ ok(bd.orients.includes('L')&&bd.orients.includes('P'),'bundle holds landscape and portrait files: '+bd.orients);
+ const dl=async(sel,name)=>{const [d]=await Promise.all([pg.waitForEvent('download',{timeout:180000}),pg.click(sel)]);await d.saveAs(OUT+name);return OUT+name;};
+ const bz=await dl('#bzip','suite-bundle.zip');
+ sh(`rm -rf ${OUT}bz && mkdir -p ${OUT}bz && unzip -oq "${bz}" -d ${OUT}bz`);
+ const listing=fs.readdirSync(OUT+'bz').sort(); ok(listing.length===2*bd.names.length,'zip has PPTX + PDF for each of '+bd.names.length+' files: '+listing.join(' | '));
+ ok(bd.names.every(n=>fs.existsSync(`${OUT}bz/${n}.pptx`)&&fs.existsSync(`${OUT}bz/${n}.pdf`)),'every file in both formats');
+ // page shapes per file (PDF) + standalone structure (set files: cover, directions, pages, terms)
+ const sizes=bd.names.map(n=>sh(`pdfinfo "${OUT}bz/${n}.pdf" | grep -E "Page size|Pages"`).stdout.replace(/\s+/g,' '));
+ ok(/792 x 612/.test(sizes[1])&&/612 x 792/.test(sizes[2])&&/612 x 792/.test(sizes[0]),'Roll and Read file landscape, Read and Draw + cover portrait: '+sizes.join(' || '));
+ const terms=bd.names.slice(1).map(n=>/Terms of Use/.test(sh(`pdftotext "${OUT}bz/${n}.pdf" - 2>/dev/null`).stdout)); ok(terms.every(Boolean),'each set file has its own Terms page');
+ const dirs=bd.names.slice(1).map(n=>/How to (Play|Use)/.test(sh(`pdftotext "${OUT}bz/${n}.pdf" - 2>/dev/null`).stdout)); ok(dirs.every(Boolean),'each set file has its own directions page');
+ const ct=sh(`pdftotext "${OUT}bz/01 Cover and Contents.pdf" - 2>/dev/null`).stdout; ok(/Test Mix Bundle/.test(ct)&&/What's Included/.test(ct)&&/02\s+Roll and Read/.test(ct)&&!/Set \d of/.test(ct),'cover/contents file lists the numbered files');
+ const sl=bd.names.map(n=>sh(`pdftotext "${OUT}bz/${n}.pdf" - 2>/dev/null`).stdout).join(''); ok(!/Set \d of \d/.test(sl),'no divider pages');
+ const ps=bd.names.map(n=>{const x=sh(`cd /tmp && rm -rf px1 && mkdir px1 && cd px1 && unzip -oq "${OUT}bz/${n}.pptx" && grep -o 'sldSz cx="[0-9]*" cy="[0-9]*"' ppt/presentation.xml`).stdout.trim();return x;}); ok(ps[1]!==ps[2]&&ps[2]===ps[0],'PPTX slide sizes differ per file: '+ps.join(' | '));
  // picker: pick pages -> picks recorded -> listing uses them
  await pg.evaluate(()=>{document.getElementById('bpickDet').open=true;});await pg.waitForTimeout(400);
  const th=await pg.$$('#bpickPages .pg'); ok(th.length>=4,'bundle picker shows student pages ('+th.length+')');
@@ -71,12 +82,8 @@ let fails=0,passes=0; const ok=(c,m)=>{if(c){passes++;}else{fails++;console.log(
  await pg.fill('#lsGrade','2nd Grade'); await pg.selectOption('#lsTheme','sky');
  const sz=await dl('#dllist','suite-single-listing.zip'); r=sh(`rm -rf ${OUT}sl && mkdir -p ${OUT}sl && unzip -oq "${sz}" -d ${OUT}sl ; python3 -c "from PIL import Image;print(Image.open('${OUT}sl/01-cover.png').size)"; cat ${OUT}sl/listing.txt`).stdout;
  ok(/\(2000, 2000\)/.test(r),'listing cover is 2000x2000'); ok(/2nd Grade/.test(r),'grade text in listing.txt');
- // orientation limitation: landscape + portrait cannot share one file -> add is refused with a visible warning
- const ow=await pg.evaluate(()=>{document.getElementById('clearBundle').click();APP.product('rollread','reading');APP.select('sh');const n=APP.addSet();return [n,document.getElementById('bundleWarn').textContent];}); ok(ow[0]===1&&ow[1]==='','landscape-only bundle: no warning '+ow);
- const ow2=await pg.evaluate(()=>{APP.product('readdraw','reading');APP.select('Unit 1');const n=APP.addSet();return [n,document.getElementById('bundleWarn').textContent];});
- ok(ow2[0]===1&&/one page shape/i.test(ow2[1]),'landscape+portrait add refused with warning: '+ow2);
- // ---- PPTX rules: no theme colors / table styles
- for(const f of [bpptx]){ const x=sh(`cd /tmp && rm -rf px && mkdir px && cd px && unzip -oq "${f}" && (grep -rl "schemeClr\\|tableStyleId" ppt/slides | wc -l)`).stdout.trim(); ok(x==='0','PPTX has no schemeClr/tableStyleId ('+x+' slides)'); }
+ // ---- PPTX rules: no theme colors / table styles in any file of the bundle
+ const x=sh(`cd /tmp && rm -rf px && mkdir px && cd px && for f in ${OUT}bz/*.pptx; do mkdir "d$(basename "$f" .pptx | tr -d ' ')" ; unzip -oq "$f" -d "d$(basename "$f" .pptx | tr -d ' ')"; done; grep -rl "schemeClr\\|tableStyleId" . | grep slides | wc -l`).stdout.trim(); ok(x==='0','no schemeClr/tableStyleId in any bundle PPTX ('+x+' slides)');
  ok(errs.filter(e=>!/favicon/.test(e)).length===0,'no page/console errors: '+errs.slice(0,3).join(' || '));
  await b.close(); console.log(`\n${passes} passed, ${fails} failed`); process.exit(fails?1:0);
 })();
