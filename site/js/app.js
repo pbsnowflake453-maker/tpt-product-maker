@@ -2,19 +2,21 @@
 const T=TPT, $=id=>document.getElementById(id);
 const READ=SKILLS, MATHS=MATH.skills;
 let prod=T.products[0], kind='reading', sel=[], seed=Date.now()%100000, cur=null, showBundle=false;
-const bundles={}; // per product id: [{cfg,seed,desc}]
+const bundleSets=[]; // one list for every product type: [{id,pid,cfg,seed,desc}]
+let setId=0, titleTouched=false, picks=[], bpicks=[]; // picks: page indexes chosen for the listing images (single product / bundle)
 // ---------- mystery state
 const MY={theme:null,name:null,rows:[],orig:[],colors:{},assign:{},undo:[],brush:null};
 const PAL=PIXELS.palette, MP=()=>T.products.find(p=>p.id==='mystery');
 const DEFAULT_READ=['sh','ch','th (unvoiced, as in thin)','wh','ck','ng','nk','qu','tch','ff','ll','ss'];
-function skillsFor(k){const L=k==='math'?MATHS:READ;return (typeof prod!=='undefined'&&prod&&prod.id==='picturewrite'&&T._pwAvail)?L.filter(s=>T._pwAvail([s]).length>=9):L;} // Picture Write hides skills with fewer than 9 pictures
-function bundle(){return bundles[prod.id]||(bundles[prod.id]=[]);}
+function skillsFor(k){const L=k==='math'?MATHS:READ;if(typeof prod!=='undefined'&&prod&&prod.id==='readdraw'&&T._rdAvail)return L.filter(s=>T._rdAvail(s)>=6);return (typeof prod!=='undefined'&&prod&&prod.id==='picturewrite'&&T._pwAvail)?L.filter(s=>T._pwAvail([s]).length>=9):L;} // Read and Draw hides skills with fewer than 6 sentences;  // Picture Write hides skills with fewer than 9 pictures
+function bundle(){return bundleSets;}
+function prodOf(x){return T.products.find(p=>p.id===x.pid);}
 // ---------- product + kind
 function renderProducts(){$('products').innerHTML='';for(const p of T.products){const b=document.createElement('button');b.textContent=p.name;b.className=p===prod?'on':'';
   b.onclick=()=>{if(p===prod)return;prod=p;if(!p.kinds.includes(kind))kind=p.kinds[0];sel=[];defaultSkill();renderAll();};$('products').appendChild(b);}
   $('kinds').innerHTML='';if(prod.kinds.length>1)for(const k of prod.kinds){const b=document.createElement('button');b.textContent=k==='math'?'Math':'Reading';b.className=k===kind?'on':'';
     b.onclick=()=>{if(k===kind)return;kind=k;sel=[];defaultSkill();if(prod.id==='mystery')defaultAssign();renderAll();};$('kinds').appendChild(b);}}
-function defaultSkill(){const L=skillsFor(kind);sel=[(kind==='math'?(L.find(s=>s.name==='Making 10')):(L.find(s=>s.name.startsWith('ou ('))))||L[0]];}
+function defaultSkill(){const L=skillsFor(kind);if(prod.id==='readdraw'){sel=[L.find(s=>s.name==='Unit 1')||L[0]];return;}sel=[(kind==='math'?(L.find(s=>s.name==='Making 10')):(L.find(s=>s.name.startsWith('ou ('))))||L[0]];}
 function labelFor(){if(prod.id==='coldread')return '';if(prod.id==='mystery'&&kind==='reading')return MY.rows.length?[...new Set(MP().colorsByCount(MY.rows).filter(([c])=>!(MY.bgOff&&c==='.')).map(([c])=>T.readLabel(MY.assign[c])))].join(' • '):'';
   return sel.map(s=>kind==='math'?s.label:T.readLabel(s)).join(' • ');}
 // ---------- skills list
@@ -72,7 +74,7 @@ function renderColors(){const counts=Object.fromEntries(MP().colorsByCount(MY.ro
   $('label').value=labelFor();}
 function renderMystery(){drawEditor();renderColors();build();}
 // ---------- config + build
-function cfg(){const c={text:$('crText').value,kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked,cut:$('wsCut')&&$('wsCut').checked,write:$('wsWrite')&&$('wsWrite').checked,mazeSize:$('mazeSize')&&$('mazeSize').value,nameLine:$('crName').checked,wordBank:$('pwBank').checked}};c.pics=crPicMap(c.text);
+function cfg(){const c={text:$('crText').value,kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked,cut:$('wsCut')&&$('wsCut').checked,write:$('wsWrite')&&$('wsWrite').checked,mazeSize:$('mazeSize')&&$('mazeSize').value,nameLine:$('crName').checked,wordBank:$('pwBank').checked,rdPages:+$('rdPages').value||2}};c.pics=crPicMap(c.text);
   if(prod.id==='mystery'){const order=MP().colorsByCount(MY.rows).map(x=>x[0]);c.image={name:MY.name,rows:MY.rows.slice()};c.colors=JSON.parse(JSON.stringify(MY.colors));c.assign=Object.fromEntries(order.map(k=>[k,MY.assign[k]]));c.bgOff=MY.bgOff;}
   return c;}
 function desc(c){if(prod.id==='coldread')return (c.label||'Cold Reads')+` (${T.products.find(p=>p.id==='coldread').parse(c.text).length} passages)`;return prod.id==='mystery'?`${c.image.name} — ${c.label||labelFor()}`:(c.label||labelFor())+(prod.id==='bingo'?` (${c.opts.boards} boards, ${c.opts.size}x${c.opts.size})`:'');}
@@ -80,33 +82,57 @@ function preview(pages){const pv=$('preview');pv.innerHTML='';const N=Math.min(p
   $('status').textContent=`${pages.length} pages`+(pages.length>N?` (showing the first ${N})`:'')+(showBundle?' · bundle preview':'');}
 function build(){if(!sel.length&&!(prod.id==='mystery'&&kind==='reading')&&prod.id!=='coldread')return;
   const c=cfg();if(prod.needs){const nd=prod.needs(c,seed).filter(w=>(window.IMAGE_MAP||{})[w]&&!T.icons[w]);if(nd.length){window.APP&&(APP.loading=true);T.loadIcons(nd).then(()=>{window.APP&&(APP.loading=false);build();});return;}}cur=T.assemble(prod,[{cfg:c,seed}]);cur.fileBase=T.fileName(prod,cur.secs);
-  $('info').innerHTML=cur.secs[0].info||'';showBundle=false;preview(cur.pages);}
+  $('info').innerHTML=cur.secs[0].info||'';showBundle=false;picks=[];renderPicker('');preview(cur.pages);}
 function renderBundle(){const b=bundle();$('bundle').innerHTML=b.map((x,i)=>`<li>${x.desc}<button data-i="${i}">✕</button></li>`).join('');
   $('bundle').querySelectorAll('button').forEach(e=>e.onclick=()=>{b.splice(+e.dataset.i,1);renderBundle();});
-  ['bpptx','bpdf','blist','showBundle'].forEach(id=>$(id).disabled=b.length<1);}
-function bundleDoc(){const b=bundle();const d=T.assemble(prod,b);d.fileBase=T.fileName(prod,d.secs);return d;}
-function renderAll(){renderProducts();const my=prod.id==='mystery';$('mysterySec').hidden=!my;$('optSec').hidden=prod.id!=='bingo';$('wsOpt').hidden=prod.id!=='wordsort';$('mazeOpt').hidden=prod.id!=='wordmaze';$('pwOpt').hidden=prod.id!=='picturewrite';const cr=prod.id==='coldread';$('crSec').hidden=!cr;if(cr&&!$('crText').value.trim())$('crText').value=prod.sample;if(cr)crSlots();$('skillSec').hidden=cr;$('shuffle').hidden=cr;
+  ['bpptx','bpdf','blist','showBundle'].forEach(id=>$(id).disabled=b.length<1);
+  $('bundleTitle').placeholder=BUNDLE.suggestTitle(b.map(prodOf))||'Type your bundle title';
+  const w=BUNDLE.orientCheck(b.map(prodOf));$('bundleWarn').textContent=w||'';
+  bpicks=[];renderPicker('b');}
+function bundleDoc(){const b=bundle();if(!b.length)return null;const sets=b.map(x=>({prod:prodOf(x),cfg:x.cfg,seed:x.seed}));
+  const d=BUNDLE.assemble(sets,$('bundleTitle').value);d.fileBase=BUNDLE.fileName(d,sets);return d;}
+// ---------- listing images: choose the pages to screen-grab (single product: "" ; bundle: "b")
+function pickState(w){return w==='b'?bpicks:picks;}
+function pickDoc(w){return w==='b'?bundleDoc():cur;}
+function pickedPages(w,doc){doc=doc||pickDoc(w);return doc?pickState(w).map(i=>doc.pages[i]).filter(Boolean):[];}
+function pickBadges(w){const arr=pickState(w);document.querySelectorAll(`#${w}pickPages .pg`).forEach(d=>{const k=arr.indexOf(+d.dataset.page);d.classList.toggle('on',k>=0);let i=d.querySelector('i');
+  if(k>=0){if(!i){i=document.createElement('i');d.appendChild(i);}i.textContent=k+1;}else if(i)i.remove();});
+  $(w+'pickInfo').textContent=arr.length?`${arr.length} page${arr.length>1?'s':''} picked (up to 9). The first two go on the cover image.`:'None picked: I will choose good pages for you.';}
+function renderPicker(w){const det=$(w+'pickDet'),box=$(w+'pickPages');if(!det||!det.open){pickBadges(w);return;}box.innerHTML='';const doc=pickDoc(w);if(!doc){pickBadges(w);return;}
+  const arr=pickState(w),n=doc.pages.length-1; let g=null,gi=-1;
+  const groups=doc.sets?doc.sets.map((s,i)=>({t:`${i+1}. ${s.prod.title}${s.sec.label?' - '+s.sec.label:''}`,from:s.from,to:s.to})):[{t:'Pages',from:0,to:n}];
+  for(const grp of groups){const wrap=document.createElement('div');wrap.className='pset';const t=document.createElement('b');t.textContent=grp.t;const gr=document.createElement('div');gr.className='pgrid';wrap.append(t,gr);box.appendChild(wrap);
+    for(let pi=grp.from;pi<Math.min(grp.to,n);pi++){const d=document.createElement('div');d.className='pg';d.dataset.page=pi;d.title='Page '+(pi+1);const cv=document.createElement('canvas');T.drawCanvas(doc.pages[pi],cv,30);d.appendChild(cv);
+      d.onclick=()=>{const k=arr.indexOf(pi);if(k>=0)arr.splice(k,1);else if(arr.length<9)arr.push(pi);else{$(w+'pickInfo').textContent='That is the most you can pick (9). Click a picked page to remove it.';return;}pickBadges(w);};gr.appendChild(d);}}
+  pickBadges(w);}
+async function busy(btn,txt,fn){const o=btn.textContent;btn.disabled=true;btn.textContent=txt;try{await fn();}catch(e){console.error(e);$('status').textContent=e.message;}finally{btn.textContent=o;btn.disabled=false;if(btn.id!=='dllist'&&btn.id!=='dlpdf'&&btn.id!=='dlpptx')btn.disabled=bundle().length<1;}}
+function listingOpts(){return {grade:$('lsGrade').value.trim(),theme:$('lsTheme').value};}
+function renderAll(){renderProducts();const my=prod.id==='mystery';$('mysterySec').hidden=!my;$('optSec').hidden=prod.id!=='bingo';$('wsOpt').hidden=prod.id!=='wordsort';$('mazeOpt').hidden=prod.id!=='wordmaze';$('pwOpt').hidden=prod.id!=='picturewrite';$('rdOpt').hidden=prod.id!=='readdraw';const cr=prod.id==='coldread';$('crSec').hidden=!cr;if(cr&&!$('crText').value.trim())$('crText').value=prod.sample;if(cr)crSlots();$('skillSec').hidden=cr;$('shuffle').hidden=cr;
   $('label').value=labelFor();if(!cr)renderSkills();renderBundle();if(my){if(!MY.name){$('theme').value='Animals';pickImage('Animals','bear');}else defaultAssignNew();renderThumbs();renderMystery();}else build();}
 // ---------- events
-$('label').onchange=build;['boards','size','same','cards','wsCut','wsWrite','mazeSize'].forEach(id=>$(id).onchange=build);
-let crT;$('crText').oninput=()=>{clearTimeout(crT);crT=setTimeout(()=>{crSlots();build();},400);};$('crName').onchange=build;$('pwBank').onchange=build;$('dllist').onclick=()=>cur&&LISTING.zip(prod,cur,cur.secs.map(s=>s.label).filter(Boolean).join(' • '),cur.fileBase);$('crSample').onclick=()=>{$('crText').value=T.products.find(p=>p.id==='coldread').sample;crSlots();build();};
+$('label').onchange=build;['boards','size','same','cards','wsCut','wsWrite','mazeSize','rdPages'].forEach(id=>$(id).onchange=build);
+let crT;$('crText').oninput=()=>{clearTimeout(crT);crT=setTimeout(()=>{crSlots();build();},400);};$('crName').onchange=build;$('pwBank').onchange=build;$('dllist').onclick=()=>cur&&busy($('dllist'),'Building…',async()=>{await LISTING.zip({prod,prods:[prod],doc:cur,skills:BUNDLE.skillsOf(cur.secs.map(s=>s.label)),picks:pickedPages('',cur),isBundle:false,nSets:cur.secs.length,opts:listingOpts()},cur.fileBase);});$('crSample').onclick=()=>{$('crText').value=T.products.find(p=>p.id==='coldread').sample;crSlots();build();};
 $('shuffle').onclick=()=>{seed=(seed*7919+13)%1000003;build();};
 $('dlpdf').onclick=()=>cur&&T.pdf(cur.pages,cur.fileBase);
 $('dlpptx').onclick=()=>cur&&T.pptx(cur.pages,cur.fileBase);
-$('addSet').onclick=()=>{const c=cfg();bundle().push({cfg:c,seed,desc:desc(c)});seed=(seed*7919+13)%1000003;renderBundle();build();};
-$('clearBundle').onclick=()=>{bundle().length=0;renderBundle();build();};
-$('showBundle').onclick=()=>{const d=bundleDoc();showBundle=true;preview(d.pages);};
-$('bpdf').onclick=()=>{const d=bundleDoc();T.pdf(d.pages,d.fileBase);};
-$('blist').onclick=()=>{const d=bundleDoc();LISTING.zip(prod,d,T.skillsText(d.secs).replace(/^Skills?: /,''),d.fileBase,true);};
-$('bpptx').onclick=()=>{const d=bundleDoc();T.pptx(d.pages,d.fileBase);};
+$('addSet').onclick=()=>{const c=cfg();const bad=BUNDLE.orientCheck(bundle().map(prodOf).concat([prod]));if(bad){$('bundleWarn').textContent=bad;return;}
+  bundle().push({id:++setId,pid:prod.id,cfg:c,seed,desc:prod.name+' - '+desc(c)});seed=(seed*7919+13)%1000003;renderBundle();build();};
+$('clearBundle').onclick=()=>{bundle().length=0;titleTouched=false;renderBundle();build();};
+$('bundleTitle').oninput=()=>{titleTouched=$('bundleTitle').value.trim()!=='';bpicks=[];renderPicker('b');};
+$('pickClear').onclick=()=>{picks=[];pickBadges('');};$('bpickClear').onclick=()=>{bpicks=[];pickBadges('b');};
+$('pickDet').ontoggle=()=>renderPicker('');$('bpickDet').ontoggle=()=>renderPicker('b');
+$('showBundle').onclick=()=>{const d=bundleDoc();if(!d)return;showBundle=true;preview(d.pages);};
+$('bpdf').onclick=()=>busy($('bpdf'),'Building…',async()=>{const d=bundleDoc();T.pdf(d.pages,d.fileBase);});
+$('bpptx').onclick=()=>busy($('bpptx'),'Building…',async()=>{const d=bundleDoc();await T.pptx(d.pages,d.fileBase);});
+$('blist').onclick=()=>busy($('blist'),'Building…',async()=>{const d=bundleDoc();await LISTING.zip({prod:d.sets[0].prod,prods:d.sets.map(x=>x.prod),doc:d,skills:d.skills,title:d.title,picks:pickedPages('b',d),isBundle:true,nSets:d.sets.length,opts:listingOpts()},d.fileBase);});
 $('bgOff').onchange=()=>{MY.bgOff=$('bgOff').checked;renderColors();build();};
 $('theme').innerHTML=Object.keys(PIXELS.themes).map(t=>`<option>${t}</option>`).join('');$('theme').onchange=renderThumbs;
 await T.init();defaultSkill();renderAll();
 // ---------- test hooks
-window.APP={loading:false,T,MY,get cur(){return cur;},
+window.APP={loading:false,T,MY,skillNames(){return skillsFor(kind).map(s=>s.name);},get cur(){return cur;},
   product(id,k){$('products').querySelectorAll('button')[T.products.findIndex(p=>p.id===id)].click();if(k&&k!==kind){[...$('kinds').children].find(b=>b.textContent.toLowerCase()===k).click();}return prod.id+'/'+kind;},
   select(names){names=[].concat(names);sel=names.map(n=>skillsFor(kind).find(s=>s.name===n));if(prod.id==='mystery')defaultAssign();$('label').value=labelFor();renderSkills();if(prod.id==='mystery')renderColors();build();return cur.secs[0].info;},
-  addSet(){$('addSet').click();return bundle().length;},bundleDoc,pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},
+  addSet(){$('addSet').click();return bundle().length;},bundleDoc,get picks(){return picks;},get bpicks(){return bpicks;},pickedPages,renderPicker,listingOpts,pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},
   paintAt(i,j,ch){MY.brush=ch;MY.undo.push(MY.rows.slice());paint(i,j);defaultAssignNew();renderColors();drawEditor();build();},
   undo(){$('undo').click();},recolor(ch,hex,name){MY.colors[ch].hex=hex;if(name)MY.colors[ch].name=name;renderColors();drawEditor();build();},
   bgOff(v){$('bgOff').checked=v;$('bgOff').onchange();},

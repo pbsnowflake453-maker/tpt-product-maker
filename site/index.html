@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html><html lang="en"><head><link rel="icon" href="data:,"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TpT Product Maker · My Side of the Classroom</title><link rel="stylesheet" href="style.css"></head><body>
 <header><img src="assets/logo.png" alt=""><div><h1>TpT Product Maker</h1><p>My Side of the Classroom</p></div></header>
 <main>
@@ -32,6 +32,7 @@
     <p class="small">Add one picture per passage. Tap Upload, or click a box and paste, or drag a picture onto it. It prints to the right of the Key Words.</p>
     <div id="crPics" style="display:flex;flex-wrap:wrap;gap:8px"></div>
   </section>
+  <section id="rdOpt" hidden><h2>Options</h2><label>Pages <input type="number" id="rdPages" min="1" max="10" value="2"> <span class="small">(6 sentences per page)</span></label></section>
   <section id="pwOpt" hidden><h2>Options</h2><label class="blk"><input type="checkbox" id="pwBank" checked> Word bank at the top</label></section>
   <section id="optSec" hidden><h2>Options</h2>
     <label>Boards <input type="number" id="boards" min="1" max="40" value="6"></label>
@@ -42,20 +43,28 @@
   <section><h2>3. Make it</h2>
     <label>Skill label on pages <input id="label"></label>
     <div id="info"></div>
-    <div class="btns"><button id="shuffle">🔀 Shuffle</button><button id="dlpptx" class="primary">Download PowerPoint</button><button id="dlpdf">Download PDF</button><button id="dllist">TpT listing pack</button></div>
+    <div class="btns"><button id="shuffle">🔀 Shuffle</button><button id="dlpptx" class="primary">Download PowerPoint</button><button id="dlpdf">Download PDF</button><button id="dllist">TpT listing images</button></div>
     <p class="small">PowerPoint opens in Google Slides: upload to Drive, then Open with Slides.</p>
   </section>
-  <section><h2>4. Bundle <span class="small">(optional)</span></h2>
-    <p class="small">Add sets one at a time (different skills, or the same skill again after a shuffle). The bundle gets one cover, one directions page, a divider before each set, and one Terms of Use.</p>
+  <section id="lsSec"><h2>4. TpT listing images</h2>
+    <p class="small">Bold, colorful cover image plus preview images. The pages you pick below are the ones that get screen-grabbed.</p>
+    <label>Grade callout <input id="lsGrade" value="1st Grade" placeholder="Leave blank for none"></label>
+    <label>Colors <select id="lsTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option></select></label>
+    <details id="pickDet"><summary>Choose the pages for the images (optional)</summary><div id="pickPages"></div><div class="row small"><span id="pickInfo"></span><button id="pickClear">Clear picks</button></div></details>
+  </section>
+  <section><h2>5. Bundle <span class="small">(optional)</span></h2>
+    <p class="small">Add sets one at a time, from any product type (or the same skill again after a shuffle). You get ONE file: a cover, what is included, directions, a divider before each set, and one Terms of Use. A file holds one page shape, so landscape products (Roll and Read, Roll and Solve, Task Cards) bundle together and portrait products bundle together.</p>
     <div class="btns"><button id="addSet">+ Add this set</button><button id="showBundle">Preview bundle</button><button id="clearBundle">Clear</button></div>
-    <ol id="bundle"></ol>
-    <div class="btns"><button id="bpptx" class="primary">Bundle PowerPoint</button><button id="bpdf">Bundle PDF</button><button id="blist">Bundle listing pack</button></div>
+    <ol id="bundle"></ol><p id="bundleWarn" class="warn small"></p>
+    <label>Bundle title (cover page and listing images) <input id="bundleTitle" placeholder="Type your bundle title"></label>
+    <div class="btns"><button id="bpptx" class="primary">Bundle PowerPoint</button><button id="bpdf">Bundle PDF</button><button id="blist">Bundle listing images</button></div>
+    <details id="bpickDet"><summary>Choose the pages for the bundle listing images (optional)</summary><div id="bpickPages"></div><div class="row small"><span id="bpickInfo"></span><button id="bpickClear">Clear picks</button></div></details>
   </section>
 </aside>
 <div><p id="status">Loading fonts…</p><div id="preview"></div></div>
 </main>
 <script src="vendor/jspdf.umd.min.js"></script><script src="vendor/pptxgen.bundle.js"></script>
-<script src="data/skills.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
-<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script><script src="js/products/coldread.js"></script><script src="data/images.js"></script><script src="js/products/picturewrite.js"></script><script src="vendor/jszip.min.js"></script><script src="js/listing.js"></script>
+<script src="data/skills.js"></script><script src="data/sentences.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
+<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script><script src="js/products/coldread.js"></script><script src="data/images.js"></script><script src="js/products/picturewrite.js"></script><script src="js/products/readdraw.js"></script><script src="vendor/jszip.min.js"></script><script src="js/listing.js"></script><script src="js/bundle.js"></script>
 <script src="js/app.js"></script>
 </body></html>

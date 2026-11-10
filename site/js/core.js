@@ -164,7 +164,9 @@ window.TPT = (function(){
       else r=[{t:l,b:!!o.bold||(!!o.colonBold&&l.endsWith(':')),u:!!o.underline}];
       if(o.nowrap) runs.push(r); else runs.push(...wrapRuns(r,font,size,W));});
     p.text(X,Y,W,H,String(text),{runs,size,font,bold:!!o.bold,align:o.align||'center',valign:o.top?'top':'middle',color:o.color||'000000',nowrap:!!o.nowrap});return p;}
-  function skillsText(secs){const u=[...new Set(secs.map(s=>s.label))];return (u.length>1?'Skills: ':'Skill: ')+u.join(' • ');}
+  // Several sets can share skills inside a longer label ("short a • short e"), so for more than one set split the labels and list each skill once.
+  function skillList(secs){return secs.length>1?[...new Set(secs.flatMap(s=>String(s.label||'').split(' • ').map(x=>x.trim()).filter(Boolean)))]:[...new Set(secs.map(s=>s.label))];}
+  function skillsText(secs){const u=skillList(secs);return (u.length>1?'Skills: ':'Skill: ')+u.join(' • ');}
   // sets: [{cfg,seed}] -> {pages,secs}. One set = cover, directions, pages, terms. Bundle adds a divider before each set.
   function assemble(prod,sets){
     const secs=sets.map(s=>prod.section(s.cfg,s.seed));
@@ -173,5 +175,5 @@ window.TPT = (function(){
     pages.push(termsPage(prod.orient)); return {pages,secs};}
   function fileName(prod,secs){const u=[...new Set(secs.map(s=>s.label))];const lab=!u.filter(Boolean).length?'Pack':secs.length>1?(u.length>3?`Bundle of ${secs.length}`:'Bundle - '+u.join(', ')):u[0];
     return `${prod.title} - ${lab} - ${STORE}`.replace(/[\/\\:*?"<>|]/g,'');}
-  return {skillTag,icons,loadIcons,tb,skillsText,assemble,fileName,PW,PH,STORE,init,Page,frame,footer,bubble,die,termsPage,divider,textW,fit,wrapRuns,rng,shuffle,fillGrid,drawCanvas,pdf,pdfDoc,pptx,pptxDoc,products:[]};
+  return {skillTag,icons,loadIcons,tb,skillsText,skillList,assemble,fileName,PW,PH,STORE,init,Page,frame,footer,bubble,die,termsPage,divider,textW,fit,wrapRuns,rng,shuffle,fillGrid,drawCanvas,pdf,pdfDoc,pptx,pptxDoc,products:[]};
 })();

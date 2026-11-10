@@ -1,5 +1,5 @@
-const {chromium}=require('/tmp/pw/node_modules/playwright');
-(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});
+const {chromium,opts}=require('../lib');
+(async()=>{const b=await chromium.launch(opts);const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});
 const errs=[];pg.on('pageerror',e=>errs.push(e.message));pg.on('console',m=>{if(m.type()==='error')errs.push(m.text())});
 await pg.goto('http://127.0.0.1:8812/index.html?'+Date.now());await pg.waitForSelector('#preview canvas');
 const dl=async(id,tag)=>{const [d]=await Promise.all([pg.waitForEvent('download'),pg.click('#'+id)]);await d.saveAs(`u_${tag}.${d.suggestedFilename().split('.').pop()}`);};

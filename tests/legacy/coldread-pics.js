@@ -1,5 +1,5 @@
-const {chromium}=require('/tmp/pw/node_modules/playwright');const fs=require('fs');const O='previews/crpics/';
-(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+const {chromium,opts}=require('../lib');const fs=require('fs');const O='previews/crpics/';
+(async()=>{const b=await chromium.launch(opts);const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 await pg.goto('http://127.0.0.1:8812/index.html?'+Date.now());await pg.waitForSelector('#preview canvas');
 await pg.evaluate(()=>APP.product('coldread'));await pg.waitForTimeout(400);
 await pg.evaluate(()=>{const t=document.getElementById('crText');const s=TPT.products.find(p=>p.id==='coldread').sample;t.value=s+'\n---\n'+s.replace(/Title:.*/,'Title: The Red Barn');t.oninput();});await pg.waitForTimeout(900);

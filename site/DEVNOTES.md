@@ -2,7 +2,7 @@
 Static site, no server or sign-in. Open index.html through any static host.
 - js/core.js: shared page model (inches, landscape letter), fonts, logo, Terms of Use, shuffle helpers, and the canvas, PDF (jsPDF) and PowerPoint (PptxGenJS) renderers.
 - js/products/*.js: one file per product type. Each pushes {id, name, status, display(skill), build(skill, seed, label)} onto TPT.products. Add a new type by adding a file plus a script tag.
-- data/skills.js: skill bank generated from wordlists_audited.json (CKLA audit).
+- data/skills.js: skill bank generated from the Mega Word Bank (data-src/phonics_words.csv) by spec/build_from_megabank.py. data/sentences.js: decodable sentences (spec/build_sentences.py).
 
 ## Product types (Oct 30 update)
 - rollread.js (Roll and Read), rollsolve.js (Roll and Solve), taskcards.js (Task Cards), bingo.js (Bingo, portrait), mystery.js (Mystery Picture, portrait).
@@ -11,7 +11,8 @@ Static site, no server or sign-in. Open index.html through any static host.
 - fonts/Fredoka-Bold.ttf is a static instance of Google's Fredoka variable font (wght 700) for the Bingo title.
 - coldread.js (Cold Read, portrait): paste passages in a plain-text format (Title:, Key Words:, Passage:, Questions:, --- between passages; *b. marks the right answer, Answer: under a writing question). Auto-wraps, running word counts, bolds key words, cold/hot score lines, answer key if answers are marked.
 - picturewrite.js (Picture Write, portrait): 3x3 pictures with writing lines, optional word bank, answer key. Pictures come from data/images.js (window.IMAGE_MAP word -> PNG path). Words mapped to null draw a dashed placeholder box until her real icons are added; set the path to swap one in (core.js loads them at startup and draws them contain-fit in canvas, PDF and PPTX).
-- js/listing.js + vendor/jszip.min.js: "TpT listing pack" button on every product. Zip with 01-cover.png (2000x2000, title, skill bubble, two page previews, logo-v2), 02-04 preview PNGs, and listing.txt (title, description, what's included, tags). Uses the current single-set build.
+- js/bundle.js: BUNDLE.assemble(sets,title) builds one-file mixed bundles (portrait-only or landscape-only mixes). readdraw.js: Read and Draw.
+- js/listing.js + vendor/jszip.min.js (redesigned Nov 10): "TpT listing images" for single products and bundles. LISTING.zip({prod,prods,doc,skills,title,picks,isBundle,nSets,opts:{grade,theme}},fname): 2000x2000 PNGs (01-cover with title, skill pill, grade burst, tilted page mockups; one preview per picked page; a What's Included image) plus listing.txt. picks = page objects chosen in the page picker in app.js (none = automatic). Themes: apple, sky, sunny, grape, mint. Logo: assets/logo-brand.png (1000px copy of the brand logo-v2).
 - Importing Picture Write icons (tools/import_icons.py, needs Pillow and cairosvg for SVGs):
   1. Download her finished icon folder from Drive to the box (any subfolders are fine).
   2. Run `python3 tools/import_icons.py <downloaded folder>` (options: `--size 600`, `--bg white|transparent`, `--keep-placeholders`, `--dry-run`).

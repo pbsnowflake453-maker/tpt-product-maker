@@ -1,5 +1,5 @@
-const {chromium}=require('/tmp/pw/node_modules/playwright');
-(async()=>{const b=await chromium.launch();const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
+const {chromium,opts}=require('../lib');
+(async()=>{const b=await chromium.launch(opts);const pg=await b.newPage({viewport:{width:1500,height:1100},acceptDownloads:true});const errs=[];pg.on('pageerror',e=>errs.push(e.message));
 await pg.goto('http://127.0.0.1:8812/index.html?'+Date.now());await pg.waitForSelector('#preview canvas');
 const dl=async t=>{const [d]=await Promise.all([pg.waitForEvent('download'),pg.click('#dlpdf')]);await d.saveAs('f_'+t+'.pdf');};
 await pg.evaluate(()=>APP.product('bingo','reading'));await pg.selectOption('#size','3');
