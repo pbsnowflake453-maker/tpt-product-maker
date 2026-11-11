@@ -1,0 +1,10 @@
+# Listing Image Maker (`site/listing.html`)
+
+Drop in any PDF, PowerPoint (.pptx) or pictures (PNG, JPG, WebP) and get the same colorful 2000x2000 TpT listing images as the generator's "TpT listing images" button, with every piece of text editable and a live preview.
+
+- Files: `site/listing.html`, `site/listing.css`, `site/js/dropin.js` (UI, file loaders, picker, fields), `site/js/pptxrender.js` (client-side .pptx slide renderer), `site/vendor/pdf.min.mjs` + `pdf.worker.min.mjs` (pdf.js 6.x, PDFs).
+- Rendering is **not duplicated**: `dropin.js` builds a spec and calls `LISTING.build` (`site/js/listing.js`). Drop-in pages are `{w,h,canvas,role}` objects (`role` `'student'` or `'key'`); `pageImg` draws `page.canvas` when present. `spec.text` holds optional text overrides (skills pill, subtitle, banner text, answer-key burst, store pill, preview labels, What's Included lines, description, tags); `LISTING.defaults(spec)` returns the automatic values.
+- Pages: click to pick (up to 9, first three go on the cover, none picked = first three pages), reorder, and mark a picked page as an answer key. Full-size rendering happens only for picked pages (thumbnails are 300px).
+- **PPTX**: slides are drawn by `pptxrender.js` (shapes incl. custom geometry, pictures with crop, groups, text with wrap/alignment/bullets/autofit, simple tables, theme colors, layouts/masters). Not drawn: charts, SmartArt, video, EMF/WMF images, table styles (only explicit cell fills/borders), shadows/glows/3D, vertical text. Tell Samantha to save as PDF (Google Slides: File > Download > PDF) if a slide looks off. Fonts that are not installed on her computer fall back to a default font; Pacifico, Andika and Fredoka are bundled.
+- Listing fixes (apply to generator and drop-in): store-name pill is smaller (38px text, 76px tall, was 56px/140px) and centered on the logo badge, which now sits fully inside the image; the yellow bottom banner on the cover is level (was tilted -0.05 rad).
+- Test: `node tests/dropin.js` (site served on :8812).

@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><link rel="icon" href="data:,"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Listing Image Maker · My Side of the Classroom</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="listing.css"></head><body>
+<header><img src="assets/logo.png" alt=""><div><h1>Listing Image Maker</h1><p>Drop in any PDF, PowerPoint, or pictures and get TpT listing images · <a href="index.html">← TpT Product Maker</a></p></div></header>
+<main>
+<aside>
+  <section><h2>1. Drop in your files</h2>
+    <div id="drop" tabindex="0"><b>Drop files here</b> or click to choose<br><span class="small">PDF, PowerPoint (.pptx), PNG, JPG, WebP. More than one file is fine.</span>
+      <input type="file" id="fileIn" multiple accept=".pdf,.pptx,.png,.jpg,.jpeg,.webp,.gif,application/pdf,image/*,application/vnd.openxmlformats-officedocument.presentationml.presentation" hidden></div>
+    <ul id="fileList"></ul>
+    <p class="small" id="pptNote" hidden>PowerPoint pages are drawn right here in your browser, so they can look a little different from PowerPoint (charts, SmartArt and fancy effects are not drawn). If a slide looks off, save the deck as a PDF (File &gt; Download &gt; PDF in Google Slides) and drop that in instead.</p>
+  </section>
+  <section><h2>2. Pick the pages</h2>
+    <p class="small" id="pickInfo">Drop a file to see its pages.</p>
+    <div id="pages"></div>
+    <div id="pickedWrap" hidden><h3>Picked pages</h3><ol id="picked"></ol><div class="btns"><button id="pickClear">Clear picks</button></div></div>
+  </section>
+  <section id="textSec"><h2>3. Text on the images</h2>
+    <p class="small">Change anything here and the previews update. Leave a box empty to leave that item off.</p>
+    <label>Title <input id="fTitle" data-k="title"></label>
+    <label>Skill pill <input id="fSkills" data-k="skills" placeholder="Leave blank for no pill"></label>
+    <label>Grade burst <input id="fGrade" data-k="grade" value="1st Grade" placeholder="Leave blank for none"></label>
+    <label>Subtitle <input id="fSub" data-k="subtitle" placeholder="Optional line under the title"></label>
+    <label>Bottom yellow banner <input id="fRibbon" data-k="ribbon"></label>
+    <label>Store name pill <input id="fStore" data-k="store"></label>
+    <label class="blk"><input type="checkbox" id="fKey"> Show the “Answer Key” burst on the cover</label>
+    <div class="two"><label>Burst line 1 <input id="fKeyTop" data-k="keyTop" value="ANSWER"></label><label>Burst line 2 <input id="fKeyBot" data-k="keyBot" value="KEY"></label></div>
+    <details><summary>More text (preview images, What's Included, listing.txt)</summary>
+      <div class="two"><label>Preview label <input id="fPrev" data-k="previewLabel" value="PREVIEW"></label><label>Answer key label <input id="fKeyLab" data-k="keyLabel" value="ANSWER KEY"></label></div>
+      <label>Preview header title <input id="fPTitle" data-k="previewTitle"></label>
+      <label>Preview header pill <input id="fPPill" data-k="previewPill"></label>
+      <label>What's Included (one item per line) <textarea id="fInc" rows="6" data-k="included"></textarea></label>
+      <label>Listing description <textarea id="fBlurb" rows="4" data-k="blurb" placeholder="Goes into listing.txt"></textarea></label>
+      <label>Tags (separate with commas) <textarea id="fTags" rows="2" data-k="tags" placeholder="Goes into listing.txt"></textarea></label>
+    </details>
+    <label>Colors <select id="fTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option></select></label>
+  </section>
+  <section><h2>4. Download</h2>
+    <div class="btns"><button id="dl" class="primary" disabled>Download listing images (ZIP)</button></div>
+    <p class="small">2000 × 2000 PNG images plus listing.txt.</p>
+  </section>
+</aside>
+<div><p id="status">Loading fonts…</p><div id="preview"></div></div>
+</main>
+<script src="vendor/jszip.min.js"></script>
+<script src="js/core.js"></script><script src="js/listing.js"></script><script src="js/pptxrender.js"></script><script src="js/dropin.js"></script>
+</body></html>
