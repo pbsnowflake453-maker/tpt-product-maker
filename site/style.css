@@ -40,3 +40,6 @@ details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:700}
 .pgrid{display:flex;flex-wrap:wrap;gap:8px;max-height:320px;overflow:auto;padding:6px;border:1px solid #eee;border-radius:8px}
 .pg{position:relative;width:70px;cursor:pointer;border:3px solid transparent;border-radius:6px;line-height:0}.pg canvas{width:100%;background:#fff;box-shadow:0 1px 3px #0003}.pg.on{border-color:#000}
 .pg i{position:absolute;top:-8px;right:-8px;width:22px;height:22px;line-height:22px;border-radius:50%;background:#000;color:#fff;font:700 12px Andika,sans-serif;text-align:center;font-style:normal}
+#wwOpt label{display:block;margin:6px 0;font-size:14px}#wwOpt input[type=number]{width:70px}#wwOpt select{padding:4px;font:inherit}
+#twChips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}#twChips button{padding:3px 9px;font-size:13px;border-radius:14px}#twChips button.on{background:#000;color:#fff;border-color:#000}
+#twText{width:100%;margin-top:8px;font:inherit;font-size:14px;padding:6px;border:1px solid #bbb;border-radius:8px}
