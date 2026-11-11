@@ -84,14 +84,14 @@ function fillWords(path, rows, cols, matchList, otherList, rng){
 }
 function mazePage(grid, path, label, answer){
   const p=new T.Page('P'); T.frame(p);
-  p.text(0.5,0.35,2.0,0.3,'Name:',{size:14,align:'left'}); p.line(1.35,0.6,3.6,0.6,{lw:1});
+  p.text(0.5,0.5,2.0,0.3,'Name:',{size:14,align:'left'}); p.line(1.35,0.75,3.6,0.75,{lw:1});
   const bw=Math.min(5.2,Math.max(2.2,T.textW('Skill: '+label,'Andika',15,true)+0.4));
-  T.bubble(p,PW-0.45-bw,0.32,bw,0.45,'Skill: '+label,{size:15});
-  p.text(0,0.85,PW,0.45,'Word Maze',{font:'Pacifico',size:28});
-  p.text(0.45,1.35,PW-0.9,0.3,'Color the words with the target sound to make a path from the arrow to the star.',{size:12,align:'left'});
+  T.bubble(p,PW-0.45-bw,0.47,bw,0.45,'Skill: '+label,{size:15});
+  p.text(0,1.0,PW,0.45,'Word Maze',{font:'Pacifico',size:28});
+  p.text(0.45,1.5,PW-0.9,0.3,'Color the words with the target sound to make a path from the arrow to the star.',{size:12,align:'left'});
   const rows=grid.length, cols=grid[0].length;
   const pathSet=new Set(path.map(([r,c])=>r+','+c));
-  const left=0.65, top=1.75;
+  const left=0.65, top=1.9;
   const maxW=PW-1.4, maxH=PH-top-0.7;
   const cell=Math.min(maxW/cols, maxH/rows);
   for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){

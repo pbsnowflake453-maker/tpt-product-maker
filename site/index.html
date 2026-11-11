@@ -33,6 +33,21 @@
     <div id="crPics" style="display:flex;flex-wrap:wrap;gap:8px"></div>
   </section>
   <section id="rdOpt" hidden><h2>Options</h2><label>Pages <input type="number" id="rdPages" min="1" max="10" value="2"> <span class="small">(6 sentences per page)</span></label></section>
+  <section id="wwOpt" hidden><h2>Options</h2>
+    <label id="wwPagesRow">Pages <input type="number" id="wwPages" min="1" max="10" value="2"></label>
+    <label id="wwBoxesRow">Boxes per page <select id="wwBoxes"><option>9</option><option>10</option><option selected>12</option></select></label>
+    <label id="wwLinesRow">Lines per page <select id="wwLines"><option>10</option><option>11</option><option selected>12</option></select></label>
+    <label id="wwPerRow">Words per page <select id="wwPer"><option>4</option><option selected>6</option><option>8</option></select></label>
+  </section>
+  <section id="twSec" hidden><h2>Words</h2>
+    <p class="small">Click a word to add or remove it (these are the tricky words from the word bank), or type any words you like below. Letters only, separated by spaces or commas. Words go on pages in the order listed.</p>
+    <div id="twChips"></div>
+    <div class="btns"><button id="twAll">Select all</button><button id="twNone">Clear</button></div>
+    <textarea id="twText" rows="4" aria-label="Words"></textarea>
+    <div id="twLettersWrap" hidden><h3>Missing letters</h3>
+      <p class="small">Click a letter to hide it on the page (black). Click it again to show it. Show every letter to go back to automatic.</p>
+      <div id="twLetters"></div><div class="btns"><button id="twResetAll">Reset all letters</button></div></div>
+  </section>
   <section id="pwOpt" hidden><h2>Options</h2><label class="blk"><input type="checkbox" id="pwBank" checked> Word bank at the top</label></section>
   <section id="optSec" hidden><h2>Options</h2>
     <label>Boards <input type="number" id="boards" min="1" max="40" value="6"></label>
@@ -41,6 +56,8 @@
     <label class="blk"><input type="checkbox" id="cards" checked> Add cut-apart calling cards (12 per page)</label>
   </section>
   <section><h2>3. Make it</h2>
+    <label id="twTitleRow" hidden>Page title <input id="twTitle" placeholder="No title"></label>
+    <p class="small" id="twTitleHint" hidden>Clear the title to take it off the page. The boxes get more room.</p>
     <label>Skill label on pages <input id="label"></label>
     <div id="info"></div>
     <div class="btns"><button id="shuffle">🔀 Shuffle</button><button id="dlpptx" class="primary">Download PowerPoint</button><button id="dlpdf">Download PDF</button><button id="dllist">TpT listing images</button></div>
@@ -64,7 +81,7 @@
 <div><p id="status">Loading fonts…</p><div id="preview"></div></div>
 </main>
 <script src="vendor/jspdf.umd.min.js"></script><script src="vendor/pptxgen.bundle.js"></script>
-<script src="data/skills.js"></script><script src="data/sentences.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
-<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script><script src="js/products/coldread.js"></script><script src="data/images.js"></script><script src="js/products/picturewrite.js"></script><script src="js/products/readdraw.js"></script><script src="vendor/jszip.min.js"></script><script src="js/listing.js"></script><script src="js/bundle.js"></script>
+<script src="data/skills.js"></script><script src="data/sentences.js"></script><script src="data/wordinfo.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
+<script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script><script src="js/products/coldread.js"></script><script src="data/images.js"></script><script src="js/products/picturewrite.js"></script><script src="js/products/readdraw.js"></script><script src="js/products/wordwork.js"></script><script src="vendor/jszip.min.js"></script><script src="js/listing.js"></script><script src="js/bundle.js"></script>
 <script src="js/app.js"></script>
 </body></html>

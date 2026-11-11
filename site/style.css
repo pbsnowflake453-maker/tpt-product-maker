@@ -5,7 +5,7 @@ main{display:flex;gap:18px;padding:18px}aside{width:330px;flex:none;display:flex
 section{background:#fff;border-radius:12px;padding:12px 14px;box-shadow:0 1px 3px #0001}h2{font-size:15px;margin:0 0 8px}
 #products button{display:block;width:100%;text-align:left;margin:4px 0;padding:8px 10px;border:1px solid #ccc;border-radius:8px;background:#fff;cursor:pointer;font:inherit}
 #products button.on{border:2px solid #000;font-weight:700}#products button:disabled{color:#999;cursor:default}#products small{float:right;color:#999}
-#search,#label,#bundleTitle{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
+#search,#label,#twTitle,#bundleTitle{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
 #skills{max-height:300px;overflow:auto;margin-top:8px;border:1px solid #eee;border-radius:8px}
 .sk{padding:5px 8px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:14px}.sk:hover{background:#f6f6f6}.sk.on{background:#000;color:#fff}.sk span{float:right;opacity:.6;font-size:12px}
 .grp{padding:4px 8px;background:#fafafa;font-size:12px;color:#888;font-weight:700}
@@ -40,3 +40,12 @@ details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:700}
 .pgrid{display:flex;flex-wrap:wrap;gap:8px;max-height:320px;overflow:auto;padding:6px;border:1px solid #eee;border-radius:8px}
 .pg{position:relative;width:70px;cursor:pointer;border:3px solid transparent;border-radius:6px;line-height:0}.pg canvas{width:100%;background:#fff;box-shadow:0 1px 3px #0003}.pg.on{border-color:#000}
 .pg i{position:absolute;top:-8px;right:-8px;width:22px;height:22px;line-height:22px;border-radius:50%;background:#000;color:#fff;font:700 12px Andika,sans-serif;text-align:center;font-style:normal}
+#wwOpt label{display:block;margin:6px 0;font-size:14px}#wwOpt input[type=number]{width:70px}#wwOpt select{padding:4px;font:inherit}
+#twChips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}#twChips button{padding:3px 9px;font-size:13px;border-radius:14px}#twChips button.on{background:#000;color:#fff;border-color:#000}
+#twText{width:100%;margin-top:8px;font:inherit;font-size:14px;padding:6px;border:1px solid #bbb;border-radius:8px}
+#twLettersWrap h3{margin:14px 0 4px;font-size:14px}
+#twLetters .tw-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin:7px 0;padding-left:14px;position:relative}
+#twLetters .tw-row button{width:26px;height:30px;padding:0;border-radius:6px;font-size:15px}
+#twLetters .tw-row button.hide{background:#000;color:#fff;border-color:#000}
+#twLetters .tw-row button.tw-reset{width:auto;height:26px;padding:0 8px;margin-left:6px;font-size:12px}
+#twLetters .tw-row.custom::before{content:"\25CF";font-size:9px;position:absolute;left:2px;top:50%;transform:translateY(-50%)}

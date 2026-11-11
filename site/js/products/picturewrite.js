@@ -16,10 +16,10 @@ function pic(p,x,y,w,h,word,num){
   else { p.rect(x+0.35,y+0.2,w-0.7,h-0.4,{r:0.06,lw:1,dash:'dash',fill:'FFFFFF'}); p.text(x,y,w,h,'picture '+num,{size:11,color:'777777'}); }
 }
 function header(p,label,title){
-  p.text(0.5,0.32,2.0,0.26,'Name:',{size:13,align:'left'}); p.line(1.15,0.54,3.6,0.54,{lw:1});
+  p.text(0.5,0.49,2.0,0.26,'Name:',{size:13,align:'left'}); p.line(1.15,0.71,3.6,0.71,{lw:1});
   const bw=Math.min(4.2,Math.max(2.0,T.textW('Skill: '+label,'Andika',15,true)+0.45));
-  T.bubble(p,PW-0.45-bw,0.25,bw,0.44,'Skill: '+label,{size:15});
-  p.text(0,0.72,PW,0.5,title,{font:'Pacifico',size:26});
+  T.bubble(p,PW-0.45-bw,0.42,bw,0.44,'Skill: '+label,{size:15});
+  p.text(0,0.89,PW,0.5,title,{font:'Pacifico',size:26});
 }
 
 function grid(p,top,words,bottom,cb){
@@ -28,7 +28,7 @@ function grid(p,top,words,bottom,cb){
 }
 function studentPage(words,label,withBank,r){
   const p=new T.Page('P'); T.frame(p); header(p,label,'Write the Word');
-  let top=1.35;
+  let top=1.52;
   if(withBank){ const bankH=0.85; p.rect(0.6,top,PW-1.2,bankH,{r:0.08,lw:1.6,fill:'FFFFFF'});
     p.text(0.72,top+0.03,1.8,0.26,'Word Bank',{size:11,bold:true,align:'left'});
     const bank=T.shuffle(words,r), cols=5, cw=(PW-1.4)/cols, ch=(bankH-0.3)/Math.ceil(bank.length/cols);
