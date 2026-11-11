@@ -12,7 +12,7 @@ const T=TPT, PW=T.PH, PH=T.PW;                       // portrait: 8.5 wide, 11 t
 const WI=window.WORDINFO||{};
 const mk=s=>new Set((s||'').split(' ').filter(Boolean));
 const DRAW=mk(WI.drawable), COUNT=mk(WI.countable), IRR=WI.irregular||{};
-const X0=0.6, CW=PW-1.2, TOP=1.4, BOT=PH-0.7;
+const X0=0.6, CW=PW-1.2, TOP=1.57, BOT=PH-0.7;
 const PENCIL='A6A6A6', EDGE='777777', RULE='D0D0D0';   // writing lines, letter-shape boxes, row dividers (all one weight of gray)
 const EM_BASE=0.415;                                 // Andika: baseline sits 0.415 em below the middle of its text box
 const TALL=new Set('tdfhklb'), HANG=new Set('qypgj');
@@ -65,10 +65,10 @@ const okFor=kind=>kind==='B'?okMissing:okShapes;
 
 // ---------- drawing pieces
 function header(p,title,label){
-  p.text(0.5,0.32,2.0,0.26,'Name:',{size:13,align:'left'}); p.line(1.15,0.54,3.6,0.54,{lw:1});
+  p.text(0.5,0.49,2.0,0.26,'Name:',{size:13,align:'left'}); p.line(1.15,0.71,3.6,0.71,{lw:1});
   const bw=Math.min(4.2,Math.max(2.0,T.textW('Skill: '+label,'Andika',15,true)+0.45));
-  T.bubble(p,PW-0.45-bw,0.25,bw,0.44,'Skill: '+label,{size:15});
-  p.text(0,0.72,PW,0.5,title,{font:'Pacifico',size:26});}
+  T.bubble(p,PW-0.45-bw,0.42,bw,0.44,'Skill: '+label,{size:15});
+  p.text(0,0.89,PW,0.5,title,{font:'Pacifico',size:26});}
 function sectionTitle(p,y,text){p.text(X0,y,CW,0.4,text,{font:'Pacifico',size:20,align:'left'});}
 function hwLines(p,x,y,w,h){ // writing lines: top, dashed middle, bottom, all the same weight
   p.line(x,y,x+w,y,{lw:0.9,line:PENCIL}); p.line(x,y+h/2,x+w,y+h/2,{lw:0.9,line:PENCIL,dash:'dash'}); p.line(x,y+h,x+w,y+h,{lw:0.9,line:PENCIL});}
@@ -104,8 +104,9 @@ function csRows(p,words,x,y,w,h){
 const LEFT_W=3.7;
 function shapeRow(p,word,x,y,h,gap){
   const n=word.length, cw=Math.min(0.5,(LEFT_W-0.05)/n), rh=Math.min(0.32,(h-0.22)/3), top=y+(h-3*rh)/2;
+  const x0=x+(LEFT_W-n*cw)/2;
   [...word].forEach((c,i)=>{const t=TALL.has(c)||c!==c.toLowerCase(), hg=HANG.has(c); const ry=t?0:1, rn=t||hg?2:1;
-    p.rect(x+0.02+i*cw,top+ry*rh,cw,rn*rh,{lw:1.25,line:EDGE,fill:'FFFFFF'});});
+    p.rect(x0+i*cw,top+ry*rh,cw,rn*rh,{lw:1.25,line:EDGE,fill:'FFFFFF'});});
   const sh=Math.min(0.5,3*rh*0.8); hwLines(p,x+LEFT_W+gap,top+(3*rh-sh)/2,CW-LEFT_W-gap,sh);}
 function missingRow(p,word,S,x,y,h,gap,maxFs){
   const segs=[]; let i=0; while(i<word.length){const blank=S.includes(i); let j=i; while(j<word.length&&S.includes(j)===blank) j++; segs.push({gap:blank,s:word.slice(i,j)}); i=j;}
@@ -113,7 +114,7 @@ function missingRow(p,word,S,x,y,h,gap,maxFs){
   let fs=maxFs; const avail=LEFT_W-0.15; if(widthAt(fs)>avail) fs=Math.floor(fs*avail/widthAt(fs));
   const em=fs/72, sh=0.76*em*1.15, top=y+(h-sh)/2, yb=top+sh;
   hwLines(p,x,top,LEFT_W,sh);
-  let cx=x+0.1;
+  let cx=x+(LEFT_W-widthAt(fs))/2;
   for(const g of segs){
     if(g.gap){const gw=g.s.length*0.62*em; p.line(cx+0.06*em,yb,cx+0.06*em+gw,yb,{lw:2.6,line:'1A1A1A'}); cx+=gw+0.12*em;}
     else{const tw=T.textW(g.s,'Andika',fs,false), bh=em*1.5; p.text(cx,yb-EM_BASE*em-bh/2,tw+0.02,bh,g.s,{size:fs,align:'left',nowrap:true,color:'1A1A1A'}); cx+=tw;}}
