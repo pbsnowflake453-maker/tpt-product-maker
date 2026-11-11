@@ -39,11 +39,11 @@
     <label id="wwLinesRow">Lines per page <select id="wwLines"><option>10</option><option>11</option><option selected>12</option></select></label>
     <label id="wwPerRow">Words per page <select id="wwPer"><option>4</option><option selected>6</option><option>8</option></select></label>
   </section>
-  <section id="twSec" hidden><h2>Tricky words</h2>
-    <p class="small">Click a word to add or remove it, or type your own below. Letters only, separated by spaces or commas. Words go on pages in the order listed.</p>
+  <section id="twSec" hidden><h2>Words</h2>
+    <p class="small">Click a word to add or remove it (these are the tricky words from the word bank), or type any words you like below. Letters only, separated by spaces or commas. Words go on pages in the order listed.</p>
     <div id="twChips"></div>
     <div class="btns"><button id="twAll">Select all</button><button id="twNone">Clear</button></div>
-    <textarea id="twText" rows="4" aria-label="Tricky words"></textarea>
+    <textarea id="twText" rows="4" aria-label="Words"></textarea>
     <div id="twLettersWrap" hidden><h3>Missing letters</h3>
       <p class="small">Click a letter to hide it on the page (black). Click it again to show it. Show every letter to go back to automatic.</p>
       <div id="twLetters"></div><div class="btns"><button id="twResetAll">Reset all letters</button></div></div>
@@ -56,6 +56,8 @@
     <label class="blk"><input type="checkbox" id="cards" checked> Add cut-apart calling cards (12 per page)</label>
   </section>
   <section><h2>3. Make it</h2>
+    <label id="twTitleRow" hidden>Page title <input id="twTitle" placeholder="No title"></label>
+    <p class="small" id="twTitleHint" hidden>Clear the title to take it off the page. The boxes get more room.</p>
     <label>Skill label on pages <input id="label"></label>
     <div id="info"></div>
     <div class="btns"><button id="shuffle">🔀 Shuffle</button><button id="dlpptx" class="primary">Download PowerPoint</button><button id="dlpdf">Download PDF</button><button id="dllist">TpT listing images</button></div>

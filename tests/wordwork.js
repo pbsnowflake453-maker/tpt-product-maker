@@ -42,7 +42,7 @@ const sh=c=>cp.spawnSync('bash',['-c',c],{cwd:__dirname+'/..',encoding:'utf8'});
  for(const id of ['wwshapes','wwmissing','wwtricky']){
    const res=await pg.evaluate(([id,all])=>{APP.product(id,'reading');const info=APP.setTricky(all);const pages=APP.cur.pages.slice(2,-1);
      return {info,n:pages.length,hidden:document.getElementById('skillSec').hidden,label:document.getElementById('label').value,twShown:!document.getElementById('twSec').hidden};},[id,ALL]);
-   ok(res.n>=3&&res.hidden&&res.label==='Tricky Words'&&res.twShown,`${id}: builds from the picked words, skill picker hidden, label "Tricky Words" (${res.n} pages)`);}
+   ok(res.n>=3&&res.hidden&&res.label==='Word Work'&&res.twShown,`${id}: builds from the picked words, skill picker hidden, label "Word Work" (${res.n} pages)`);}
  // the rules the page builder must keep, on every page it makes from all 52 tricky words
  const rules=await pg.evaluate(all=>{const K=TPT.tricky, W=all.split(' '), out={shapes:true,ml:true,left:0,pages:0,pairA:true,pairB:true};
    for(const per of [4,6,8]){
@@ -54,6 +54,28 @@ const sh=c=>cp.spawnSync('bash',['-c',c],{cwd:__dirname+'/..',encoding:'utf8'});
  ok(rules.shapes,'words on one Letter Shapes page never share a shape (4, 6, 8 per page)');
  ok(rules.ml&&rules.left===0,'every Missing Letters page has a blank pattern that fits only one word ('+rules.left+' left out)');
  ok(rules.pairA&&rules.pairB&&rules.all===rules.want,'tricky pair page follows the same rules; one-letter words only go on shapes: '+JSON.stringify(rules));
+ // names and titles: nothing says "tricky" now that any word can be typed; the page title is editable
+ const nm=await pg.evaluate(()=>TPT.products.filter(p=>/^ww(shapes|missing|tricky)$/.test(p.id)).map(p=>p.name+'|'+p.title));
+ ok(nm.length===3&&!nm.some(x=>/tricky/i.test(x))&&nm.join()==='Letter Shapes|Letter Shapes,Missing Letters|Missing Letters,Letter Shapes + Missing Letters|Letter Shapes and Missing Letters','product names: '+nm.join(' ; '));
+ const tt=await pg.evaluate(()=>{const out={};const txt=(i)=>APP.cur.pages[2].items.filter(x=>x.t==='text').map(x=>x.text);
+   for(const [id,def] of [['wwshapes','Letter Shapes'],['wwmissing','Missing Letters'],['wwtricky','Letter Shapes and Missing Letters']]){
+     APP.product(id,'reading');APP.setTricky('said they were some would could people friend');
+     const box=document.getElementById('twTitle'); const d=box.value, hasDef=txt().includes(def), cover=APP.cur.pages[0].items.filter(x=>x.t==='text').map(x=>x.text).join('|');
+     APP.setTitle('Spelling Practice'); const mine=txt().includes('Spelling Practice')&&!txt().includes(def), cov=APP.cur.pages[0].items.some(x=>x.t==='text'&&x.text==='Spelling Practice');
+     APP.setTitle(''); const none=!txt().some(x=>/Letter Shapes|Missing Letters|Spelling Practice/.test(x));
+     const ys=pagesTop=>APP.cur.pages[2].items.filter(x=>x.t==='rect'&&x.r>0.1&&x.w>6.9&&x.h<5).map(x=>x.y);
+     out[id]={d,hasDef,mine,cov,none,bank:ys()[0]};
+     APP.setTitle(def); out[id].bankWithTitle=ys()[0]; out[id].tricky=/tricky/i.test(txt().join(' ')+cover);}
+   return out;});
+ for(const id of Object.keys(tt)){const t=tt[id]; ok(t.hasDef&&t.mine&&t.cov&&t.none&&!t.tricky&&t.bank<t.bankWithTitle-0.3,`${id}: default title, her own title (also on the cover), or no title (content moves up): `+JSON.stringify(t));}
+ // pair page: no section labels, smaller bank, tall enough letter boxes, nothing overlaps
+ const pp=await pg.evaluate(()=>{APP.product('wwtricky','reading');APP.setTricky('said they were some would could people friend');const out={};
+   for(const [k,t] of [['title','Letter Shapes and Missing Letters'],['none','']]){APP.setTitle(t); const it=APP.cur.pages[2].items, txt=it.filter(x=>x.t==='text').map(x=>x.text);
+     const boxes=it.filter(x=>x.t==='rect'&&x.line==='777777'&&x.w<1&&x.h>0.2), banks=it.filter(x=>x.t==='rect'&&x.r>0.1&&x.w>6.9&&x.h<5).sort((a,b)=>a.y-b.y);
+     const short=Math.min(...boxes.map(b=>b.h)), tall=Math.max(...boxes.map(b=>b.h)), lowest=Math.max(...boxes.map(b=>b.y+b.h)), bottom=Math.max(...it.filter(x=>x.y<10.4&&!(x.h>=5)).map(x=>Math.max(x.y+(x.h||0),x.y2||0)));
+     out[k]={labels:txt.filter(x=>x==='Letter Shapes'||x==='Missing Letters').length,banks:banks.length,bankH:+banks[0].h.toFixed(2),short:+short.toFixed(3),tall:+tall.toFixed(3),clear:lowest<banks[1].y,fits:bottom<10.35};}
+   return out;});
+ for(const k of ['title','none']){const t=pp[k]; ok(t.labels===0&&t.banks===2&&t.bankH<0.6&&t.short>=0.3&&t.tall>=0.6&&t.clear&&t.fits,`pair page (${k}): no section labels, small word banks, short letters at least 0.3in, no overlap: `+JSON.stringify(t));}
  // letter shapes: tall / hanging / small boxes
  const sh1=await pg.evaluate(()=>{const K=TPT.tricky;return [K.shapeOf('the'),K.shapeOf('yes'),K.shapeOf('I'),K.shapeOf('a'),K.shapeOf('big')];}); ok(sh1.join()==='TTS,HSS,T,S,TSH','shape letters: '+sh1);
  // two letters stay visible; the irregular letters are the ones blanked
@@ -115,7 +137,7 @@ const sh=c=>cp.spawnSync('bash',['-c',c],{cwd:__dirname+'/..',encoding:'utf8'});
  ok(col.length===0,'student pages use only black, white and gray: '+col.slice(0,5));
  // bundle: a word-work set sits next to an older product
  const bd=await pg.evaluate(()=>{document.getElementById('clearBundle').click();APP.product('wwdraw','reading');APP.select('Unit 2');APP.addSet();APP.product('wwmissing','reading');APP.setTricky('said they were some');APP.addSet();APP.product('wwtricky','reading');APP.addSet();const d=APP.bundleDoc();return {names:d.files.map(f=>f.name),pages:d.pages.length};});
- ok(bd.names.length===4&&/^02 Read and Draw Words - Unit 2/.test(bd.names[1])&&/^03 Tricky Words Missing Letters - Tricky Words/.test(bd.names[2]),'bundle file names: '+bd.names.join(' | '));
+ ok(bd.names.length===4&&/^02 Read and Draw Words - Unit 2/.test(bd.names[1])&&/^03 Missing Letters - Word Work/.test(bd.names[2]),'bundle file names: '+bd.names.join(' | '));
  ok(errs.filter(e=>!/favicon/.test(e)).length===0,'no page/console errors: '+errs.slice(0,3).join(' || '));
  await b.close(); console.log(`\n${passes} passed, ${fails} failed`); process.exit(fails?1:0);
 })();

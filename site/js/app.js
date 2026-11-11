@@ -22,7 +22,7 @@ function renderProducts(){$('products').innerHTML='';for(const p of T.products){
   $('kinds').innerHTML='';if(prod.kinds.length>1)for(const k of prod.kinds){const b=document.createElement('button');b.textContent=k==='math'?'Math':'Reading';b.className=k===kind?'on':'';
     b.onclick=()=>{if(k===kind)return;kind=k;sel=[];defaultSkill();if(prod.id==='mystery')defaultAssign();renderAll();};$('kinds').appendChild(b);}}
 function defaultSkill(){const L=skillsFor(kind);if(prod.noSkill){sel=[L.find(s=>s.name==='Tricky Words')||L[0]];return;}if(prod.id==='readdraw'||WW_MIN[prod.id]){sel=[L.find(s=>s.name==='Unit 1')||L[0]];return;}sel=[(kind==='math'?(L.find(s=>s.name==='Making 10')):(L.find(s=>s.name.startsWith('ou ('))))||L[0]];}
-function labelFor(){if(prod.id==='coldread')return '';if(prod.noSkill)return 'Tricky Words';if(prod.id==='mystery'&&kind==='reading')return MY.rows.length?[...new Set(MP().colorsByCount(MY.rows).filter(([c])=>!(MY.bgOff&&c==='.')).map(([c])=>T.readLabel(MY.assign[c])))].join(' • '):'';
+function labelFor(){if(prod.id==='coldread')return '';if(prod.noSkill)return 'Word Work';if(prod.id==='mystery'&&kind==='reading')return MY.rows.length?[...new Set(MP().colorsByCount(MY.rows).filter(([c])=>!(MY.bgOff&&c==='.')).map(([c])=>T.readLabel(MY.assign[c])))].join(' • '):'';
   return sel.map(s=>kind==='math'?s.label:T.readLabel(s)).join(' • ');}
 // ---------- skills list
 let mainPick=null;
@@ -78,11 +78,12 @@ function renderColors(){const counts=Object.fromEntries(MP().colorsByCount(MY.ro
     d.prepend(br,col,nm,ct);d.append(s);box.appendChild(d);}
   $('label').value=labelFor();}
 function renderMystery(){drawEditor();renderColors();build();}
-// ---------- word-work pages: option rows and the tricky-word picker
+// ---------- word-work pages: option rows and the word picker for the letter-shape / missing-letter pages
 const WW_ROWS={wwdraw:['Pages','Boxes'],wwsounds:['Pages','Lines'],wwphonics:['Pages'],wwshapes:['Per'],wwmissing:['Per'],wwtricky:[]};
 const TRICKY=(window.WORDINFO&&WORDINFO.tricky||[]).map(x=>x[0]).filter(w=>w.length>1);
+let twTitleFor=null; // which product the page-title box was last filled for
 function wwShow(){const rows=WW_ROWS[prod.id]||[];$('wwOpt').hidden=!rows.length;['Pages','Boxes','Lines','Per'].forEach(k=>$('ww'+k+'Row').hidden=!rows.includes(k));
-  $('twSec').hidden=!prod.noSkill;if(prod.noSkill){if(!$('twText').value.trim())$('twText').value=TRICKY.slice(0,16).join(' ');twChips();}}
+  $('twSec').hidden=!prod.noSkill;$('twTitleRow').hidden=!prod.noSkill;$('twTitleHint').hidden=!prod.noSkill;if(prod.noSkill&&twTitleFor!==prod.id){$('twTitle').value=prod.pageTitle||'';twTitleFor=prod.id;}if(prod.noSkill){if(!$('twText').value.trim())$('twText').value=TRICKY.slice(0,16).join(' ');twChips();}}
 function twChips(){const on=new Set(T.tricky.parseWords($('twText').value).words);$('twChips').innerHTML='';
   for(const w of (window.WORDINFO&&WORDINFO.tricky||[]).map(x=>x[0])){const b=document.createElement('button');b.type='button';b.textContent=w;b.className=on.has(T.tricky.parseWords(w).words[0])?'on':'';b.onclick=()=>twToggle(w);$('twChips').appendChild(b);}}
 function twToggle(w){const cur=T.tricky.parseWords($('twText').value).words,k=T.tricky.parseWords(w).words[0],i=cur.indexOf(k);if(i>=0)cur.splice(i,1);else cur.push(k);$('twText').value=cur.join(' ');twChips();build();}
@@ -99,7 +100,7 @@ $('twResetAll').onclick=()=>{twBlanks={};build();};
 let twT;$('twText').oninput=()=>{clearTimeout(twT);twT=setTimeout(()=>{twChips();build();},300);};
 $('twAll').onclick=()=>{$('twText').value=TRICKY.join(' ');twChips();build();};$('twNone').onclick=()=>{$('twText').value='';twChips();build();};
 // ---------- config + build
-function cfg(){const c={text:$('crText').value,kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked,cut:$('wsCut')&&$('wsCut').checked,write:$('wsWrite')&&$('wsWrite').checked,mazeSize:$('mazeSize')&&$('mazeSize').value,nameLine:$('crName').checked,wordBank:$('pwBank').checked,rdPages:+$('rdPages').value||2,wwPages:+$('wwPages').value||2,wwBoxes:+$('wwBoxes').value,wwLines:+$('wwLines').value,wwPer:+$('wwPer').value,twText:$('twText').value,twBlanks:JSON.parse(JSON.stringify(twBlanks))}};c.pics=crPicMap(c.text);
+function cfg(){const c={text:$('crText').value,kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked,cut:$('wsCut')&&$('wsCut').checked,write:$('wsWrite')&&$('wsWrite').checked,mazeSize:$('mazeSize')&&$('mazeSize').value,nameLine:$('crName').checked,wordBank:$('pwBank').checked,rdPages:+$('rdPages').value||2,wwPages:+$('wwPages').value||2,wwBoxes:+$('wwBoxes').value,wwLines:+$('wwLines').value,wwPer:+$('wwPer').value,twText:$('twText').value,twTitle:$('twTitle').value,twBlanks:JSON.parse(JSON.stringify(twBlanks))}};c.pics=crPicMap(c.text);
   if(prod.id==='mystery'){const order=MP().colorsByCount(MY.rows).map(x=>x[0]);c.image={name:MY.name,rows:MY.rows.slice()};c.colors=JSON.parse(JSON.stringify(MY.colors));c.assign=Object.fromEntries(order.map(k=>[k,MY.assign[k]]));c.bgOff=MY.bgOff;}
   return c;}
 function desc(c){if(prod.id==='coldread')return (c.label||'Cold Reads')+` (${T.products.find(p=>p.id==='coldread').parse(c.text).length} passages)`;return prod.id==='mystery'?`${c.image.name} — ${c.label||labelFor()}`:(c.label||labelFor())+(prod.id==='bingo'?` (${c.opts.boards} boards, ${c.opts.size}x${c.opts.size})`:'');}
@@ -135,7 +136,7 @@ function listingOpts(){return {grade:$('lsGrade').value.trim(),theme:$('lsTheme'
 function renderAll(){renderProducts();const my=prod.id==='mystery';$('mysterySec').hidden=!my;$('optSec').hidden=prod.id!=='bingo';$('wsOpt').hidden=prod.id!=='wordsort';$('mazeOpt').hidden=prod.id!=='wordmaze';$('pwOpt').hidden=prod.id!=='picturewrite';$('rdOpt').hidden=prod.id!=='readdraw';wwShow();const cr=prod.id==='coldread';$('crSec').hidden=!cr;if(cr&&!$('crText').value.trim())$('crText').value=prod.sample;if(cr)crSlots();$('skillSec').hidden=cr||!!prod.noSkill;$('shuffle').hidden=cr;
   $('label').value=labelFor();if(!cr)renderSkills();renderBundle();if(my){if(!MY.name){$('theme').value='Animals';pickImage('Animals','bear');}else defaultAssignNew();renderThumbs();renderMystery();}else build();}
 // ---------- events
-$('label').onchange=build;['boards','size','same','cards','wsCut','wsWrite','mazeSize','rdPages','wwPages','wwBoxes','wwLines','wwPer'].forEach(id=>$(id).onchange=build);
+$('label').onchange=build;let ttT;$('twTitle').oninput=()=>{clearTimeout(ttT);ttT=setTimeout(build,250);};['boards','size','same','cards','wsCut','wsWrite','mazeSize','rdPages','wwPages','wwBoxes','wwLines','wwPer'].forEach(id=>$(id).onchange=build);
 let crT;$('crText').oninput=()=>{clearTimeout(crT);crT=setTimeout(()=>{crSlots();build();},400);};$('crName').onchange=build;$('pwBank').onchange=build;$('dllist').onclick=()=>cur&&busy($('dllist'),'Building…',async()=>{await LISTING.zip({prod,prods:[prod],doc:cur,skills:BUNDLE.skillsOf(cur.secs.map(s=>s.label)),picks:pickedPages('',cur),isBundle:false,nSets:cur.secs.length,opts:listingOpts()},cur.fileBase);});$('crSample').onclick=()=>{$('crText').value=T.products.find(p=>p.id==='coldread').sample;crSlots();build();};
 $('shuffle').onclick=()=>{seed=(seed*7919+13)%1000003;build();};
 $('dlpdf').onclick=()=>cur&&T.pdf(cur.pages,cur.fileBase);
@@ -153,7 +154,7 @@ $('bgOff').onchange=()=>{MY.bgOff=$('bgOff').checked;renderColors();build();};
 $('theme').innerHTML=Object.keys(PIXELS.themes).map(t=>`<option>${t}</option>`).join('');$('theme').onchange=renderThumbs;
 await T.init();defaultSkill();renderAll();
 // ---------- test hooks
-window.APP={loading:false,T,MY,setBlanks(o){twBlanks=o||{};build();return cur.secs[0].patterns;},setTricky(t){$('twText').value=t;twChips();build();return cur.secs[0].info;},skillNames(){return skillsFor(kind).map(s=>s.name);},get cur(){return cur;},
+window.APP={loading:false,T,MY,setBlanks(o){twBlanks=o||{};build();return cur.secs[0].patterns;},setTitle(t){$('twTitle').value=t;build();return cur.pages.length;},setTricky(t){$('twText').value=t;twChips();build();return cur.secs[0].info;},skillNames(){return skillsFor(kind).map(s=>s.name);},get cur(){return cur;},
   product(id,k){$('products').querySelectorAll('button')[T.products.findIndex(p=>p.id===id)].click();if(k&&k!==kind){[...$('kinds').children].find(b=>b.textContent.toLowerCase()===k).click();}return prod.id+'/'+kind;},
   select(names){names=[].concat(names);sel=names.map(n=>skillsFor(kind).find(s=>s.name===n));if(prod.id==='mystery')defaultAssign();$('label').value=labelFor();renderSkills();if(prod.id==='mystery')renderColors();build();return cur.secs[0].info;},
   addSet(){$('addSet').click();return bundle().length;},bundleDoc,get picks(){return picks;},get bpicks(){return bpicks;},pickedPages,renderPicker,listingOpts,pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},

@@ -16,17 +16,17 @@ const BLURB={
   wwdraw:'Students read each word and draw a picture to match. Up to 12 words on a page, with a drawing box under each one.',
   wwsounds:'Students read each word, tap a box for every sound, write how many sounds they counted, and write the word on the lines.',
   wwphonics:'Two phonics activities on every page: Read and Draw on top and Count the Sounds below.',
-  wwshapes:'Students match each tricky word from the word bank to a row of letter-shape boxes, then write the word on the lines.',
-  wwmissing:'Students fill in the missing letters of each tricky word from the word bank, then write the whole word on the lines.',
-  wwtricky:'Two tricky word activities on every page: Letter Shapes on top and Missing Letters below.'};
+  wwshapes:'Students match each word from the word bank to a row of letter-shape boxes, then write the word on the lines.',
+  wwmissing:'Students fill in the missing letters of each word from the word bank, then write the whole word on the lines.',
+  wwtricky:'Two word activities on every page: letter-shape boxes on top and missing letters below.'};
 const TAGS={rollread:['roll and read','phonics games','reading centers','decodable words','fluency'],rollsolve:['math games','math centers','fact fluency','roll and solve'],
   taskcards:['task cards','scoot','math centers','write the room'],bingo:['bingo','whole group games','phonics games','math games'],
   mystery:['color by code','mystery picture','early finishers','phonics practice'],wordsort:['word sort','phonics','cut and paste','word work'],
   wordmaze:['word maze','phonics','word work','early finishers'],coldread:['cold reads','reading fluency','reading comprehension','decodable passages','fluency assessment'],
   picturewrite:['picture write','phonics','encoding','spelling','word work'],readdraw:['read and draw','decodable sentences','sentence reading','phonics','literacy centers'],
   wwdraw:['read and draw','phonics','word work','literacy centers','decodable words'],wwsounds:['count the sounds','phoneme counting','phonics','word work','encoding'],
-  wwphonics:['phonics','word work','read and draw','count the sounds','literacy centers'],wwshapes:['tricky words','heart words','word shapes','sight words','word work'],
-  wwmissing:['tricky words','heart words','missing letters','sight words','word work'],wwtricky:['tricky words','heart words','word shapes','missing letters','sight words']};
+  wwphonics:['phonics','word work','read and draw','count the sounds','literacy centers'],wwshapes:['letter shapes','word shapes','spelling words','sight words','word work'],
+  wwmissing:['missing letters','fill in the missing letters','spelling words','sight words','word work'],wwtricky:['letter shapes','word shapes','missing letters','sight words','word work']};
 // brand: apple red + leaf green from the logo; the other themes keep the same black outlines and white cards
 const THEMES={
   apple:{p:'#B71F2B',d:'#7C1019',l:'#FDE7E8',a:'#FFD23F',dot:'#CC3944'},
