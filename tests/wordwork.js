@@ -71,6 +71,35 @@ const sh=c=>cp.spawnSync('bash',['-c',c],{cwd:__dirname+'/..',encoding:'utf8'});
  await pg.click('#twChips button:has-text("said")'); ok(await pg.inputValue('#twText')==='they','clicking again removes it');
  await pg.click('#twAll'); ok((await pg.inputValue('#twText')).split(' ').length>40,'Select all'); await pg.click('#twNone'); ok(await pg.inputValue('#twText')==='','Clear');
 
+ // ---- she chooses which letters are missing
+ const tiles=()=>pg.$$eval('#twLetters .tw-row',rs=>rs.map(r=>({word:[...r.querySelectorAll('button:not(.tw-reset)')].map(b=>b.textContent).join(''),hid:[...r.querySelectorAll('button:not(.tw-reset)')].map((b,i)=>b.classList.contains('hide')?i:-1).filter(i=>i>=0),custom:r.classList.contains('custom'),reset:!!r.querySelector('.tw-reset')})));
+ const pats=()=>pg.evaluate(()=>APP.cur.secs[0].patterns);
+ const pageText=()=>pg.evaluate(()=>APP.cur.pages.slice(2,-1).map(p=>p.items.filter(i=>i.t==='text').map(i=>(i.runs?i.runs.map(r=>r.text).join(''):i.text)).join('|')).join('||'));
+ await pg.evaluate(()=>{APP.product('wwmissing','reading');APP.setTricky('said they were some');});
+ let tl=await tiles(); ok(await pg.isVisible('#twLettersWrap')&&tl.length===4&&tl[0].word==='said'&&JSON.stringify(tl[0].hid)==='[1,2]'&&!tl[0].custom,'letter tiles show each word and the automatic blanks: '+JSON.stringify(tl[0]));
+ await pg.click('#twLetters .tw-row:nth-child(1) button:nth-child(2)');   // show the a again
+ tl=await tiles(); ok(JSON.stringify((await pats()).said)==='[2]'&&tl[0].custom&&tl[0].reset&&JSON.stringify(tl[0].hid)==='[2]','clicking a hidden letter shows it; the word is marked as chosen');
+ await pg.click('#twLetters .tw-row:nth-child(1) button:nth-child(1)');   // hide the s
+ ok(JSON.stringify((await pats()).said)==='[0,2]','clicking a shown letter hides it');
+ ok(/\|a\|d\|th\|w\|r\|s\|m\|/.test(await pageText()+'|'),'the page shows only the letters she left visible (a, d for said): '+(await pageText()).slice(0,200));
+ ok(/uses letters you chose/.test(await pg.innerText('#info')),'info line says one word uses her letters');
+ ok(JSON.stringify((await pats()).they)==='[2,3]','other words stay automatic');
+ await pg.click('#twLetters .tw-row:nth-child(1) .tw-reset'); ok(JSON.stringify((await pats()).said)==='[1,2]','Reset puts that word back to automatic');
+ await pg.evaluate(()=>APP.setBlanks({said:[0],they:[1]})); await pg.click('#twResetAll'); ok(JSON.stringify(await pats())===JSON.stringify({said:[1,2],they:[2,3],were:[1,3],some:[1,3]}),'Reset all letters');
+ // showing every letter goes back to automatic
+ await pg.evaluate(()=>APP.setBlanks({some:[1]})); await pg.click('#twLetters .tw-row:nth-child(4) button:nth-child(2)'); ok((await tiles())[3].custom===false&&JSON.stringify((await pats()).some)==='[1,3]','showing the last hidden letter returns the word to automatic');
+ // a choice that would match another word on the page sends that word to its own page
+ const cl=await pg.evaluate(()=>{APP.setTricky('said sand sad');const r=APP.setBlanks({said:[1,2]});return {pages:APP.cur.pages.length-3,r,fit:TPT.tricky.okMissing(['said'],'sand',{said:[1,2]}),alone:TPT.tricky.okMissing([],'said',{said:[1,2]})};});
+ ok(cl.pages===2&&cl.fit===false&&cl.alone===true&&JSON.stringify(cl.r.said)==='[1,2]','a chosen pattern that fits another word moves that word to another page: '+JSON.stringify(cl));
+ // bad input is cleaned; one-letter words are not editable
+ ok(await pg.evaluate(()=>JSON.stringify(TPT.tricky.cleanBlanks({said:[9,-1,2,2,1.5],a:[0],they:'x'},['said','a','they']))==='{"said":[2]}'),'chosen letters are cleaned (out of range, repeats, one-letter words, wrong type)');
+ // the pair page uses her letters too, and typing stays wide open
+ const pr=await pg.evaluate(()=>{APP.product('wwtricky','reading');APP.setTricky('said they were some would could people friend');APP.setBlanks({some:[0,1,2]});return {p:APP.cur.secs[0].patterns,shown:!document.getElementById('twLettersWrap').hidden};});
+ ok(pr.shown&&JSON.stringify(pr.p.some)==='[0,1,2]','the pair page honors chosen letters: '+JSON.stringify(pr.p));
+ const wide=await pg.evaluate(()=>{APP.product('wwmissing','reading');APP.setBlanks({});const i=APP.setTricky('ocean cousin beautiful');return {n:APP.cur.pages.length-3,i};}); ok(wide.n>=1&&!/Left out/.test(wide.i),'any typed words still work with chosen letters: '+JSON.stringify(wide));
+ ok(await pg.evaluate(()=>{APP.product('wwshapes','reading');return document.getElementById('twLettersWrap').hidden;}),'letter picker is hidden on the Letter Shapes product');
+ await pg.evaluate(()=>APP.setBlanks({}));
+
  // ---- cover, directions, terms on every product; no theme colors / table styles in the PPTX
  for(const id of IDS){
    const res=await pg.evaluate(id=>{APP.product(id,'reading');if(!document.getElementById('twSec').hidden)APP.setTricky('said they were some');else APP.select('Unit 4');const c=APP.cur,t=p=>p.items.filter(i=>i.t==='text').map(i=>i.text).join(' ');

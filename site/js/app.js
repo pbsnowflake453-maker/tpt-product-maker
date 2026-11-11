@@ -86,10 +86,20 @@ function wwShow(){const rows=WW_ROWS[prod.id]||[];$('wwOpt').hidden=!rows.length
 function twChips(){const on=new Set(T.tricky.parseWords($('twText').value).words);$('twChips').innerHTML='';
   for(const w of (window.WORDINFO&&WORDINFO.tricky||[]).map(x=>x[0])){const b=document.createElement('button');b.type='button';b.textContent=w;b.className=on.has(T.tricky.parseWords(w).words[0])?'on':'';b.onclick=()=>twToggle(w);$('twChips').appendChild(b);}}
 function twToggle(w){const cur=T.tricky.parseWords($('twText').value).words,k=T.tricky.parseWords(w).words[0],i=cur.indexOf(k);if(i>=0)cur.splice(i,1);else cur.push(k);$('twText').value=cur.join(' ');twChips();build();}
+let twBlanks={}; // letters Samantha chose to hide on the Missing Letters pages: {word:[positions]}
+function twEditor(){const wrap=$('twLettersWrap'),box=$('twLetters');const show=prod.id==='wwmissing'||prod.id==='wwtricky';wrap.hidden=!show;if(!show||!cur)return;
+  const P=cur.secs[0].patterns||{},words=Object.keys(P);box.innerHTML='';
+  if(!words.length){box.innerHTML='<p class="small">No Missing Letters words yet.</p>';return;}
+  for(const w of words){const S=P[w],row=document.createElement('div');row.className='tw-row'+(twBlanks[w]?' custom':'');
+    [...w].forEach((c,i)=>{const b=document.createElement('button'),hid=S.includes(i);b.type='button';b.textContent=c;b.className=hid?'hide':'';b.title=hid?'Hidden on the page. Click to show it.':'Click to hide this letter.';
+      b.onclick=()=>{const n=hid?S.filter(x=>x!==i):S.concat([i]).sort((a,b)=>a-b);if(n.length)twBlanks[w]=n;else delete twBlanks[w];build();};row.appendChild(b);});
+    if(twBlanks[w]){const r=document.createElement('button');r.type='button';r.className='tw-reset';r.textContent='Reset';r.onclick=()=>{delete twBlanks[w];build();};row.appendChild(r);}
+    box.appendChild(row);}}
+$('twResetAll').onclick=()=>{twBlanks={};build();};
 let twT;$('twText').oninput=()=>{clearTimeout(twT);twT=setTimeout(()=>{twChips();build();},300);};
 $('twAll').onclick=()=>{$('twText').value=TRICKY.join(' ');twChips();build();};$('twNone').onclick=()=>{$('twText').value='';twChips();build();};
 // ---------- config + build
-function cfg(){const c={text:$('crText').value,kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked,cut:$('wsCut')&&$('wsCut').checked,write:$('wsWrite')&&$('wsWrite').checked,mazeSize:$('mazeSize')&&$('mazeSize').value,nameLine:$('crName').checked,wordBank:$('pwBank').checked,rdPages:+$('rdPages').value||2,wwPages:+$('wwPages').value||2,wwBoxes:+$('wwBoxes').value,wwLines:+$('wwLines').value,wwPer:+$('wwPer').value,twText:$('twText').value}};c.pics=crPicMap(c.text);
+function cfg(){const c={text:$('crText').value,kind,skills:sel.slice(),label:$('label').value.trim(),opts:{boards:Math.max(1,Math.min(40,+$('boards').value||1)),size:+$('size').value,same:$('same').checked,cards:$('cards').checked,cut:$('wsCut')&&$('wsCut').checked,write:$('wsWrite')&&$('wsWrite').checked,mazeSize:$('mazeSize')&&$('mazeSize').value,nameLine:$('crName').checked,wordBank:$('pwBank').checked,rdPages:+$('rdPages').value||2,wwPages:+$('wwPages').value||2,wwBoxes:+$('wwBoxes').value,wwLines:+$('wwLines').value,wwPer:+$('wwPer').value,twText:$('twText').value,twBlanks:JSON.parse(JSON.stringify(twBlanks))}};c.pics=crPicMap(c.text);
   if(prod.id==='mystery'){const order=MP().colorsByCount(MY.rows).map(x=>x[0]);c.image={name:MY.name,rows:MY.rows.slice()};c.colors=JSON.parse(JSON.stringify(MY.colors));c.assign=Object.fromEntries(order.map(k=>[k,MY.assign[k]]));c.bgOff=MY.bgOff;}
   return c;}
 function desc(c){if(prod.id==='coldread')return (c.label||'Cold Reads')+` (${T.products.find(p=>p.id==='coldread').parse(c.text).length} passages)`;return prod.id==='mystery'?`${c.image.name} — ${c.label||labelFor()}`:(c.label||labelFor())+(prod.id==='bingo'?` (${c.opts.boards} boards, ${c.opts.size}x${c.opts.size})`:'');}
@@ -97,7 +107,7 @@ function preview(pages){const pv=$('preview');pv.innerHTML='';const N=Math.min(p
   $('status').textContent=`${pages.length} pages`+(pages.length>N?` (showing the first ${N})`:'')+(showBundle?' · bundle preview':'');}
 function build(){if(!sel.length&&!(prod.id==='mystery'&&kind==='reading')&&prod.id!=='coldread')return;
   const c=cfg();if(prod.needs){const nd=prod.needs(c,seed).filter(w=>(window.IMAGE_MAP||{})[w]&&!T.icons[w]);if(nd.length){window.APP&&(APP.loading=true);T.loadIcons(nd).then(()=>{window.APP&&(APP.loading=false);build();});return;}}cur=T.assemble(prod,[{cfg:c,seed}]);cur.fileBase=T.fileName(prod,cur.secs);
-  $('info').innerHTML=cur.secs[0].info||'';showBundle=false;picks=[];renderPicker('');preview(cur.pages);}
+  $('info').innerHTML=cur.secs[0].info||'';showBundle=false;picks=[];renderPicker('');preview(cur.pages);twEditor();}
 function renderBundle(){const b=bundle();$('bundle').innerHTML=b.map((x,i)=>`<li>${x.desc}<button data-i="${i}">✕</button></li>`).join('');
   $('bundle').querySelectorAll('button').forEach(e=>e.onclick=()=>{b.splice(+e.dataset.i,1);renderBundle();});
   ['bzip','blist','showBundle'].forEach(id=>$(id).disabled=b.length<1);
@@ -143,7 +153,7 @@ $('bgOff').onchange=()=>{MY.bgOff=$('bgOff').checked;renderColors();build();};
 $('theme').innerHTML=Object.keys(PIXELS.themes).map(t=>`<option>${t}</option>`).join('');$('theme').onchange=renderThumbs;
 await T.init();defaultSkill();renderAll();
 // ---------- test hooks
-window.APP={loading:false,T,MY,setTricky(t){$('twText').value=t;twChips();build();return cur.secs[0].info;},skillNames(){return skillsFor(kind).map(s=>s.name);},get cur(){return cur;},
+window.APP={loading:false,T,MY,setBlanks(o){twBlanks=o||{};build();return cur.secs[0].patterns;},setTricky(t){$('twText').value=t;twChips();build();return cur.secs[0].info;},skillNames(){return skillsFor(kind).map(s=>s.name);},get cur(){return cur;},
   product(id,k){$('products').querySelectorAll('button')[T.products.findIndex(p=>p.id===id)].click();if(k&&k!==kind){[...$('kinds').children].find(b=>b.textContent.toLowerCase()===k).click();}return prod.id+'/'+kind;},
   select(names){names=[].concat(names);sel=names.map(n=>skillsFor(kind).find(s=>s.name===n));if(prod.id==='mystery')defaultAssign();$('label').value=labelFor();renderSkills();if(prod.id==='mystery')renderColors();build();return cur.secs[0].info;},
   addSet(){$('addSet').click();return bundle().length;},bundleDoc,get picks(){return picks;},get bpicks(){return bpicks;},pickedPages,renderPicker,listingOpts,pickImage(t,n){pickImage(t,n);renderThumbs();renderMystery();},

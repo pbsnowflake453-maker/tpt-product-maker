@@ -29,7 +29,7 @@ function pairAlloc(dpool,cpool,n,r){const C=new Set(cpool), A0=T.shuffle(dpool,r
   return rd.length===6*n&&cs.length===6*n?{n,rd,cs}:null;}
 T._wwAvail=(sk,kind)=>kind==='pair'?(pairAlloc(poolOf([sk],'draw'),poolOf([sk],'count'),1,T.rng(1))?6:0):poolOf([sk],kind).length;
 T._wwCfg=cfg=>{const o=cfg.opts||{}; return {pages:Math.max(1,Math.min(10,+o.wwPages||2)),boxes:[9,10,12].includes(+o.wwBoxes)?+o.wwBoxes:12,
-  lines:[10,11,12].includes(+o.wwLines)?+o.wwLines:12,per:[4,6,8].includes(+o.wwPer)?+o.wwPer:6,text:o.twText||''};};
+  lines:[10,11,12].includes(+o.wwLines)?+o.wwLines:12,per:[4,6,8].includes(+o.wwPer)?+o.wwPer:6,text:o.twText||'',blanks:o.twBlanks||{}};};
 
 // ---------- tricky words: parse, shapes, missing-letter patterns
 const norm=w=>{w=String(w).trim(); return (w==='I'||w==='i')?'I':w.toLowerCase();};
@@ -49,8 +49,15 @@ function candidates(w){const n=w.length; if(n<2) return []; const I=irregularPos
 function cmpArr(a,b){for(let i=0;i<Math.min(a.length,b.length);i++) if(a[i]!==b[i]) return a[i]-b[i]; return a.length-b.length;}
 const fits=(w,S,v)=>v.length===w.length&&v!==w&&[...w].every((c,i)=>S.includes(i)||v[i]===c);
 // for each word on a Missing Letters page, the best pattern that fits only that word; null when some word has none
-function mlPatterns(words){const res={};
-  for(const w of words){const c=candidates(w).find(x=>words.every(v=>!fits(w,x.S,v))); if(!c) return null; res[w]=c.S;} return res;}
+// custom: {word: [positions]} letters Samantha chose to blank; those are used as given. Returns null when a chosen pattern also fits another word on the page.
+function mlPatterns(words,custom){custom=custom||{}; const res={};
+  for(const w of words){const cu=custom[w];
+    if(cu&&cu.length){if(words.some(v=>fits(w,cu,v))) return null; res[w]=cu; continue;}
+    const c=candidates(w).find(x=>words.every(v=>!fits(w,x.S,v))); if(!c) return null; res[w]=c.S;}
+  return res;}
+// keep only usable choices: positions inside the word, no repeats, sorted
+function cleanBlanks(raw,words){const out={}; for(const w of words){const a=raw&&raw[w]; if(!Array.isArray(a)) continue;
+  const S=[...new Set(a.filter(i=>Number.isInteger(i)&&i>=0&&i<w.length))].sort((x,y)=>x-y); if(S.length&&w.length>=2) out[w]=S;} return out;}
 // walk the words in the order given and put each one on the first page where it is allowed. cap = words per page slot.
 // kindOf(i) says what slot i holds ('A' or 'B'); ok(kind,slotWords,w) says whether the word can go there.
 function pack(words,cap,kindOf,ok){const slots=[], left=[];
@@ -60,7 +67,7 @@ function pack(words,cap,kindOf,ok){const slots=[], left=[];
     if(!done) left.push(w);}
   return {slots,left};}
 const okShapes=(s,w)=>!s.some(x=>shapeOf(x)===shapeOf(w));
-const okMissing=(s,w)=>w.length>=2&&mlPatterns(s.concat([w]))!==null;
+const okMissing=(s,w,custom)=>w.length>=2&&mlPatterns(s.concat([w]),custom)!==null;
 const okFor=kind=>kind==='B'?okMissing:okShapes;
 
 // ---------- drawing pieces
@@ -119,12 +126,12 @@ function missingRow(p,word,S,x,y,h,gap,maxFs){
     if(g.gap){const gw=g.s.length*0.62*em; p.line(cx+0.06*em,yb,cx+0.06*em+gw,yb,{lw:2.6,line:'1A1A1A'}); cx+=gw+0.12*em;}
     else{const tw=T.textW(g.s,'Andika',fs,false), bh=em*1.5; p.text(cx,yb-EM_BASE*em-bh/2,tw+0.02,bh,g.s,{size:fs,align:'left',nowrap:true,color:'1A1A1A'}); cx+=tw;}}
   hwLines(p,x+LEFT_W+gap,top,CW-LEFT_W-gap,sh);}
-function trickyRows(p,kind,words,x,y,h,fsMax){ // kind 'A' shapes, 'B' missing letters
-  const pit=Math.min(1.3,h/words.length), pats=kind==='B'?mlPatterns(words):null;
+function trickyRows(p,kind,words,x,y,h,fsMax,custom){ // kind 'A' shapes, 'B' missing letters
+  const pit=Math.min(1.3,h/words.length), pats=kind==='B'?mlPatterns(words,custom):null;
   words.forEach((w,i)=>{const ry=y+i*pit; if(kind==='B') missingRow(p,w,pats[w],x,ry,pit,0.3,fsMax); else shapeRow(p,w,x,ry,pit,0.3);
     if(pit>=1.1&&i<words.length-1) rowRule(p,ry+pit);});}
-function trickyBlock(p,kind,words,x,y,h,w,fsMax,r){ // word bank, then the rows
-  const bh=bankBox(p,deranged(words,r),x,y,w); trickyRows(p,kind,words,x,y+bh+0.12,h-bh-0.12,fsMax);}
+function trickyBlock(p,kind,words,x,y,h,w,fsMax,r,custom){ // word bank, then the rows
+  const bh=bankBox(p,deranged(words,r),x,y,w); trickyRows(p,kind,words,x,y+bh+0.12,h-bh-0.12,fsMax,custom);}
 
 // ---------- pages
 const pageOf=(title,label,fn)=>{const p=new T.Page('P'); T.frame(p); header(p,title,label); fn(p); T.footer(p); return p;};
@@ -133,11 +140,11 @@ const csPage=(words,label)=>pageOf('Count the Sounds',label,p=>csRows(p,words,X0
 const phonicsPage=(rd,cs,label)=>pageOf('Phonics Practice',label,p=>{
   sectionTitle(p,TOP,'Read and Draw'); rdGrid(p,rd,X0,TOP+0.42,CW,3.15,3,2);
   const y2=TOP+0.42+3.15+0.2; sectionTitle(p,y2,'Count the Sounds'); csRows(p,cs,X0,y2+0.42,CW,BOT-(y2+0.42));});
-const trickyPage=(kind,words,label,per,r)=>pageOf(kind==='B'?'Tricky Words: Missing Letters':'Tricky Words: Letter Shapes',label,p=>trickyBlock(p,kind,words,X0,TOP,BOT-TOP,CW,40,r));
-const trickyPairPage=(a,b,label,r)=>pageOf('Tricky Words',label,p=>{
+const trickyPage=(kind,words,label,per,r,custom)=>pageOf(kind==='B'?'Tricky Words: Missing Letters':'Tricky Words: Letter Shapes',label,p=>trickyBlock(p,kind,words,X0,TOP,BOT-TOP,CW,40,r,custom));
+const trickyPairPage=(a,b,label,r,custom)=>pageOf('Tricky Words',label,p=>{
   const hh=(BOT-TOP-0.15)/2;
-  if(a.length){sectionTitle(p,TOP,'Letter Shapes'); trickyBlock(p,'A',a,X0,TOP+0.42,hh-0.42,CW,36,r);}
-  if(b.length){const y2=TOP+hh+0.15; sectionTitle(p,y2,'Missing Letters'); trickyBlock(p,'B',b,X0,y2+0.42,hh-0.42,CW,36,r);}});
+  if(a.length){sectionTitle(p,TOP,'Letter Shapes'); trickyBlock(p,'A',a,X0,TOP+0.42,hh-0.42,CW,36,r,custom);}
+  if(b.length){const y2=TOP+hh+0.15; sectionTitle(p,y2,'Missing Letters'); trickyBlock(p,'B',b,X0,y2+0.42,hh-0.42,CW,36,r,custom);}});
 
 // ---------- how to / cover
 function howTo(lines){const p=new T.Page('P'); T.frame(p); p.text(0,0.55,PW,0.85,'How to Use',{font:'Pacifico',size:36});
@@ -173,19 +180,25 @@ function phonicsSection(cfg,seed,kinds){ // kinds: ['draw'] | ['count'] | ['draw
   return {label,n:pick.n,pages:pg,words:pick.n*12,info:`${plural(pick.n,'page')}, each with 6 words to draw and 6 words to count<br>${dpool.length} drawable and ${cpool.length} countable words available.`};}
 
 function trickySection(cfg,seed,pair){
-  const o=T._wwCfg(cfg), label=cfg.label||'Tricky Words', r=T.rng(seed), {words,skipped}=parseWords(o.text);
+  const o=T._wwCfg(cfg), label=cfg.label||'Tricky Words', r=T.rng(seed), {words,skipped}=parseWords(o.text), custom=cleanBlanks(o.blanks,words);
   const bad=skipped.length?`<br>${warn('Left out (letters only): '+skipped.join(', '))}`:'';
   if(!words.length) return {label,pages:[],n:0,info:warn('Pick or type at least one tricky word.')};
+  const patterns={};   // patterns: word -> positions blanked on its Missing Letters row
+  const noteML=slots=>slots.forEach(s=>{const m=mlPatterns(s,custom); if(m) Object.assign(patterns,m);});
+  const chosen=()=>{const n=Object.keys(patterns).filter(w=>custom[w]).length; return n?`<br>${plural(n,'word')} ${n===1?'uses':'use'} letters you chose.`:'';};
+  const ok=(k,s,w)=>okFor(k)(s,w,custom);
   if(!pair.mode){ // one activity on every page
-    const kind=pair.kind, res=pack(words,o.per,()=>kind,(k,s,w)=>okFor(k)(s,w)), slots=res.slots.filter(s=>s.length);
+    const kind=pair.kind, res=pack(words,o.per,()=>kind,ok), slots=res.slots.filter(s=>s.length);
     const left=res.left.length?`<br>${warn('Left out (needs two or more letters): '+res.left.join(', '))}`:'';
     if(!slots.length) return {label,pages:[],n:0,info:warn('None of those words can go on this page.')+bad};
-    return {label,n:slots.length,pages:slots.map(s=>trickyPage(kind,s,label,o.per,r)),words:slots.reduce((a,s)=>a+s.length,0),
-      info:`${plural(words.length-res.left.length,'word')} on ${plural(slots.length,'page')} (up to ${o.per} per page). Words on a page never share a ${kind==='B'?'blank pattern':'shape'}.${left}${bad}`};}
-  const res=pack(words,4,i=>i%2?'B':'A',(k,s,w)=>okFor(k)(s,w)), slots=res.slots;
-  const n=Math.ceil(slots.length/2), pg=[]; for(let i=0;i<n;i++) pg.push(trickyPairPage(slots[2*i]||[],slots[2*i+1]||[],label,r));
+    if(kind==='B') noteML(slots);
+    return {label,n:slots.length,pages:slots.map(s=>trickyPage(kind,s,label,o.per,r,custom)),words:slots.reduce((a,s)=>a+s.length,0),patterns,
+      info:`${plural(words.length-res.left.length,'word')} on ${plural(slots.length,'page')} (up to ${o.per} per page). Words on a page never share a ${kind==='B'?'blank pattern':'shape'}.${chosen()}${left}${bad}`};}
+  const res=pack(words,4,i=>i%2?'B':'A',ok), slots=res.slots;
+  const n=Math.ceil(slots.length/2), pg=[]; noteML(slots.filter((_,i)=>i%2));
+  for(let i=0;i<n;i++) pg.push(trickyPairPage(slots[2*i]||[],slots[2*i+1]||[],label,r,custom));
   const used=words.length-res.left.length, left=res.left.length?`<br>${warn('Left out (needs two or more letters): '+res.left.join(', '))}`:'';
-  return {label,n:pg.length,pages:pg,words:used,info:`${plural(used,'word')} on ${plural(n,'page')}: 4 Letter Shapes words on top and 4 Missing Letters words below.${left}${bad}`};}
+  return {label,n:pg.length,pages:pg,words:used,patterns,info:`${plural(used,'word')} on ${plural(n,'page')}: 4 Letter Shapes words on top and 4 Missing Letters words below.${chosen()}${left}${bad}`};}
 
 const common={orient:'P',kinds:['reading'],multiSkill:true};
 T.products.push(Object.assign({id:'wwdraw',name:'Read and Draw: Words',title:'Read and Draw Words'},common,{
@@ -213,5 +226,5 @@ T.products.push(Object.assign({id:'wwtricky',name:'Tricky Words: Shapes + Missin
   section:(cfg,seed)=>trickySection(cfg,seed,{mode:'pair'}),
   directions:()=>[howTo(['Letter Shapes','1. Read the words in the word bank.','2. Pick the word that fits the boxes and write one letter in each box.','Missing Letters','3. Pick the word that fits and write the missing letters on the blank spaces.','4. Write the whole word on the lines.'])],
   cover:secs=>cover('Tricky Word Practice',T.skillsText(secs),`Letter Shapes + Missing Letters  •  ${plural(secs.reduce((a,s)=>a+(s.words||0),0),'word')}  •  ${plural(secs.reduce((a,s)=>a+s.n,0),'page')}`)}));
-T.tricky={parseWords,shapeOf,mlPatterns,pack,okShapes,okMissing};
+T.tricky={parseWords,shapeOf,mlPatterns,cleanBlanks,pack,okShapes,okMissing};
 })();

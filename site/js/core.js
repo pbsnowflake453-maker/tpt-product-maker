@@ -150,7 +150,7 @@ window.TPT = (function(){
         else if(it.t==='image'){const [a,b,w2,h2]=fitBox(it); s.addImage({data:it.icon?it.icon.src:logoData,x:a,y:b,w:w2,h:h2});}
         else if(it.t==='text'){const L=lines(it), arr=[];
           L.forEach((l,i)=>l.forEach((r,j)=>arr.push({text:r.t,options:{bold:!!r.b,underline:r.u?{style:'sng'}:undefined,breakLine:j===l.length-1&&i<L.length-1}})));
-          s.addText(arr,{x:it.x,y:it.y,w:it.w,h:it.h,fontFace:it.font,fontSize:it.size,color:it.color,align:it.align,valign:it.valign,margin:0,fill:{type:'none'},line:{type:'none'},fit:'none',wrap:!it.nowrap,lineSpacingMultiple:1.0});}
+          s.addText(arr,{x:it.x,y:it.y,w:it.w,h:it.h,fontFace:it.font,fontSize:it.size,color:it.color,align:it.align,valign:it.valign,margin:0,fill:{type:'none'},line:{type:'none'},fit:'none',wrap:!it.nowrap,...(it.exact?{lineSpacing:it.size*1.25}:{lineSpacingMultiple:1.0})});}
       }}
     return P;}
   async function pptx(pages,fname){await pptxDoc(pages,fname).writeFile({fileName:fname+'.pptx'});}

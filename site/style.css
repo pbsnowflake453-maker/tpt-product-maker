@@ -43,3 +43,9 @@ details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:700}
 #wwOpt label{display:block;margin:6px 0;font-size:14px}#wwOpt input[type=number]{width:70px}#wwOpt select{padding:4px;font:inherit}
 #twChips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}#twChips button{padding:3px 9px;font-size:13px;border-radius:14px}#twChips button.on{background:#000;color:#fff;border-color:#000}
 #twText{width:100%;margin-top:8px;font:inherit;font-size:14px;padding:6px;border:1px solid #bbb;border-radius:8px}
+#twLettersWrap h3{margin:14px 0 4px;font-size:14px}
+#twLetters .tw-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px;margin:7px 0;padding-left:14px;position:relative}
+#twLetters .tw-row button{width:26px;height:30px;padding:0;border-radius:6px;font-size:15px}
+#twLetters .tw-row button.hide{background:#000;color:#fff;border-color:#000}
+#twLetters .tw-row button.tw-reset{width:auto;height:26px;padding:0 8px;margin-left:6px;font-size:12px}
+#twLetters .tw-row.custom::before{content:"\25CF";font-size:9px;position:absolute;left:2px;top:50%;transform:translateY(-50%)}

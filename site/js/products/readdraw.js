@@ -17,25 +17,27 @@ function poolFor(skills){const ms=(skills||[]).map(matcher), seen=new Set(), out
   for(const s of S()) if(ms.some(f=>f(s))&&!seen.has(s.t)){seen.add(s.t);out.push(s);} return out;}
 T._rdAvail=sk=>poolFor([sk]).length;
 function header(p,label){
-  p.text(0.5,0.32,2.0,0.26,'Name:',{size:13,align:'left'}); p.line(1.15,0.54,3.6,0.54,{lw:1});
+  p.text(0.5,0.49,2.0,0.26,'Name:',{size:13,align:'left'}); p.line(1.15,0.71,3.6,0.71,{lw:1});
   const bw=Math.min(4.2,Math.max(2.0,T.textW('Skill: '+label,'Andika',15,true)+0.45));
-  T.bubble(p,PW-0.45-bw,0.25,bw,0.44,'Skill: '+label,{size:15});
-  p.text(0,0.72,PW,0.5,'Read and Draw',{font:'Pacifico',size:26});
+  T.bubble(p,PW-0.45-bw,0.42,bw,0.44,'Skill: '+label,{size:15});
+  p.text(0,0.89,PW,0.5,'Read and Draw',{font:'Pacifico',size:26});
 }
 function layout(text,w,maxH){ // biggest size (22..14pt) whose wrapped lines fit
   for(let size=22;size>=14;size-=1){const L=T.wrapRuns([{t:text,b:false}],'Andika',size,w), lh=size*1.3/72; if(L.length*lh<=maxH||size===14) return {L,size,lh};}
 }
-function cell(p,x,y,w,h,num,text){
-  const tx=x+0.5, tw=w-0.62, th=1.05, bt=y+th+0.1;
-  p.oval(x+0.02,y+0.06,0.36,0.36,{fill:'000000'}); p.text(x+0.02,y+0.06,0.36,0.36,String(num),{size:13,bold:true,color:'FFFFFF'});
-  const f=layout(text,tw-0.1,th-0.05);
-  p.text(tx,y+0.04,tw,th,'',{runs:f.L,size:f.size,align:'left',valign:'top',nowrap:true});
+// The sentence sits right above its drawing box: the text is bottom-aligned in a strip as tall as the longest sentence in its row,
+// and the box fills the rest of the cell, so a row of short sentences gets bigger boxes instead of a gap.
+function cell(p,x,y,w,h,num,f,rowH){
+  const tx=x+0.5, tw=w-0.62, H=f.L.length*f.size*1.25/72, ty=y+rowH-H, bt=y+rowH+0.1, mid=ty+f.size*1.25/144; // mid = middle of the first line
+  p.oval(x+0.02,mid-0.18,0.36,0.36,{fill:'000000'}); p.text(x+0.02,mid-0.18,0.36,0.36,String(num),{size:13,bold:true,color:'FFFFFF'});
+  p.text(tx,ty,tw,H,'',{runs:f.L,size:f.size,align:'left',valign:'top',nowrap:true,exact:true}); // exact: PowerPoint and Slides keep the same 1.25 line spacing as the preview
   p.rect(x,bt,w,y+h-bt,{r:0.12,lw:1.5,fill:'FFFFFF'});
 }
 function studentPage(items,label,startNum){
   const p=new T.Page('P'); T.frame(p); header(p,label);
-  const top=1.35,bottom=PH-0.7,gap=0.15,cw=(PW-1.2-gap)/2,ch=(bottom-top-2*gap)/3;
-  items.forEach((s,i)=>{const c=i%2,r=Math.floor(i/2); cell(p,0.6+c*(cw+gap),top+r*(ch+gap),cw,ch,startNum+i,s.t);});
+  const top=1.52,bottom=PH-0.7,gap=0.15,cw=(PW-1.2-gap)/2,ch=(bottom-top-2*gap)/3, tw=cw-0.62;
+  const fit=items.map(s=>layout(s.t,tw-0.1,1.0)), rowH=r=>Math.max(...fit.slice(2*r,2*r+2).map(f=>f.L.length*f.size*1.25/72));
+  items.forEach((s,i)=>{const c=i%2,r=Math.floor(i/2); cell(p,0.6+c*(cw+gap),top+r*(ch+gap),cw,ch,startNum+i,fit[i],rowH(r));});
   T.footer(p); return p;
 }
 function howTo(){
