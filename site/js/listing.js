@@ -197,12 +197,20 @@ function drawBlackBanner(g,y,h,text,maxSize,rightInset){
   const inset=rightInset||0;
   g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
   const s=fitFont(g,t,'700','Fredoka',maxSize||Math.floor(h*0.86),S-160-inset,26);
-  g.font=FONT(700,s,'Fredoka'); g.fillText(t,(S-inset)/2,y+h/2+Math.round(s*0.04));
+  g.font=FONT(700,s,'Fredoka'); g.fillText(t,(S-inset)/2,y+h/2);
   return y+h;
 }
 function drawPinkFrame(g){
   const t=BOLD.fw; g.fillStyle=BOLD.frame;
   g.fillRect(0,0,S,t); g.fillRect(0,S-t,S,t); g.fillRect(0,0,t,S); g.fillRect(S-t,0,t,S);
+}
+// Bottom bar sits fully above the pink frame. Logo stays inside the banner.
+function styleBFooter(botH,logoR){
+  const fw=BOLD.fw, stroke=8, pad=18;
+  const h=botH, y=S-fw-h;
+  const r=Math.min(logoR, Math.floor((h-stroke-pad)/2));
+  const cx=S-fw-pad-r, cy=y+h/2;
+  return {y,h,logoX:cx,logoY:cy,logoR:r,inset:S-cx+r+28};
 }
 function scallopBadge(g,cx,cy,r,top,bot){
   const n=20, bump=r*0.17;
@@ -291,10 +299,10 @@ function drawCollage(g,cards,top,bot){
   const sc=cards.map(c=>scaleCard(c,880,areaH*0.6));
   const topY=top+sc[0].height*0.5+12;
   const botY=bot-sc[2].height*0.5-28;
-  paper(g,sc[0],S/2-360,topY,-0.1,1.05);
-  paper(g,sc[1],S/2+390,topY-16,0.09,1.05);
-  paper(g,sc[2],S/2-330,botY,-0.04,1.08);
-  return {cx:S/2+300, cy:topY*0.35+botY*0.65, r:236};
+  paper(g,sc[0],S/2-330,topY,-0.1,1.05);
+  paper(g,sc[1],S/2+410,topY+10,0.09,1.05);
+  paper(g,sc[2],S/2-250,botY,-0.04,1.08);
+  return {cx:S/2+360, cy:topY*0.22+botY*0.78, r:230};
 }
 async function coverBold(spec,th,L,st){
   const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S);
@@ -303,14 +311,14 @@ async function coverBold(spec,th,L,st){
   const titleBot=drawTitleBlock(g,title,top,maxW,titleMaxH);
   const banH=176, banY=Math.max(titleBot+4, 460);
   drawBlackBanner(g,banY,banH,bannerLine(spec,st));
-  const botH=210, botY=S-botH;
+  const foot=styleBFooter(210,88);
   const pics=boldPicks(spec,st);
   const cards=pics.map((p,i)=>{ const t=cardCopy(spec,st,p,i); return makePageCard(p,t.heading,t.sub,BOLD.bands[i%BOLD.bands.length]); });
-  const slot=drawCollage(g,cards,banY+banH+6,botY-6);
+  const slot=drawCollage(g,cards,banY+banH+6,foot.y-8);
   const badge=badgeCopy(spec,st);
   scallopBadge(g,slot.cx,slot.cy,slot.r,badge.top,badge.bot);
-  drawBlackBanner(g,botY,botH,boldRibbon(spec,st),null,240);
-  logoBadge(g,L,S-160,S-botH/2,92);
+  drawBlackBanner(g,foot.y,foot.h,boldRibbon(spec,st),Math.floor(foot.h*0.72),foot.inset);
+  logoBadge(g,L,foot.logoX,foot.logoY,foot.logoR);
   drawPinkFrame(g);
   return c;
 }
@@ -323,12 +331,12 @@ async function previewBold(spec,th,L,page,role,k,total,prodTitle,skillsTxt){
   drawBlackBanner(g,banY,banH,skillsTxt||bannerLine(spec,null));
   const sub=up(cleanTxt(skillsTxt)||(role==='key'?'ANSWERS':'STUDENT PAGE'));
   const card=makePageCard(page,up(label||'PREVIEW'),sub,BOLD.bands[(k||0)%BOLD.bands.length]);
-  const botH=190, botY=S-botH;
-  const sc=scaleCard(card,1500,botY-(banY+banH)-30);
-  paper(g,sc,S/2,(banY+banH+botY)/2, (k%2?0.03:-0.03), 1.1);
-  if(label) drawBlackBanner(g,botY,botH,label,null,220);
-  else g.fillStyle='#000', g.fillRect(0,botY,S,botH);
-  logoBadge(g,L,S-150,S-botH/2,84);
+  const foot=styleBFooter(200,80);
+  const sc=scaleCard(card,1500,foot.y-(banY+banH)-30);
+  paper(g,sc,S/2,(banY+banH+foot.y)/2, (k%2?0.03:-0.03), 1.1);
+  if(label) drawBlackBanner(g,foot.y,foot.h,label,Math.floor(foot.h*0.72),foot.inset);
+  else g.fillStyle='#000', g.fillRect(0,foot.y,S,foot.h);
+  logoBadge(g,L,foot.logoX,foot.logoY,foot.logoR);
   drawPinkFrame(g);
   return c;
 }
@@ -338,7 +346,7 @@ async function includedBold(spec,th,L,st){
   const banY=Math.max(titleBot+6, 430), banH=140;
   drawBlackBanner(g,banY,banH,bannerLine(spec,st),90);
   const items=defaults(spec,st).included.map(cleanTxt).filter(Boolean);
-  const botH=190, botY=S-botH, top=banY+banH+50, bot=botY-40;
+  const foot=styleBFooter(200,80), top=banY+banH+50, bot=foot.y-40;
   const gap=Math.min(200,(bot-top)/Math.max(items.length,1));
   const x0=280;
   items.forEach((t,i)=>{
@@ -353,8 +361,8 @@ async function includedBold(spec,th,L,st){
     const ts=fitFont(g,t,'700','Andika',52,cardW-220,26);
     g.font=FONT(700,ts,'Andika'); g.fillText(t,x0+80,y+3);
   });
-  drawBlackBanner(g,botY,botH,boldRibbon(spec,st),null,220);
-  logoBadge(g,L,S-150,S-botH/2,84);
+  drawBlackBanner(g,foot.y,foot.h,boldRibbon(spec,st),Math.floor(foot.h*0.72),foot.inset);
+  logoBadge(g,L,foot.logoX,foot.logoY,foot.logoR);
   drawPinkFrame(g);
   return c;
 }
