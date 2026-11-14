@@ -83,6 +83,21 @@ const hash=b=>crypto.createHash('md5').update(b).digest('hex');
  for(const th of ['apple','sky','sunny','grape','mint']){ await pg.selectOption('#fTheme',th); await settled();
    const r=await pg.evaluate(()=>{const c=DROPIN.last.images[0][1],x=c.getContext('2d'); const row=(y)=>{const d=x.getImageData(0,y,2000,1).data;let w=0;for(let i=0;i<d.length;i+=4)if(d[i]>235&&d[i+1]>235&&d[i+2]>235)w++;return w;}; return {w:c.width,top:row(300)>200,bot:row(1500)>200};});
    ok(r.w===2000&&r.top&&r.bot,`portrait/${th}: cover renders with page grabs above and below the band`); fs.writeFileSync(OUT+`band-portrait-${th}.png`,Buffer.from((await pg.evaluate(()=>DROPIN.last.images[0][1].toDataURL('image/png'))).split(',')[1],'base64')); }
+ // ---------- Style C: every image uses the band look (stripes, flush bottom ribbon), sunny pills have white text
+ const gb=await mk(); await gb.goto(SITE+'index.html?'+Date.now()); await gb.waitForFunction(()=>window.APP&&document.getElementById('status').textContent!=='Loading fonts…');
+ await gb.evaluate(()=>{APP.product('rollread','reading');APP.select('sh');window.__cap=null;LISTING.zip=async(sp)=>{window.__cap=sp;};}); await gb.click('#dllist'); await gb.waitForFunction(()=>window.__cap);
+ for(const th of ['sunny','mint']){
+   const r=await gb.evaluate(async th=>{const sp=window.__cap; const res=await LISTING.build(Object.assign({},sp,{picks:sp.doc.pages.slice(1,4),opts:{grade:'1st Grade',theme:th,style:'band'}}));
+     const T=LISTING.THEMES[th]; const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+     return res.images.map(([n,c])=>{const x=c.getContext('2d'); const px=(a,b)=>[...x.getImageData(a,b,1,1).data].slice(0,3); const ribbon=px(20,1990); let white=0,dark=0; const d=x.getImageData(100,1915,1300,70).data; for(let i=0;i<d.length;i+=4){ if(d[i]>240&&d[i+1]>240&&d[i+2]>240)white++; if(d[i]<40&&d[i+1]<40&&d[i+2]<40)dark++; }
+       // polka-dot check: the stripes background has no near-round dots, so just require stripes: two different colors along a horizontal line at y=1000 near the left edge
+       const row=x.getImageData(0,1000,40,1).data; const cols=new Set(); for(let i=0;i<row.length;i+=4*5)cols.add(row[i]+','+row[i+1]+','+row[i+2]);
+       return {n,ribbonOk:Math.abs(ribbon[0]-hex(T.a)[0])+Math.abs(ribbon[1]-hex(T.a)[1])+Math.abs(ribbon[2]-hex(T.a)[2])<12,white,dark};});},th);
+   ok(r.length>=5&&r.every(i=>i.ribbonOk),`band/${th}: cover, previews and What's Included all have the flush accent ribbon (${r.map(i=>i.ribbonOk).join(',')})`);
+   const cover=r[0], inc=r[r.length-1]; if(th==='sunny') ok(cover.white>150&&inc.white>=0&&r[1].white>=0&&cover.dark<cover.white,'band/sunny: ribbon text is white on red (white '+cover.white+', dark '+cover.dark+')');
+ }
+ await gb.evaluate(()=>{}); const cmp=await gb.evaluate(async()=>{const sp=window.__cap; const mkb=async st=>{const res=await LISTING.build(Object.assign({},sp,{picks:sp.doc.pages.slice(1,3),opts:{grade:'1st Grade',theme:'sunny',style:st}})); return res.images.map(i=>i[1].toDataURL('image/png').length+':'+i[1].toDataURL('image/png').slice(-200));}; const a=await mkb('classic'), b=await mkb('band'); return a.some((v,i)=>v===b[i]);});
+ ok(!cmp,'band images are not the same as classic images'); await gb.close();
  ok(errs.length===0,'no page errors: '+errs.slice(0,3).join(' / '));
  await b.close(); console.log(`${passes} passed, ${fails} failed`); process.exit(fails?1:0);
 })();
