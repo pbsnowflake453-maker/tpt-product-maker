@@ -132,7 +132,7 @@ function renderPicker(w){const det=$(w+'pickDet'),box=$(w+'pickPages');if(!det||
       d.onclick=()=>{const k=arr.indexOf(pi);if(k>=0)arr.splice(k,1);else if(arr.length<9)arr.push(pi);else{$(w+'pickInfo').textContent='That is the most you can pick (9). Click a picked page to remove it.';return;}pickBadges(w);};gr.appendChild(d);}}
   pickBadges(w);}
 async function busy(btn,txt,fn){const o=btn.textContent;btn.disabled=true;btn.textContent=txt;try{await fn();}catch(e){console.error(e);$('status').textContent=e.message;}finally{btn.textContent=o;btn.disabled=false;if(btn.id!=='dllist'&&btn.id!=='dlpdf'&&btn.id!=='dlpptx')btn.disabled=bundle().length<1;}}
-function listingOpts(){return {grade:$('lsGrade').value.trim(),theme:$('lsTheme').value};}
+function listingOpts(){return {grade:\( ('lsGrade').value.trim(),theme: \)('lsTheme').value,style:\( ('lsStyle')? \)('lsStyle').value:'classic'};}
 function renderAll(){renderProducts();const my=prod.id==='mystery';$('mysterySec').hidden=!my;$('optSec').hidden=prod.id!=='bingo';$('wsOpt').hidden=prod.id!=='wordsort';$('mazeOpt').hidden=prod.id!=='wordmaze';$('pwOpt').hidden=prod.id!=='picturewrite';$('rdOpt').hidden=prod.id!=='readdraw';wwShow();const cr=prod.id==='coldread';$('crSec').hidden=!cr;if(cr&&!$('crText').value.trim())$('crText').value=prod.sample;if(cr)crSlots();$('skillSec').hidden=cr||!!prod.noSkill;$('shuffle').hidden=cr;
   $('label').value=labelFor();if(!cr)renderSkills();renderBundle();if(my){if(!MY.name){$('theme').value='Animals';pickImage('Animals','bear');}else defaultAssignNew();renderThumbs();renderMystery();}else build();}
 // ---------- events
