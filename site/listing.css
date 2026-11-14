@@ -12,7 +12,7 @@ header p a{color:#B71F2B}
 #picked li{margin:4px 0}#picked li div{display:inline-flex;align-items:center;gap:6px;vertical-align:middle;flex-wrap:wrap}#picked label{white-space:nowrap}
 #picked canvas{width:34px;border:1px solid #ccc;background:#fff}
 #picked button{padding:0 6px;font-size:12px}
-#textSec label{display:block;margin:7px 0;font-size:13px}
+#textSec label{display:block;margin:7px 0;font-size:13px}#textSec>label{margin-top:4px}
 #textSec input:not([type=checkbox]),#textSec select,#textSec textarea{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:3px}
 #textSec .two{display:flex;gap:8px}#textSec .two label{flex:1}
 #textSec label.blk{display:flex;gap:6px;align-items:center}

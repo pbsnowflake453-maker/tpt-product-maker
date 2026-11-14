@@ -14,25 +14,37 @@
     <div id="pages"></div>
     <div id="pickedWrap" hidden><h3>Picked pages</h3><ol id="picked"></ol><div class="btns"><button id="pickClear">Clear picks</button></div></div>
   </section>
-  <section id="textSec"><h2>3. Text on the images</h2>
-    <p class="small">Change anything here and the previews update. Leave a box empty to leave that item off.</p>
-    <label>Title <input id="fTitle" data-k="title"></label>
-    <label>Skill pill <input id="fSkills" data-k="skills" placeholder="Leave blank for no pill"></label>
-    <label>Grade burst <input id="fGrade" data-k="grade" value="1st Grade" placeholder="Leave blank for none"></label>
-    <label>Subtitle <input id="fSub" data-k="subtitle" placeholder="Optional line under the title"></label>
-    <label>Bottom yellow banner <input id="fRibbon" data-k="ribbon"></label>
-    <label>Store name pill <input id="fStore" data-k="store"></label>
-    <label class="blk"><input type="checkbox" id="fKey"> Show the “Answer Key” burst on the cover</label>
-    <div class="two"><label>Burst line 1 <input id="fKeyTop" data-k="keyTop" value="ANSWER"></label><label>Burst line 2 <input id="fKeyBot" data-k="keyBot" value="KEY"></label></div>
-    <details><summary>More text (preview images, What's Included, listing.txt)</summary>
-      <div class="two"><label>Preview label <input id="fPrev" data-k="previewLabel" value="PREVIEW"></label><label>Answer key label <input id="fKeyLab" data-k="keyLabel" value="ANSWER KEY"></label></div>
-      <label>Preview header title <input id="fPTitle" data-k="previewTitle"></label>
-      <label>Preview header pill <input id="fPPill" data-k="previewPill"></label>
-      <label>What's Included (one item per line) <textarea id="fInc" rows="6" data-k="included"></textarea></label>
-      <label>Listing description <textarea id="fBlurb" rows="4" data-k="blurb" placeholder="Goes into listing.txt"></textarea></label>
+  <section id="textSec"><h2>3. Look and text</h2>
+    <div class="stylepick" role="group" aria-label="Layout"><button type="button" data-style="classic"><b>A</b> Classic<small>Tilted pages on a title banner</small></button><button type="button" data-style="bold"><b>B</b> Bold Graphic<small>Chunky letters, black banners</small></button><button type="button" data-style="band"><b>C</b> Center Band<small>Title band, pages above and below</small></button></div>
+    <select id="lsStyle" hidden aria-hidden="true"><option value="classic">Style A - Classic</option><option value="bold">Style B - Bold Graphic</option><option value="band">Style C - Center Band</option></select>
+    <label data-styles="classic band">Colors <select id="fTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option></select></label>
+    <p class="small" id="styleNote"></p>
+    <p class="small">Change anything and the previews update. Leave a box empty to leave that item off.</p>
+    <details class="tgrp" open><summary>Cover</summary>
+      <label>Title <input id="fTitle" data-k="title"></label>
+      <label data-styles="classic band">Subtitle <input id="fSub" data-k="subtitle" placeholder="Optional line under the title"></label>
+      <label>Skill line <span class="hint" data-styles="classic band">(pill under the title)</span><span class="hint" data-styles="bold">(black banner under the title)</span><input id="fSkills" data-k="skills" placeholder="Leave blank for none"></label>
+      <label data-styles="classic band">Grade burst <input id="fGrade" data-k="grade" value="1st Grade" placeholder="Leave blank for none"></label>
+      <div class="two" data-styles="bold"><label>Page-count burst <input id="lsBurstTop" placeholder="Automatic number"></label><label>Under it <input id="lsBurstBot" placeholder="PAGES"></label></div>
+      <div data-styles="classic band"><label class="blk"><input type="checkbox" id="fKey"> Show an answer key burst</label>
+      <div class="two"><label>Line 1 <input id="fKeyTop" data-k="keyTop" value="ANSWER"></label><label>Line 2 <input id="fKeyBot" data-k="keyBot" value="KEY"></label></div></div>
+    </details>
+    <details class="tgrp" open><summary>Bottom of the images</summary>
+      <label>Bottom banner text <input id="fRibbon" data-k="ribbon"></label>
+      <label data-styles="classic">Store name pill <input id="fStore" data-k="store"></label>
+    </details>
+    <details class="tgrp"><summary>Preview images</summary>
+      <label>Header title <input id="fPTitle" data-k="previewTitle"></label>
+      <label>Header pill <input id="fPPill" data-k="previewPill"></label>
+      <div class="two"><label>Page label <input id="fPrev" data-k="previewLabel" value="PREVIEW"></label><label>Answer key label <input id="fKeyLab" data-k="keyLabel" value="ANSWER KEY"></label></div>
+    </details>
+    <details class="tgrp"><summary>What's Included image</summary>
+      <label>One item per line <textarea id="fInc" rows="6" data-k="included"></textarea></label>
+    </details>
+    <details class="tgrp"><summary>Listing text (listing.txt)</summary>
+      <label>Description <textarea id="fBlurb" rows="4" data-k="blurb" placeholder="Goes into listing.txt"></textarea></label>
       <label>Tags (separate with commas) <textarea id="fTags" rows="2" data-k="tags" placeholder="Goes into listing.txt"></textarea></label>
     </details>
-    <label>Colors <select id="fTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option></select></label>
   </section>
   <section><h2>4. Download</h2>
     <div class="btns"><button id="dl" class="primary" disabled>Download listing images (ZIP)</button></div>

@@ -64,9 +64,16 @@
     <p class="small">PowerPoint opens in Google Slides: upload to Drive, then Open with Slides.</p>
   </section>
   <section id="lsSec"><h2>4. TpT listing images</h2>
-    <p class="small">Bold, colorful cover image plus preview images. The pages you pick below are the ones that get screen-grabbed.</p>
-    <label>Grade callout <input id="lsGrade" value="1st Grade" placeholder="Leave blank for none"></label>
-    <label>Colors <select id="lsTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option></select></label>
+    <p class="small">Colorful cover plus preview images. The pages you pick below are the ones that get screen-grabbed.</p>
+    <div class="stylepick" role="group" aria-label="Layout"><button type="button" data-style="classic"><b>A</b> Classic<small>Tilted pages on a title banner</small></button><button type="button" data-style="bold"><b>B</b> Bold Graphic<small>Chunky letters, black banners</small></button><button type="button" data-style="band"><b>C</b> Center Band<small>Title band, pages above and below</small></button></div>
+    <select id="lsStyle" hidden aria-hidden="true"><option value="classic">Style A - Classic</option><option value="bold">Style B - Bold Graphic</option><option value="band">Style C - Center Band</option></select>
+    <label data-styles="classic band">Colors <select id="lsTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option></select></label>
+    <p class="small" id="styleNote"></p>
+    <details class="tgrp" open><summary>Cover text</summary>
+      <label data-styles="classic band">Grade callout <input id="lsGrade" value="1st Grade" placeholder="Leave blank for none"></label>
+      <div class="two" data-styles="bold"><label>Page-count burst <input id="lsBurstTop" placeholder="Automatic number"></label><label>Under it <input id="lsBurstBot" placeholder="PAGES"></label></div>
+      <p class="small">The title, skill and banner come from the product. Need to change more text? Use the <a href="listing.html">Listing Image Maker</a>.</p>
+    </details>
     <details id="pickDet"><summary>Choose the pages for the images (optional)</summary><div id="pickPages"></div><div class="row small"><span id="pickInfo"></span><button id="pickClear">Clear picks</button></div></details>
   </section>
   <section><h2>5. Bundle <span class="small">(optional)</span></h2>

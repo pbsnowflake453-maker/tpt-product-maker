@@ -34,7 +34,7 @@ button:disabled{opacity:.4;cursor:default}
 .pk-body{max-height:380px;overflow:auto;margin-top:6px}.pk-sec{padding:6px 8px;font-weight:700;background:#f0f0ee;border-radius:6px;margin:3px 0;cursor:pointer;font-size:13px}
 .picker.compact{flex:1;min-width:0;margin:0}.picker.compact .pk-btn{padding:3px 6px;font-size:12px}
 
-#lsSec label{display:block;margin:6px 0}#lsSec input,#lsSec select{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
+#lsSec .two{display:flex;gap:8px}#lsSec .two label{flex:1}#lsSec label{display:block;margin:6px 0}#lsSec input,#lsSec select{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
 details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:700}
 #pickPages .pset,#bpickPages .pset{margin-top:8px}.pset b{display:block;font-size:12px;margin-bottom:4px}
 .pgrid{display:flex;flex-wrap:wrap;gap:8px;max-height:320px;overflow:auto;padding:6px;border:1px solid #eee;border-radius:8px}
@@ -49,3 +49,16 @@ details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:700}
 #twLetters .tw-row button.hide{background:#000;color:#fff;border-color:#000}
 #twLetters .tw-row button.tw-reset{width:auto;height:26px;padding:0 8px;margin-left:6px;font-size:12px}
 #twLetters .tw-row.custom::before{content:"\25CF";font-size:9px;position:absolute;left:2px;top:50%;transform:translateY(-50%)}
+
+/* layout picker + grouped text boxes (generator section 4 and the Listing Image Maker) */
+[hidden]{display:none!important}
+.stylepick{display:flex;gap:6px;margin:4px 0 6px}
+.stylepick button{flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:7px 8px;border:2px solid #ccc;border-radius:10px;background:#fff;font-size:13px;font-weight:700;text-align:left;line-height:1.2}
+.stylepick button b{display:inline-block;background:#B71F2B;color:#fff;border-radius:50%;width:20px;height:20px;line-height:20px;text-align:center;font-size:12px;margin-bottom:2px}
+.stylepick button small{font-weight:400;color:#666;font-size:11px}
+.stylepick button.on{border-color:#000;background:#FFF4C2;box-shadow:0 2px 0 #000}
+details.tgrp{margin-top:8px;border:1px solid #e4e4e0;border-radius:10px;padding:2px 10px 6px;background:#fcfcfa}
+details.tgrp>summary{padding:6px 0;font-size:13px}
+details.tgrp[open]>summary{border-bottom:1px solid #eee;margin-bottom:2px}
+.hint{font-weight:400;color:#888;font-size:11px}
+#lsSec label{font-size:13px}
