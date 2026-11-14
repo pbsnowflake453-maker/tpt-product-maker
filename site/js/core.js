@@ -1,8 +1,8 @@
 // Shared core: page model, fonts, skills, renderers. Units: inches. Pages are landscape (11x8.5) or portrait (8.5x11) letter.
 window.TPT = (function(){
   const PW=11, PH=8.5, STORE='My Side of the Classroom';
-  const FONTS={Pacifico:'fonts/Pacifico-Regular.ttf',Andika:'fonts/Andika-Regular.ttf','Andika-Bold':'fonts/Andika-Bold.ttf','Fredoka-Bold':'fonts/Fredoka-Bold.ttf'};
-  const FAM={Pacifico:['Pacifico','400'],Andika:['Andika','400'],'Andika-Bold':['Andika','700'],'Fredoka-Bold':['Fredoka','700']};
+  const FONTS={Pacifico:'fonts/Pacifico-Regular.ttf',Andika:'fonts/Andika-Regular.ttf','Andika-Bold':'fonts/Andika-Bold.ttf','Fredoka-Bold':'fonts/Fredoka-Bold.ttf','Lilita-One':'fonts/LilitaOne-Regular.ttf'};
+  const FAM={Pacifico:['Pacifico','400'],Andika:['Andika','400'],'Andika-Bold':['Andika','700'],'Fredoka-Bold':['Fredoka','700'],'Lilita-One':['Lilita One','400']};
   const fontData={}; let logoData=null, logoImg=null;
   async function b64(url){const r=await fetch(url);const buf=new Uint8Array(await r.arrayBuffer());let s='';for(let i=0;i<buf.length;i+=0x8000)s+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000));return btoa(s);}
   async function init(){

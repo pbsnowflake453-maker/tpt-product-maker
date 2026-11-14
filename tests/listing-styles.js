@@ -71,6 +71,17 @@ const hash=b=>crypto.createHash('md5').update(b).digest('hex');
  const lst=require('child_process').spawnSync('unzip',['-l',OUT+'band-listing.zip']).stdout.toString(); ok(/01-cover\.png/.test(lst)&&/listing\.txt/.test(lst),'band listing zip has cover and listing.txt');
  // one page and no page picks edge cases
  for(const n of [1,2,3,5]){ const r=await pg.evaluate(async n=>{const sp=DROPIN.specNow(); sp.picks=DROPIN.allPages().slice(0,n); for(const p of sp.picks) if(!p.canvas) p.canvas=await p.full(); const res=await LISTING.build(sp); return res.images[0][1].width;},n); ok(r===2000,`band cover with ${n} picked page(s) renders`); }
+ // ---------- portrait PDF (Read and Draw) through the drop-in tool, Center Band
+ const pm=await mk(); await pm.goto(SITE+'index.html?'+Date.now()); await pm.waitForFunction(()=>window.APP&&document.getElementById('status').textContent!=='Loading fonts…');
+ ok(await pm.evaluate(()=>document.fonts.check('400 100px "Lilita One"')),'Lilita One font is loaded for the canvas');
+ await pm.evaluate(()=>{APP.product('readdraw','reading');APP.select('Unit 5');});
+ const [dp]=await Promise.all([pm.waitForEvent('download',{timeout:120000}),pm.click('#dlpdf')]); await dp.saveAs(OUT+'ls-portrait.pdf'); await pm.close();
+ await pg.reload(); await pg.waitForFunction(()=>window.DROPIN&&/^Drop/.test(document.getElementById('status').textContent));
+ await pg.setInputFiles('#fileIn',[OUT+'ls-portrait.pdf']); await pg.waitForFunction(()=>DROPIN.allPages().length>=3,null,{timeout:60000}); await pg.click('.stylepick button[data-style=band]'); await settled();
+ ok(await pg.evaluate(()=>DROPIN.allPages().every(p=>p.h>p.w)),'portrait: every dropped page is portrait');
+ for(const th of ['apple','sky','sunny','grape','mint']){ await pg.selectOption('#fTheme',th); await settled();
+   const r=await pg.evaluate(()=>{const c=DROPIN.last.images[0][1],x=c.getContext('2d'); const row=(y)=>{const d=x.getImageData(0,y,2000,1).data;let w=0;for(let i=0;i<d.length;i+=4)if(d[i]>235&&d[i+1]>235&&d[i+2]>235)w++;return w;}; return {w:c.width,top:row(300)>200,bot:row(1500)>200};});
+   ok(r.w===2000&&r.top&&r.bot,`portrait/${th}: cover renders with page grabs above and below the band`); fs.writeFileSync(OUT+`band-portrait-${th}.png`,Buffer.from((await pg.evaluate(()=>DROPIN.last.images[0][1].toDataURL('image/png'))).split(',')[1],'base64')); }
  ok(errs.length===0,'no page errors: '+errs.slice(0,3).join(' / '));
  await b.close(); console.log(`${passes} passed, ${fails} failed`); process.exit(fails?1:0);
 })();

@@ -89,9 +89,9 @@ function titleBanner(g,th,title,skillsTxt,{big,sub}){
   if(sub){ const cxs=S/2-(big?90:0), ss=fitFont(g,sub,'700','Andika',70,tw,34); g.font=FONT(700,ss,'Andika'); g.fillStyle='#333'; g.fillText(sub,cxs,ty+(L.length-1)*lh+size*0.42+68); }
   return {bx,by,bw,bh,two,subH};
 }
-function skillPill(g,th,txt,cx,cy,maxW,size){
+function skillPill(g,th,txt,cx,cy,maxW,size,o){ o=o||{};
   g.textAlign='center'; g.textBaseline='middle'; const s=fitFont(g,txt,'700','Andika',size,maxW-120,40); g.font=FONT(700,s,'Andika'); const w=Math.min(maxW,g.measureText(txt).width+130), h=s*1.7;
-  pill(g,cx-w/2,cy-h/2,w,h,th.p,'#000',10); g.fillStyle='#fff'; g.fillText(txt,cx,cy+s*0.04); return h;
+  pill(g,cx-w/2,cy-h/2,w,h,o.fill||th.p,'#000',10); g.fillStyle=o.color||'#fff'; g.fillText(txt,cx,cy+s*0.04); return h;
 }
 function gradeBadge(g,th,grade,cx,cy,r){
   if(!grade) return; burst(g,cx,cy,r,14,th.a,'#000',-0.18); g.save(); g.translate(cx,cy); g.rotate(-0.18); g.fillStyle='#000'; g.textAlign='center'; g.textBaseline='middle';
@@ -357,40 +357,49 @@ function bandRow(g,cards,cx,W,gap,y0,yMax,anchor,tiltBase){ // anchor 'bottom': 
   const w=cards.reduce((a,c)=>a+c.width,0)+(cards.length-1)*gap; let x=cx-w/2;
   cards.forEach((c,i)=>{ const tilt=(i%2?1:-1)*tiltBase*(cards.length===1?0.4:1); const cxx=x+c.width/2, cyy=anchor==='bottom'?y0-c.height/2:y0+c.height/2; paper(g,c,cxx,cyy,tilt,1.1); x+=c.width+gap; });
 }
+function mixHex(h,t){ const n=parseInt(h.slice(1),16), c=[n>>16&255,n>>8&255,n&255].map(v=>Math.round(v+(255-v)*t)); return `rgb(${c[0]},${c[1]},${c[2]})`; }
+function stripes(g,th){ // bold diagonal stripes: theme color + a lighter tint of it
+  g.fillStyle=th.p; g.fillRect(0,0,S,S); g.fillStyle=mixHex(th.p,0.3); const w=120;
+  for(let x=-S;x<S*2;x+=w*2){ g.beginPath(); g.moveTo(x,S); g.lineTo(x+w,S); g.lineTo(x+w+S,0); g.lineTo(x+S,0); g.closePath(); g.fill(); } }
 function drawBand(g,th,y,h){
-  g.save(); g.shadowColor='rgba(0,0,0,.4)'; g.shadowBlur=36; g.shadowOffsetY=14; g.fillStyle='#fff'; g.fillRect(-20,y,S+40,h); g.restore();
-  g.fillStyle='#fff'; g.fillRect(-20,y,S+40,h);
+  g.save(); g.shadowColor='rgba(0,0,0,.45)'; g.shadowBlur=36; g.shadowOffsetY=14; g.fillStyle=th.d; g.fillRect(-20,y,S+40,h); g.restore();
+  g.fillStyle=th.d; g.fillRect(-20,y,S+40,h);
   // two level accent stripes (theme accent) just inside the black edges
   g.fillStyle=th.a; g.fillRect(-20,y+16,S+40,18); g.fillRect(-20,y+h-34,S+40,18);
   g.fillStyle='#000'; g.fillRect(-20,y,S+40,12); g.fillRect(-20,y+h-12,S+40,12);
   g.fillRect(-20,y+34,S+40,5); g.fillRect(-20,y+h-39,S+40,5);
 }
 async function coverBand(spec,th,L,st){
-  const [c,g]=newCanvas(); dots(g,th.dot,th.p,150,26); const X=TX(spec);
+  try{ await document.fonts.load('400 120px "Lilita One"'); }catch(e){}
+  const [c,g]=newCanvas(); stripes(g,th); const X=TX(spec);
   const title=cleanTxt(spec.title||'')||'Listing', skillsTxt=cleanTxt(skillsOf(spec)), sub=cleanTxt(X.subtitle), grade=(spec.opts&&spec.opts.grade)||'';
   const showKey=has(X,'keyBurst')?X.keyBurst:st.hasKey;
   const leftLim=showKey?420:90, rightLim=grade?S-420:S-90, W=rightLim-leftLim, cx=(leftLim+rightLim)/2;
   // title: one line if it fits at a good size, otherwise two balanced lines
-  let L1=[title], size=fitFont(g,title,'400','Pacifico',240,W,60);
-  if(size<170&&title.includes(' ')){ g.font=FONT(400,100,'Pacifico'); const w=title.split(' '); let best=null;
+  let L1=[title], size=fitFont(g,title,'400','Lilita One',250,W,60);
+  if(size<170&&title.includes(' ')){ g.font=FONT(400,100,'Lilita One'); const w=title.split(' '); let best=null;
     for(let i=1;i<w.length;i++){const a=w.slice(0,i).join(' '),b=w.slice(i).join(' '),m=Math.max(g.measureText(a).width,g.measureText(b).width); if(!best||m<best.m)best={a,b,m};}
-    if(best){ const s2=Math.min(200,fitFont(g,best.a,'400','Pacifico',200,W,60),fitFont(g,best.b,'400','Pacifico',200,W,60)); if(s2>size){L1=[best.a,best.b]; size=s2;} } }
+    if(best){ const s2=Math.min(230,fitFont(g,best.a,'400','Lilita One',230,W,60),fitFont(g,best.b,'400','Lilita One',230,W,60)); if(s2>size){L1=[best.a,best.b]; size=s2;} } }
   const lh=size*1.1, titleH=L1.length*lh, subH=sub?96:0, pillH=skillsTxt?150:0;
-  const bandH=Math.round(Math.min(760,Math.max(400,titleH+subH+pillH+130)));
-  const gap=1630-bandH, zh=gap/2, tuck=38, bandY=Math.round(40+zh), bandBot=bandY+bandH;
+  const bandH=Math.round(Math.min(760,Math.max(400,titleH+subH+pillH+112)));
+  const pics=bandPicks(spec,st), portrait=pics.filter(p=>p.h>p.w).length>pics.length/2; // portrait pages: barely tuck them so headers and bottoms stay readable
+  const gap=1630-bandH, zh=gap/2, tuck=portrait?10:38, bandY=Math.round(40+zh), bandBot=bandY+bandH;
   // page grabs behind the band: top row hangs above it, bottom row below it
-  const pics=bandPicks(spec,st), nTop=Math.ceil(pics.length/2), nBot=pics.length-nTop, cardH=Math.round(zh+tuck-14);
+  const nTop=Math.ceil(pics.length/2), nBot=pics.length-nTop, cardH=Math.round(zh+tuck-14);
   const mk=(arr)=>{ const cols=Math.max(arr.length,1), cw=Math.min(720,(S-120-(cols-1)*50)/cols); return arr.map(p=>pageImg(p,cw,cardH)); };
-  bandRow(g,mk(pics.slice(0,nTop)),S/2,S-120,50,bandY+tuck,0,'bottom',0.035);
-  bandRow(g,mk(pics.slice(nTop)),S/2,S-120,50,bandBot-tuck,0,'top',0.035);
+  bandRow(g,mk(pics.slice(0,nTop)),S/2,S-120,portrait?90:50,bandY+tuck,0,'bottom',0.035);
+  bandRow(g,mk(pics.slice(nTop)),S/2,S-120,portrait?90:50,bandBot-tuck,0,'top',0.035);
   drawBand(g,th,bandY,bandH);
   // title (theme color, heavy black outline, black drop shadow), subtitle, skill pill
   const stackH=titleH+subH+(skillsTxt?pillH:0), top0=bandY+(bandH-stackH)/2;
-  g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(400,size,'Pacifico'); g.lineJoin='round';
-  L1.forEach((l,i)=>{ const y=top0+lh*i+lh/2; g.fillStyle='#000'; g.fillText(l,cx+8,y+10); textStroke(g,l,cx,y,th.p,'#000',Math.max(14,size*0.09)); g.fillStyle=th.p; g.fillText(l,cx,y); });
+  g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(400,size,'Lilita One'); g.lineJoin='round';
+  L1.forEach((l,i)=>{ const y=top0+lh*i+lh/2, ex=Math.max(8,Math.round(size*0.07)); // chunky white letters with a stacked accent-color 3D edge and a black outline
+    g.lineWidth=Math.max(10,size*0.07); g.strokeStyle='#000'; g.fillStyle='#000';
+    for(let k=ex;k>=1;k--){ g.fillStyle=th.a; g.strokeStyle=th.a; g.lineWidth=2; g.strokeText(l,cx+k,y+k*1.15); g.fillText(l,cx+k,y+k*1.15); }
+    g.lineWidth=Math.max(10,size*0.07); g.strokeStyle='#000'; g.strokeText(l,cx+ex+2,y+ex*1.15+2); g.strokeText(l,cx,y); g.fillStyle='#fff'; g.fillText(l,cx,y); });
   let yy=top0+titleH;
-  if(sub){ const ss=fitFont(g,sub,'700','Andika',64,W,30); g.font=FONT(700,ss,'Andika'); g.fillStyle='#222'; g.fillText(sub,cx,yy+subH/2); yy+=subH; }
-  if(skillsTxt) skillPill(g,th,skillsTxt,cx,yy+pillH/2-8,Math.min(W,1300),88);
+  if(sub){ const ss=fitFont(g,sub,'700','Andika',64,W,30); g.font=FONT(700,ss,'Andika'); g.fillStyle='#fff'; g.fillText(sub,cx,yy+subH/2); yy+=subH; }
+  if(skillsTxt) skillPill(g,th,skillsTxt,cx,yy+pillH/2-8,Math.min(W,1300),88,{fill:'#fff',color:th.d});
   // stickers on the band ends: answer-key burst left, grade burst right
   if(showKey){ const ky=bandY+bandH/2; burst(g,215,ky,165,13,th.a,'#000',0.2); g.save(); g.translate(215,ky); g.rotate(0.2); g.fillStyle='#000'; g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(700,60,'Fredoka'); g.fillText(has(X,'keyTop')?X.keyTop:'ANSWER',0,-28); g.fillText(has(X,'keyBot')?X.keyBot:'KEY',0,36); g.restore(); }
   if(grade) gradeBadge(g,th,grade,S-215,bandY+bandH/2,175);
