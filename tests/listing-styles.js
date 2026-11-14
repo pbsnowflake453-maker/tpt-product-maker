@@ -48,11 +48,12 @@ const hash=b=>crypto.createHash('md5').update(b).digest('hex');
  await pg.evaluate(()=>document.querySelectorAll('#textSec details').forEach(d=>d.open=true));
  // layout buttons
  await pg.click('.stylepick button[data-style=band]'); await settled();
- for(const id of ['fSub','fGrade','fKey','fKeyTop','fStore','fTheme']) ok(await pg.isVisible('#'+id),`band: #${id} visible`);
+ for(const id of ['fSub','fGrade','fKey','fKeyTop','fTheme']) ok(await pg.isVisible('#'+id),`band: #${id} visible`);
+ ok(!await pg.isVisible('#fStore'),'band: store pill box hidden (no store pill in this layout)');
  ok(!await pg.isVisible('#lsBurstTop'),'band: page-count burst box hidden');
  const bandBase=await coverHash();
  // every cover field changes the band cover
- const edits=[['fTitle','A Brand New Title'],['fSub','Phonics center game'],['fSkills','/sh/ and /ch/'],['fGrade','2nd Grade'],['fRibbon','HUGE SAVINGS'],['fStore','Yarn Side']];
+ const edits=[['fTitle','A Brand New Title'],['fSub','Phonics center game'],['fSkills','/sh/ and /ch/'],['fGrade','2nd Grade'],['fRibbon','HUGE SAVINGS']];
  for(const [id,v] of edits){ const before=await coverHash(); await pg.fill('#'+id,v); await settled(); ok(await coverHash()!==before,`band: editing #${id} changes the cover`); }
  await pg.check('#fKey'); await settled(); const k1=await coverHash(); await pg.fill('#fKeyTop','TEACHER'); await settled(); ok(await coverHash()!==k1,'band: answer key burst text changes the cover');
  await pg.selectOption('#fTheme','mint'); await settled(); ok(await coverHash()!==k1,'band: theme changes the cover');

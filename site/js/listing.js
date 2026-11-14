@@ -383,7 +383,7 @@ async function coverBand(spec,th,L,st){
   const lh=size*1.1, titleH=L1.length*lh, subH=sub?96:0, pillH=skillsTxt?150:0;
   const bandH=Math.round(Math.min(760,Math.max(400,titleH+subH+pillH+112)));
   const pics=bandPicks(spec,st), portrait=pics.filter(p=>p.h>p.w).length>pics.length/2; // portrait pages: barely tuck them so headers and bottoms stay readable
-  const gap=1630-bandH, zh=gap/2, tuck=portrait?10:38, bandY=Math.round(40+zh), bandBot=bandY+bandH;
+  const gap=1830-bandH, zh=gap/2, tuck=portrait?10:38, bandY=Math.round(40+zh), bandBot=bandY+bandH;
   // page grabs behind the band: top row hangs above it, bottom row below it
   const nTop=Math.ceil(pics.length/2), nBot=pics.length-nTop, cardH=Math.round(zh+tuck-14);
   const mk=(arr)=>{ const cols=Math.max(arr.length,1), cw=Math.min(720,(S-120-(cols-1)*50)/cols); return arr.map(p=>pageImg(p,cw,cardH)); };
@@ -404,9 +404,13 @@ async function coverBand(spec,th,L,st){
   if(showKey){ const ky=bandY+bandH/2; burst(g,215,ky,165,13,th.a,'#000',0.2); g.save(); g.translate(215,ky); g.rotate(0.2); g.fillStyle='#000'; g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(700,60,'Fredoka'); g.fillText(has(X,'keyTop')?X.keyTop:'ANSWER',0,-28); g.fillText(has(X,'keyBot')?X.keyBot:'KEY',0,36); g.restore(); }
   if(grade) gradeBadge(g,th,grade,S-215,bandY+bandH/2,175);
   // one page only: fill the empty lower row with the page-count burst
-  if(!nBot){ const b=badgeCopy(spec,st); scallopBadge(g,S/2,(bandBot+1660)/2,Math.min(190,(1660-bandBot)/2-10),b.top,b.bot); }
-  const rb=defaults(spec,st).ribbon; if(rb) ribbon(g,th,rb,S/2,1735,spec.isBundle&&!has(X,'ribbon')?760:1280);
-  footerBar(g,th,L,X.store,1860);
+  if(!nBot){ const b=badgeCopy(spec,st); scallopBadge(g,S/2,(bandBot+1860)/2,Math.min(220,(1860-bandBot)/2-10),b.top,b.bot); }
+  // bottom: level accent ribbon flush with the bottom edge, logo badge sitting on top of it (fully inside the image); no store-name pill in this layout
+  const rb=defaults(spec,st).ribbon, rh=104, ry=S-rh, lr=100;
+  g.save(); g.shadowColor='rgba(0,0,0,.35)'; g.shadowBlur=24; g.shadowOffsetY=-6; g.fillStyle=th.a; g.fillRect(-20,ry,S+40,rh+20); g.restore();
+  g.fillStyle=th.a; g.fillRect(-20,ry,S+40,rh+20); g.fillStyle='#000'; g.fillRect(-20,ry,S+40,10);
+  if(rb){ const tw=S-70-2*lr-90; g.fillStyle='#000'; g.textAlign='center'; g.textBaseline='middle'; const fs=fitFont(g,rb,'700','Fredoka',68,tw,28); g.font=FONT(700,fs,'Fredoka'); g.fillText(rb,tw/2+40,ry+rh/2+8); }
+  logoBadge(g,L,S-70-lr,S-lr-16,lr);
   return c;
 }
 async function cover(spec,th,L,st){
