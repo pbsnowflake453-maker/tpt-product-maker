@@ -106,47 +106,256 @@ function footerBar(g,th,L,store,y){
   logoBadge(g,L,S-70-r,cy,r);
 }
 // ---- images
-async function coverBold(spec,th,L,st){
-  const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S); const X=TX(spec);
-  const skillsTxt=skillsOf(spec);
-  g.fillStyle='#000'; g.fillRect(0,0,S,280);
+// Style B: pastel frame, chunky multicolor title, black banners, collage cards, starburst badge
+const BOLD={
+  pastels:['#E098A0','#F0C088','#C5DC8E','#8ED4C4','#8FA6DC','#C56BB0'],
+  bands:['#F6D4D8','#FDE8C4','#DCECB8','#C8EDE4','#D4DEF6','#EBD0E6'],
+  frame:'#E89AA3',
+  fw:52
+};
+function cleanTxt(t){return String(t||'').replace(/[\u2014\u2013]/g,' ').replace(/\bcharacters?\b/gi,' ').replace(/\s+/g,' ').trim();}
+function up(t){return cleanTxt(t).toUpperCase();}
+function boldRibbon(spec,st){
+  const X=TX(spec);
+  if(has(X,'ribbon')&&cleanTxt(X.ribbon)) return up(X.ribbon);
+  return spec.isBundle?'HUGE BUNDLE':'POWERPOINT + PDF';
+}
+function boldDisplayTitle(spec){
+  const t=cleanTxt(spec.title||'');
+  if(spec.isBundle&&t.length>16) return 'BUNDLE';
+  return t||'LISTING';
+}
+function bannerLine(spec,st){
+  const X=TX(spec);
+  const skills=cleanTxt(has(X,'skills')?X.skills:skillsOf(spec));
+  if(skills) return skills;
+  if(spec.opts&&spec.opts.grade) return spec.opts.grade;
+  return spec.isBundle?'PRINT AND GO':'STUDENT PAGES';
+}
+function chunkyWidth(g,str,size){
+  g.font=FONT(700,size,'Fredoka');
+  let w=0; for(const ch of str) w+=ch===' '?size*0.35:g.measureText(ch).width*0.9;
+  return w;
+}
+function fitChunky(g,text,maxW,maxSize,minSize){
+  const words=up(text).split(' ').filter(Boolean);
+  const one=words.join(' ')||'LISTING';
+  const pad=s=>Math.round(s*0.23);
+  let oneSize=maxSize;
+  while(oneSize>minSize&&chunkyWidth(g,one,oneSize)+pad(oneSize)>maxW) oneSize-=4;
+  if(oneSize>=Math.max(minSize+20,120)||words.length<=2||one.replace(/ /g,'').length<=12){
+    if(chunkyWidth(g,one,oneSize)+pad(oneSize)<=maxW) return {lines:[one],size:oneSize};
+  }
+  if(words.length>=2){
+    let best=null;
+    for(let i=1;i<words.length;i++){
+      const a=words.slice(0,i).join(' '), b=words.slice(i).join(' ');
+      let s=maxSize;
+      while(s>minSize&&(chunkyWidth(g,a,s)+pad(s)>maxW||chunkyWidth(g,b,s)+pad(s)>maxW)) s-=4;
+      const score=s-Math.abs(a.length-b.length)*0.8;
+      if(!best||score>best.score) best={lines:[a,b],size:s,score};
+    }
+    if(best) return {lines:best.lines,size:best.size};
+  }
+  return {lines:[one],size:oneSize};
+}
+function drawChunky(g,text,cx,cy,size){
+  g.font=FONT(700,size,'Fredoka');
+  g.textAlign='center'; g.textBaseline='middle';
+  g.lineJoin='round'; g.lineCap='round';
+  const chars=[...text];
+  const widths=chars.map(ch=>ch===' '?size*0.35:g.measureText(ch).width*0.9);
+  const total=widths.reduce((a,b)=>a+b,0);
+  let x=cx-total/2, li=0;
+  const sw=Math.max(16,size*0.145), ox=Math.round(size*0.08), oy=Math.round(size*0.1);
+  chars.forEach((ch,i)=>{
+    const w=widths[i];
+    if(ch===' '){ x+=w; return; }
+    const col=BOLD.pastels[li%BOLD.pastels.length];
+    const jig=Math.sin(i*2.15)*size*0.045;
+    const rot=(i%2?1:-1)*(0.028+((i*7)%5)*0.005);
+    g.save(); g.translate(x+w/2,cy+jig); g.rotate(rot);
+    g.strokeStyle='#000'; g.fillStyle='#000'; g.lineWidth=sw;
+    g.strokeText(ch,ox,oy); g.fillText(ch,ox,oy);
+    g.strokeStyle='#000'; g.fillStyle=col; g.lineWidth=sw;
+    g.strokeText(ch,0,0); g.fillText(ch,0,0);
+    g.restore();
+    x+=w; li++;
+  });
+}
+function drawTitleBlock(g,title,top,maxW,maxH){
+  const fit=fitChunky(g,title,maxW,Math.min(430,Math.floor(maxH*0.98)),64);
+  const lh=fit.size*1.18, blockH=fit.lines.length*lh;
+  const used=Math.min(blockH,maxH);
+  let y=top+fit.size*0.58+(maxH-used)*0.28;
+  fit.lines.forEach(line=>{ drawChunky(g,line,S/2,y,fit.size); y+=lh; });
+  return top+used+(maxH-used)*0.28+fit.size*0.12;
+}
+function drawBlackBanner(g,y,h,text,maxSize,rightInset){
+  g.fillStyle='#000'; g.fillRect(0,y,S,h);
+  const t=up(text); if(!t) return y+h;
+  const inset=rightInset||0;
   g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
-  let size=fitFont(g,spec.title,'700','Fredoka',160,S-200,60); g.font=FONT(700,size,'Fredoka'); g.fillText(spec.title,S/2,140);
-  if(skillsTxt){ g.font=FONT(700,48,'Andika'); g.fillText(skillsTxt,S/2,220); }
-  const pics=(spec.picks.length?spec.picks:st.defaultPicks).slice(0,3);
-  const ims=pics.map(p=>pageImg(p,900,800));
-  const cy=1100;
-  if(ims.length===1) paper(g,ims[0],S/2,cy,0);
-  else if(ims.length===2){paper(g,ims[0],S/2-280,cy, -0.04); paper(g,ims[1],S/2+280,cy,0.04);}
-  else {paper(g,ims[2],S/2-340,cy+20,-0.06); paper(g,ims[1],S/2+340,cy+10,0.05); paper(g,ims[0],S/2,cy-10,0);}
-  g.fillStyle='#000'; g.fillRect(0,S-220,S,220);
-  g.fillStyle='#fff'; g.font=FONT(700,72,'Fredoka'); g.fillText(defaults(spec,st).ribbon||'POWERPOINT + PDF',S/2,S-110);
-  logoBadge(g,L,S-160,S-110,90);
+  const s=fitFont(g,t,'700','Fredoka',maxSize||Math.floor(h*0.86),S-160-inset,26);
+  g.font=FONT(700,s,'Fredoka'); g.fillText(t,(S-inset)/2,y+h/2+Math.round(s*0.04));
+  return y+h;
+}
+function drawPinkFrame(g){
+  const t=BOLD.fw; g.fillStyle=BOLD.frame;
+  g.fillRect(0,0,S,t); g.fillRect(0,S-t,S,t); g.fillRect(0,0,t,S); g.fillRect(S-t,0,t,S);
+}
+function scallopBadge(g,cx,cy,r,top,bot){
+  const n=20, bump=r*0.17;
+  g.save(); g.translate(cx,cy); g.rotate(-0.05);
+  g.fillStyle='#000';
+  g.beginPath(); g.arc(0,0,r*0.86,0,7); g.fill();
+  for(let i=0;i<n;i++){ const a=i*Math.PI*2/n; g.beginPath(); g.arc(Math.cos(a)*r*0.86,Math.sin(a)*r*0.86,bump,0,7); g.fill(); }
+  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
+  const topS=fitFont(g,top,'700','Fredoka',r*0.72,r*1.55,24);
+  g.font=FONT(700,topS,'Fredoka'); g.fillText(top,0,bot?-r*0.14:0);
+  if(bot){ const botS=fitFont(g,bot,'700','Fredoka',r*0.28,r*1.4,14); g.font=FONT(700,botS,'Fredoka'); g.fillText(bot,0,r*0.34); }
+  g.restore();
+}
+function badgeCopy(spec,st){
+  if(spec.isBundle){ const n=spec.nSets||1; return {top:String(n), bot:n===1?'SET':'SETS'}; }
+  const n=(st.R||[]).filter(r=>r==='student'||r==='key'||r==='info').length||st.nStudent||1;
+  return {top:String(Math.max(n,1)), bot:(n===1?'PAGE':'PAGES')};
+}
+function cardCopy(spec,st,page,i){
+  const idx=spec.doc&&spec.doc.pages?spec.doc.pages.indexOf(page):-1;
+  const role=idx>=0&&st.R?st.R[idx]:'student';
+  let heading, sub;
+  if(role==='key'){ heading=has(TX(spec),'keyLabel')&&TX(spec).keyLabel?TX(spec).keyLabel:'ANSWER KEY'; sub=skillsOf(spec)||'ANSWERS'; }
+  else if(role==='cover'){ heading='COVER'; sub=(spec.prod&&spec.prod.title)||'PREVIEW'; }
+  else if(role==='info'){ heading='DIRECTIONS'; sub='HOW TO USE'; }
+  else if(spec.isBundle&&spec.doc&&spec.doc.sets){
+    const set=spec.doc.sets.find(s=>idx>=s.from&&idx<s.to);
+    heading=(set&&set.prod&&set.prod.title)||(spec.prod&&spec.prod.title)||'PREVIEW';
+    sub=set?skillsLine(BUNDLE.skillsOf([set.sec.label])): (skillsOf(spec)||('PAGE '+(i+1)));
+  } else {
+    heading=(spec.prod&&spec.prod.title)||'PREVIEW';
+    sub=skillsOf(spec)||('PAGE '+(i+1));
+  }
+  return {heading:up(heading), sub:up(sub)};
+}
+function makePageCard(page,heading,sub,band){
+  const im=pageImg(page,700,560);
+  const headH=108, bandH=68, pad=16;
+  const w=im.width+pad*2, h=headH+bandH+im.height+pad;
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const g=c.getContext('2d');
+  g.fillStyle='#fff'; g.fillRect(0,0,w,h);
+  g.fillStyle='#000'; g.fillRect(0,0,w,headH);
+  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
+  const hs=fitFont(g,heading,'700','Fredoka',70,w-28,24);
+  g.font=FONT(700,hs,'Fredoka'); g.fillText(heading,w/2,headH/2+2);
+  g.fillStyle=band; g.fillRect(0,headH,w,bandH);
+  g.fillStyle='#000';
+  const ss=fitFont(g,sub,'700','Andika',34,w-28,16);
+  g.font=FONT(700,ss,'Andika'); g.fillText(sub,w/2,headH+bandH/2+2);
+  g.drawImage(im,pad,headH+bandH,im.width,im.height);
+  const dot=18, dx=w-26, dy=headH+bandH+26;
+  g.beginPath(); g.arc(dx,dy,dot,0,7); g.fillStyle=band; g.fill(); g.lineWidth=5; g.strokeStyle='#000'; g.stroke();
+  return c;
+}
+function scaleCard(card,maxW,maxH){
+  const s=Math.min(maxW/card.width,maxH/card.height,2.2);
+  if(Math.abs(s-1)<0.04) return card;
+  const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(card.width*s)); c.height=Math.max(1,Math.round(card.height*s));
+  const g=c.getContext('2d'); g.imageSmoothingQuality='high'; g.drawImage(card,0,0,c.width,c.height); return c;
+}
+function boldPicks(spec,st){
+  const pages=spec.doc&&spec.doc.pages||[];
+  const seen=new Set(), out=[];
+  const add=p=>{ if(!p||seen.has(p)||out.length>=3) return; seen.add(p); out.push(p); };
+  (spec.picks&&spec.picks.length?spec.picks:st.defaultPicks||[]).forEach(add);
+  pages.forEach((p,i)=>{ if(st.R&&st.R[i]==='key') add(p); });
+  pages.forEach((p,i)=>{ if(st.R&&st.R[i]==='student') add(p); });
+  pages.forEach((p,i)=>{ if(st.R&&st.R[i]==='info') add(p); });
+  pages.forEach((p,i)=>{ if(st.R&&st.R[i]!=='terms') add(p); });
+  return out;
+}
+function drawCollage(g,cards,top,bot){
+  const areaH=bot-top, midY=top+areaH*0.5;
+  if(cards.length===1){
+    const sc=scaleCard(cards[0],1320,areaH*0.94);
+    paper(g,sc,S/2,midY,0.02,1.1);
+    return {cx:S/2+sc.width*0.36, cy:midY+sc.height*0.22, r:Math.min(240,Math.round(sc.height*0.26))};
+  }
+  if(cards.length===2){
+    const sc=cards.map(c=>scaleCard(c,860,areaH*0.88));
+    paper(g,sc[0],S/2-400,midY,-0.1,1.05);
+    paper(g,sc[1],S/2+400,midY-12,0.09,1.05);
+    return {cx:S/2, cy:midY, r:230};
+  }
+  const sc=cards.map(c=>scaleCard(c,880,areaH*0.6));
+  const topY=top+sc[0].height*0.5+12;
+  const botY=bot-sc[2].height*0.5-28;
+  paper(g,sc[0],S/2-360,topY,-0.1,1.05);
+  paper(g,sc[1],S/2+390,topY-16,0.09,1.05);
+  paper(g,sc[2],S/2-330,botY,-0.04,1.08);
+  return {cx:S/2+300, cy:topY*0.35+botY*0.65, r:236};
+}
+async function coverBold(spec,th,L,st){
+  const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S);
+  const title=boldDisplayTitle(spec);
+  const top=BOLD.fw+8, titleMaxH=430, maxW=S-BOLD.fw*2-40;
+  const titleBot=drawTitleBlock(g,title,top,maxW,titleMaxH);
+  const banH=176, banY=Math.max(titleBot+4, 460);
+  drawBlackBanner(g,banY,banH,bannerLine(spec,st));
+  const botH=210, botY=S-botH;
+  const pics=boldPicks(spec,st);
+  const cards=pics.map((p,i)=>{ const t=cardCopy(spec,st,p,i); return makePageCard(p,t.heading,t.sub,BOLD.bands[i%BOLD.bands.length]); });
+  const slot=drawCollage(g,cards,banY+banH+6,botY-6);
+  const badge=badgeCopy(spec,st);
+  scallopBadge(g,slot.cx,slot.cy,slot.r,badge.top,badge.bot);
+  drawBlackBanner(g,botY,botH,boldRibbon(spec,st),null,240);
+  logoBadge(g,L,S-160,S-botH/2,92);
+  drawPinkFrame(g);
   return c;
 }
 async function previewBold(spec,th,L,page,role,k,total,prodTitle,skillsTxt){
-  const [c,g]=newCanvas(); g.fillStyle='#f8f8f8'; g.fillRect(0,0,S,S);
-  g.fillStyle='#000'; g.fillRect(0,0,S,200);
-  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
-  const s=fitFont(g,prodTitle,'700','Fredoka',90,S-200,40); g.font=FONT(700,s,'Fredoka'); g.fillText(prodTitle,S/2,100);
-  const im=pageImg(page,1500,1200); paper(g,im,S/2,1100,0);
+  const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S);
+  const title=cleanTxt(prodTitle)||boldDisplayTitle(spec);
+  const titleBot=drawTitleBlock(g,title,BOLD.fw+8,S-BOLD.fw*2-40,340);
   const X=TX(spec), label=(role==='key'?(has(X,'keyLabel')?X.keyLabel:'ANSWER KEY'):(has(X,'previewLabel')?X.previewLabel:'PREVIEW'));
-  if(label){ g.fillStyle='#000'; g.fillRect(0,S-160,S,160); g.fillStyle='#fff'; g.font=FONT(700,56,'Fredoka'); g.textAlign='left'; g.fillText(label,80,S-80); }
-  logoBadge(g,L,S-130,S-80,70);
+  const banY=Math.max(titleBot+4,390), banH=156;
+  drawBlackBanner(g,banY,banH,skillsTxt||bannerLine(spec,null));
+  const sub=up(cleanTxt(skillsTxt)||(role==='key'?'ANSWERS':'STUDENT PAGE'));
+  const card=makePageCard(page,up(label||'PREVIEW'),sub,BOLD.bands[(k||0)%BOLD.bands.length]);
+  const botH=190, botY=S-botH;
+  const sc=scaleCard(card,1500,botY-(banY+banH)-30);
+  paper(g,sc,S/2,(banY+banH+botY)/2, (k%2?0.03:-0.03), 1.1);
+  if(label) drawBlackBanner(g,botY,botH,label,null,220);
+  else g.fillStyle='#000', g.fillRect(0,botY,S,botH);
+  logoBadge(g,L,S-150,S-botH/2,84);
+  drawPinkFrame(g);
   return c;
 }
 async function includedBold(spec,th,L,st){
   const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S);
-  g.fillStyle='#000'; g.fillRect(0,0,S,240);
-  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(700,100,'Fredoka'); g.fillText("What's Included",S/2,120);
-  const items=defaults(spec,st).included, x0=250, y0=400;
+  const titleBot=drawTitleBlock(g,"WHAT'S INCLUDED",BOLD.fw+8,S-BOLD.fw*2-40,360);
+  const banY=Math.max(titleBot+6, 430), banH=140;
+  drawBlackBanner(g,banY,banH,bannerLine(spec,st),90);
+  const items=defaults(spec,st).included.map(cleanTxt).filter(Boolean);
+  const botH=190, botY=S-botH, top=banY+banH+50, bot=botY-40;
+  const gap=Math.min(200,(bot-top)/Math.max(items.length,1));
+  const x0=280;
   items.forEach((t,i)=>{
-    g.fillStyle='#000'; g.beginPath(); g.arc(x0,y0+i*160,40,0,7); g.fill();
-    g.fillStyle='#fff'; g.font=FONT(700,36,'Fredoka'); g.textAlign='center'; g.fillText('✓',x0,y0+i*160+4);
-    g.fillStyle='#000'; g.textAlign='left'; g.font=FONT(700,48,'Andika'); g.fillText(t,x0+80,y0+i*160+4);
+    const y=top+gap*i+gap*0.45;
+    const band=BOLD.bands[i%BOLD.bands.length];
+    const cardX=x0-120, cardW=S-cardX-140, cardH=Math.min(150,gap-16);
+    rr(g,cardX,y-cardH/2,cardW,cardH,28); g.fillStyle='#fff'; g.fill(); g.lineWidth=8; g.strokeStyle='#000'; g.stroke();
+    g.fillStyle=band; g.beginPath(); g.arc(x0,y,42,0,7); g.fill(); g.lineWidth=7; g.strokeStyle='#000'; g.stroke();
+    g.strokeStyle='#000'; g.lineWidth=10; g.lineCap='round'; g.lineJoin='round';
+    g.beginPath(); g.moveTo(x0-16,y+2); g.lineTo(x0-3,y+16); g.lineTo(x0+20,y-14); g.stroke();
+    g.fillStyle='#000'; g.textAlign='left'; g.textBaseline='middle';
+    const ts=fitFont(g,t,'700','Andika',52,cardW-220,26);
+    g.font=FONT(700,ts,'Andika'); g.fillText(t,x0+80,y+3);
   });
-  g.fillStyle='#000'; g.fillRect(0,S-180,S,180);
-  logoBadge(g,L,S-140,S-90,70);
+  drawBlackBanner(g,botY,botH,boldRibbon(spec,st),null,220);
+  logoBadge(g,L,S-150,S-botH/2,84);
+  drawPinkFrame(g);
   return c;
 }
 async function cover(spec,th,L,st){
