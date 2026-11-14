@@ -82,6 +82,8 @@ const hash=b=>crypto.createHash('md5').update(b).digest('hex');
  ok(await pg.evaluate(()=>DROPIN.allPages().every(p=>p.h>p.w)),'portrait: every dropped page is portrait');
  for(const th of ['apple','sky','sunny','grape','mint']){ await pg.selectOption('#fTheme',th); await settled();
    const r=await pg.evaluate(()=>{const c=DROPIN.last.images[0][1],x=c.getContext('2d'); const row=(y)=>{const d=x.getImageData(0,y,2000,1).data;let w=0;for(let i=0;i<d.length;i+=4)if(d[i]>235&&d[i+1]>235&&d[i+2]>235)w++;return w;}; return {w:c.width,top:row(300)>200,bot:row(1500)>200};});
+   if(th==='mint'){ const lvp=await pg.evaluate(()=>{const S=2000; return DROPIN.last.images.filter(i=>/preview/.test(i[0])).map(([n,c])=>{const x=c.getContext('2d'); const fw=(xx)=>{const d=x.getImageData(xx,600,1,1260).data; for(let y=1259;y>=0;y--) if(d[y*4]>250&&d[y*4+1]>250&&d[y*4+2]>250) return y+600; return -1;}; return [fw(S/2-300),fw(S/2+300)];});});
+     ok(lvp.length>=2&&lvp.every(([a,b])=>a>0&&Math.abs(a-b)<=2),'band preview page grabs are perfectly level (portrait): '+JSON.stringify(lvp)); }
    ok(r.w===2000&&r.top&&r.bot,`portrait/${th}: cover renders with page grabs above and below the band`); fs.writeFileSync(OUT+`band-portrait-${th}.png`,Buffer.from((await pg.evaluate(()=>DROPIN.last.images[0][1].toDataURL('image/png'))).split(',')[1],'base64')); }
  // ---------- Style C: every image uses the band look (stripes, flush bottom ribbon), sunny pills have white text
  const gb=await mk(); await gb.goto(SITE+'index.html?'+Date.now()); await gb.waitForFunction(()=>window.APP&&document.getElementById('status').textContent!=='Loading fonts…');
@@ -97,7 +99,10 @@ const hash=b=>crypto.createHash('md5').update(b).digest('hex');
    const cover=r[0], inc=r[r.length-1]; if(th==='sunny') ok(cover.white>150&&inc.white>=0&&r[1].white>=0&&cover.dark<cover.white,'band/sunny: ribbon text is white on red (white '+cover.white+', dark '+cover.dark+')');
  }
  await gb.evaluate(()=>{}); const cmp=await gb.evaluate(async()=>{const sp=window.__cap; const mkb=async st=>{const res=await LISTING.build(Object.assign({},sp,{picks:sp.doc.pages.slice(1,3),opts:{grade:'1st Grade',theme:'sunny',style:st}})); return res.images.map(i=>i[1].toDataURL('image/png').length+':'+i[1].toDataURL('image/png').slice(-200));}; const a=await mkb('classic'), b=await mkb('band'); return a.some((v,i)=>v===b[i]);});
- ok(!cmp,'band images are not the same as classic images'); await gb.close();
+ok(!cmp,'band images are not the same as classic images');
+ const lv=await gb.evaluate(async()=>{const S=2000; const sp=window.__cap; const res=await LISTING.build(Object.assign({},sp,{picks:sp.doc.pages.slice(1,4),opts:{grade:'1st Grade',theme:'mint',style:'band'}}));
+   return res.images.filter(i=>/preview/.test(i[0])).map(([n,c])=>{const x=c.getContext('2d'); const fw=(xx)=>{const d=x.getImageData(xx,600,1,1260).data; for(let y=1259;y>=0;y--) if(d[y*4]>250&&d[y*4+1]>250&&d[y*4+2]>250) return y+600; return -1;}; return [fw(S/2-500),fw(S/2+500)];});});
+ ok(lv.length>=2&&lv.every(([a,b])=>a>0&&Math.abs(a-b)<=2),'band preview page grabs are perfectly level (landscape): '+JSON.stringify(lv)); await gb.close();
  ok(errs.length===0,'no page errors: '+errs.slice(0,3).join(' / '));
  await b.close(); console.log(`${passes} passed, ${fails} failed`); process.exit(fails?1:0);
 })();

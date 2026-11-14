@@ -398,7 +398,7 @@ async function previewBand(spec,th,L,page,role,k,total,prodTitle,skillsTxt){
   const hh=Math.round(titleH+pillH+112), X=TX(spec);
   const label=role==='key'?(has(X,'keyLabel')?X.keyLabel:'ANSWER KEY'):(has(X,'previewLabel')?X.previewLabel:'PREVIEW');
   const areaTop=hh+30, areaBot=S-104-60, im=pageImg(page,S-200,areaBot-areaTop);
-  paper(g,im,S/2,(areaTop+areaBot)/2,(k%2?0.012:-0.012),1.1);
+  paper(g,im,S/2,(areaTop+areaBot)/2,0,1.1); // perfectly level
   drawBand(g,th,-12,hh+12);
   const top0=(hh-(titleH+pillH))/2; drawBandTitle(g,th,L1,size,S/2,top0);
   if(pillTxt) skillPill(g,th,pillTxt,S/2,top0+titleH+pillH/2-6,W,80,{fill:'#fff',color:th.d});
