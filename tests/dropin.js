@@ -36,7 +36,7 @@ let fails=0,passes=0; const ok=(c,m)=>{if(c){passes++;}else{fails++;console.log(
  await pg.fill('#fTitle','Roll and Read'); await pg.fill('#fSkills','/sh/ words'); await pg.fill('#fGrade','1st Grade'); await pg.fill('#fSub','Phonics center game');
  await pg.fill('#fRibbon','7 PAGES • PRINT AND GO'); await pg.fill('#fStore','My Side of the Classroom'); await pg.selectOption('#fTheme','sky');
  await pg.check('#fKey'); await pg.fill('#fKeyTop','ANSWER'); await pg.fill('#fKeyBot','KEY');
- await pg.evaluate(()=>document.querySelector('#textSec details').open=true);
+ await pg.evaluate(()=>document.querySelectorAll('#textSec details').forEach(d=>d.open=true));
  await pg.fill('#fInc','Three game boards\nWord list\nPrint and go'); await pg.fill('#fBlurb','A fun /sh/ game.'); await pg.fill('#fTags','phonics, sh');
  await pg.fill('#fPrev','SAMPLE'); await ready(5); await new Promise(r=>setTimeout(r,800)); await ready(5);
  await pg.screenshot({path:OUT+'dropin-ui.png'});

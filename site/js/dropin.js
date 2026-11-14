@@ -52,7 +52,7 @@ const allPages=()=>files.flatMap(e=>e.pages);
 function copyThumb(src,w){const c=document.createElement('canvas'); c.width=src.width; c.height=src.height; c.getContext('2d').drawImage(src,0,0); return c;}
 function renderPages(){
   const box=$('pages'); box.innerHTML=''; const n=allPages().length;
-  $('pickInfo').textContent=n?'Click pages to pick them (up to 9). The first three go on the cover. Pick none and I will use the first three pages.':'Drop a file to see its pages.';
+  $('pickInfo').textContent=n?'Click pages to pick them (up to 9). They go on the cover in order (the layout note in step 3 says how many fit) and each gets its own preview image. Pick none and I will use the first pages.':'Drop a file to see its pages.';
   for(const e of files){ if(!e.pages.length) continue; const wrap=document.createElement('div'); wrap.className='pset'; const t=document.createElement('b'); t.textContent=e.name; const gr=document.createElement('div'); gr.className='pgrid'; wrap.append(t,gr); box.appendChild(wrap);
     e.pages.forEach(p=>{ const d=document.createElement('div'); d.className='pg'; d.title='Page '+(p.i+1); d.appendChild(copyThumb(p.thumb)); p.el=d; d.onclick=()=>togglePick(p); gr.appendChild(d); }); }
   badges();

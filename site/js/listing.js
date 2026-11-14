@@ -350,6 +350,56 @@ async function includedBold(spec,th,L,st){
   drawPinkFrame(g);
   return c;
 }
+// ---- Style C: title in a bold band across the middle, page grabs tucked above and below, theme colors
+function bandPicks(spec,st){ const all=boldPicks(spec,st); return (spec.picks&&spec.picks.length)?all.slice(0,6):all.slice(0,4); }
+function bandRow(g,cards,cx,W,gap,y0,yMax,anchor,tiltBase){ // anchor 'bottom': cards sit on y0 (their bottom edge); 'top': cards hang from y0
+  if(!cards.length) return;
+  const w=cards.reduce((a,c)=>a+c.width,0)+(cards.length-1)*gap; let x=cx-w/2;
+  cards.forEach((c,i)=>{ const tilt=(i%2?1:-1)*tiltBase*(cards.length===1?0.4:1); const cxx=x+c.width/2, cyy=anchor==='bottom'?y0-c.height/2:y0+c.height/2; paper(g,c,cxx,cyy,tilt,1.1); x+=c.width+gap; });
+}
+function drawBand(g,th,y,h){
+  g.save(); g.shadowColor='rgba(0,0,0,.4)'; g.shadowBlur=36; g.shadowOffsetY=14; g.fillStyle='#fff'; g.fillRect(-20,y,S+40,h); g.restore();
+  g.fillStyle='#fff'; g.fillRect(-20,y,S+40,h);
+  // two level accent stripes (theme accent) just inside the black edges
+  g.fillStyle=th.a; g.fillRect(-20,y+16,S+40,18); g.fillRect(-20,y+h-34,S+40,18);
+  g.fillStyle='#000'; g.fillRect(-20,y,S+40,12); g.fillRect(-20,y+h-12,S+40,12);
+  g.fillRect(-20,y+34,S+40,5); g.fillRect(-20,y+h-39,S+40,5);
+}
+async function coverBand(spec,th,L,st){
+  const [c,g]=newCanvas(); dots(g,th.dot,th.p,150,26); const X=TX(spec);
+  const title=cleanTxt(spec.title||'')||'Listing', skillsTxt=cleanTxt(skillsOf(spec)), sub=cleanTxt(X.subtitle), grade=(spec.opts&&spec.opts.grade)||'';
+  const showKey=has(X,'keyBurst')?X.keyBurst:st.hasKey;
+  const leftLim=showKey?420:90, rightLim=grade?S-420:S-90, W=rightLim-leftLim, cx=(leftLim+rightLim)/2;
+  // title: one line if it fits at a good size, otherwise two balanced lines
+  let L1=[title], size=fitFont(g,title,'400','Pacifico',240,W,60);
+  if(size<170&&title.includes(' ')){ g.font=FONT(400,100,'Pacifico'); const w=title.split(' '); let best=null;
+    for(let i=1;i<w.length;i++){const a=w.slice(0,i).join(' '),b=w.slice(i).join(' '),m=Math.max(g.measureText(a).width,g.measureText(b).width); if(!best||m<best.m)best={a,b,m};}
+    if(best){ const s2=Math.min(200,fitFont(g,best.a,'400','Pacifico',200,W,60),fitFont(g,best.b,'400','Pacifico',200,W,60)); if(s2>size){L1=[best.a,best.b]; size=s2;} } }
+  const lh=size*1.1, titleH=L1.length*lh, subH=sub?96:0, pillH=skillsTxt?150:0;
+  const bandH=Math.round(Math.min(760,Math.max(400,titleH+subH+pillH+130)));
+  const gap=1630-bandH, zh=gap/2, tuck=38, bandY=Math.round(40+zh), bandBot=bandY+bandH;
+  // page grabs behind the band: top row hangs above it, bottom row below it
+  const pics=bandPicks(spec,st), nTop=Math.ceil(pics.length/2), nBot=pics.length-nTop, cardH=Math.round(zh+tuck-14);
+  const mk=(arr)=>{ const cols=Math.max(arr.length,1), cw=Math.min(720,(S-120-(cols-1)*50)/cols); return arr.map(p=>pageImg(p,cw,cardH)); };
+  bandRow(g,mk(pics.slice(0,nTop)),S/2,S-120,50,bandY+tuck,0,'bottom',0.035);
+  bandRow(g,mk(pics.slice(nTop)),S/2,S-120,50,bandBot-tuck,0,'top',0.035);
+  drawBand(g,th,bandY,bandH);
+  // title (theme color, heavy black outline, black drop shadow), subtitle, skill pill
+  const stackH=titleH+subH+(skillsTxt?pillH:0), top0=bandY+(bandH-stackH)/2;
+  g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(400,size,'Pacifico'); g.lineJoin='round';
+  L1.forEach((l,i)=>{ const y=top0+lh*i+lh/2; g.fillStyle='#000'; g.fillText(l,cx+8,y+10); textStroke(g,l,cx,y,th.p,'#000',Math.max(14,size*0.09)); g.fillStyle=th.p; g.fillText(l,cx,y); });
+  let yy=top0+titleH;
+  if(sub){ const ss=fitFont(g,sub,'700','Andika',64,W,30); g.font=FONT(700,ss,'Andika'); g.fillStyle='#222'; g.fillText(sub,cx,yy+subH/2); yy+=subH; }
+  if(skillsTxt) skillPill(g,th,skillsTxt,cx,yy+pillH/2-8,Math.min(W,1300),88);
+  // stickers on the band ends: answer-key burst left, grade burst right
+  if(showKey){ const ky=bandY+bandH/2; burst(g,215,ky,165,13,th.a,'#000',0.2); g.save(); g.translate(215,ky); g.rotate(0.2); g.fillStyle='#000'; g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(700,60,'Fredoka'); g.fillText(has(X,'keyTop')?X.keyTop:'ANSWER',0,-28); g.fillText(has(X,'keyBot')?X.keyBot:'KEY',0,36); g.restore(); }
+  if(grade) gradeBadge(g,th,grade,S-215,bandY+bandH/2,175);
+  // one page only: fill the empty lower row with the page-count burst
+  if(!nBot){ const b=badgeCopy(spec,st); scallopBadge(g,S/2,(bandBot+1660)/2,Math.min(190,(1660-bandBot)/2-10),b.top,b.bot); }
+  const rb=defaults(spec,st).ribbon; if(rb) ribbon(g,th,rb,S/2,1735,spec.isBundle&&!has(X,'ribbon')?760:1280);
+  footerBar(g,th,L,X.store,1860);
+  return c;
+}
 async function cover(spec,th,L,st){
   const [c,g]=newCanvas(); dots(g,th.dot,th.p,150,26); const X=TX(spec);
   const skillsTxt=skillsOf(spec);
@@ -426,7 +476,7 @@ async function build(spec){
   const style=(spec.opts&&spec.opts.style)||'classic';
   spec.title=spec.title||(spec.isBundle?(spec.prods.map(p=>p.title).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' Bundle'):spec.prod.title);
   const skillsTxt=skillsOf(spec), X=TX(spec);
-  out.push(['01-cover.png',await (style==='bold'?coverBold:cover)(spec,th,L,st)]);
+  out.push(['01-cover.png',await (style==='bold'?coverBold:style==='band'?coverBand:cover)(spec,th,L,st)]);
   const picks=spec.picks.length?spec.picks:[...st.defaultPicks.slice(0,3)].concat(st.keys.length?[spec.doc.pages[st.keys[0]]]:[]);
   const prodFor=(pg)=>{ // bundles: name the product the page belongs to
     if(!spec.isBundle||!spec.doc.sets) return has(X,'previewTitle')&&X.previewTitle?X.previewTitle:spec.prod.title; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?s.prod.title:spec.prod.title;};
@@ -440,6 +490,16 @@ async function build(spec){
   const txt=`TITLE\n${title}\n\nDESCRIPTION\n${spec.isBundle?`Bundle of ${spec.nSets} sets in one file. `:''}${blurb}${grade?`\n\nMade for ${grade}.`:''}\n\nWhat's included:\n${defaults(spec,st).included.map(x=>'- '+x).join('\n')}\n${label?'\nSkill: '+label+'\n':''}\nTAGS\n${(has(X,'tags')?X.tags.split(/\s*,\s*/).filter(Boolean):prods.flatMap(id=>TAGS[id]||[]).filter((v,i,a)=>a.indexOf(v)===i).concat(spec.skills||[])).join(', ')}\n`;
   return {images:out,txt,title};
 }
+// ---- layout picker UI shared by the generator and the Listing Image Maker: buttons drive the hidden #lsStyle select and show only the text boxes the chosen layout uses
+const STYLE_NOTE={classic:'Cover shows your first 3 picked pages, tilted, on a title banner.',bold:'Cover is a collage of up to 6 picked pages (pastel colors, so Colors does not apply).',band:'Cover puts up to 6 picked pages above and below the title band (none picked = 4).'};
+function initStyleUI(){
+  const sel=document.getElementById('lsStyle'); if(!sel) return;
+  const apply=()=>{ const v=sel.value; document.querySelectorAll('.stylepick button').forEach(b=>{b.classList.toggle('on',b.dataset.style===v); b.setAttribute('aria-pressed',b.dataset.style===v);});
+    document.querySelectorAll('[data-styles]').forEach(el=>{el.hidden=!el.dataset.styles.split(' ').includes(v);});
+    const n=document.getElementById('styleNote'); if(n) n.textContent=STYLE_NOTE[v]||''; };
+  document.querySelectorAll('.stylepick button').forEach(b=>b.addEventListener('click',()=>{ if(sel.value===b.dataset.style) return; sel.value=b.dataset.style; apply(); sel.dispatchEvent(new Event('change',{bubbles:true})); }));
+  sel.addEventListener('change',apply); apply();
+}
 async function zip(spec,fname){ return zipResult(await build(spec),fname); }
 async function zipResult(r,fname){
   const z=new JSZip();
@@ -447,5 +507,6 @@ async function zipResult(r,fname){
   z.file('listing.txt',r.txt); const blob=await z.generateAsync({type:'blob'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fname+' - TpT listing images.zip'; document.body.appendChild(a); a.click(); a.remove(); return r;
 }
-return {build,zip,zipResult,defaults,stats,THEMES,S};
+initStyleUI();
+return {build,zip,zipResult,defaults,stats,THEMES,S,initStyleUI};
 })();
