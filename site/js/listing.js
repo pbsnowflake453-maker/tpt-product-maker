@@ -106,6 +106,49 @@ function footerBar(g,th,L,store,y){
   logoBadge(g,L,S-70-r,cy,r);
 }
 // ---- images
+async function coverBold(spec,th,L,st){
+  const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S); const X=TX(spec);
+  const skillsTxt=skillsOf(spec);
+  g.fillStyle='#000'; g.fillRect(0,0,S,280);
+  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
+  let size=fitFont(g,spec.title,'700','Fredoka',160,S-200,60); g.font=FONT(700,size,'Fredoka'); g.fillText(spec.title,S/2,140);
+  if(skillsTxt){ g.font=FONT(700,48,'Andika'); g.fillText(skillsTxt,S/2,220); }
+  const pics=(spec.picks.length?spec.picks:st.defaultPicks).slice(0,3);
+  const ims=pics.map(p=>pageImg(p,900,800));
+  const cy=1100;
+  if(ims.length===1) paper(g,ims[0],S/2,cy,0);
+  else if(ims.length===2){paper(g,ims[0],S/2-280,cy, -0.04); paper(g,ims[1],S/2+280,cy,0.04);}
+  else {paper(g,ims[2],S/2-340,cy+20,-0.06); paper(g,ims[1],S/2+340,cy+10,0.05); paper(g,ims[0],S/2,cy-10,0);}
+  g.fillStyle='#000'; g.fillRect(0,S-220,S,220);
+  g.fillStyle='#fff'; g.font=FONT(700,72,'Fredoka'); g.fillText(defaults(spec,st).ribbon||'POWERPOINT + PDF',S/2,S-110);
+  logoBadge(g,L,S-160,S-110,90);
+  return c;
+}
+async function previewBold(spec,th,L,page,role,k,total,prodTitle,skillsTxt){
+  const [c,g]=newCanvas(); g.fillStyle='#f8f8f8'; g.fillRect(0,0,S,S);
+  g.fillStyle='#000'; g.fillRect(0,0,S,200);
+  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
+  const s=fitFont(g,prodTitle,'700','Fredoka',90,S-200,40); g.font=FONT(700,s,'Fredoka'); g.fillText(prodTitle,S/2,100);
+  const im=pageImg(page,1500,1200); paper(g,im,S/2,1100,0);
+  const X=TX(spec), label=(role==='key'?(has(X,'keyLabel')?X.keyLabel:'ANSWER KEY'):(has(X,'previewLabel')?X.previewLabel:'PREVIEW'));
+  if(label){ g.fillStyle='#000'; g.fillRect(0,S-160,S,160); g.fillStyle='#fff'; g.font=FONT(700,56,'Fredoka'); g.textAlign='left'; g.fillText(label,80,S-80); }
+  logoBadge(g,L,S-130,S-80,70);
+  return c;
+}
+async function includedBold(spec,th,L,st){
+  const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S);
+  g.fillStyle='#000'; g.fillRect(0,0,S,240);
+  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle'; g.font=FONT(700,100,'Fredoka'); g.fillText("What's Included",S/2,120);
+  const items=defaults(spec,st).included, x0=250, y0=400;
+  items.forEach((t,i)=>{
+    g.fillStyle='#000'; g.beginPath(); g.arc(x0,y0+i*160,40,0,7); g.fill();
+    g.fillStyle='#fff'; g.font=FONT(700,36,'Fredoka'); g.textAlign='center'; g.fillText('✓',x0,y0+i*160+4);
+    g.fillStyle='#000'; g.textAlign='left'; g.font=FONT(700,48,'Andika'); g.fillText(t,x0+80,y0+i*160+4);
+  });
+  g.fillStyle='#000'; g.fillRect(0,S-180,S,180);
+  logoBadge(g,L,S-140,S-90,70);
+  return c;
+}
 async function cover(spec,th,L,st){
   const [c,g]=newCanvas(); dots(g,th.dot,th.p,150,26); const X=TX(spec);
   const skillsTxt=skillsOf(spec);
@@ -179,15 +222,16 @@ function stats(spec){
 async function build(spec){
   spec.opts=spec.opts||{}; spec.picks=spec.picks||[];
   const th=THEMES[spec.opts.theme]||THEMES.apple, L=await getLogo(), st=stats(spec), out=[];
+  const style=(spec.opts&&spec.opts.style)||'classic';
   spec.title=spec.title||(spec.isBundle?(spec.prods.map(p=>p.title).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' Bundle'):spec.prod.title);
   const skillsTxt=skillsOf(spec), X=TX(spec);
-  out.push(['01-cover.png',await cover(spec,th,L,st)]);
+  out.push(['01-cover.png',await (style==='bold'?coverBold:cover)(spec,th,L,st)]);
   const picks=spec.picks.length?spec.picks:[...st.defaultPicks.slice(0,3)].concat(st.keys.length?[spec.doc.pages[st.keys[0]]]:[]);
   const prodFor=(pg)=>{ // bundles: name the product the page belongs to
     if(!spec.isBundle||!spec.doc.sets) return has(X,'previewTitle')&&X.previewTitle?X.previewTitle:spec.prod.title; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?s.prod.title:spec.prod.title;};
   const labFor=(pg)=>{ if(!spec.isBundle||!spec.doc.sets) return has(X,'previewPill')?X.previewPill:skillsTxt; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?skillsLine(BUNDLE.skillsOf([s.sec.label])):skillsTxt;};
-  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await preview(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
-  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await included(spec,th,L,st)]);
+  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await (style==='bold'?previewBold:preview)(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
+  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await (style==='bold'?includedBold:included)(spec,th,L,st)]);
   const first=spec.prod, label=skillsTxt, grade=spec.opts.grade;
   const title=`${spec.title}${label?' - '+label:''}${grade?' - '+grade:''}`.replace(/\u2014/g,'-');
   const prods=[...new Set((spec.prods||[spec.prod]).map(p=>p.id))];
