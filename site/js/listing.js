@@ -219,52 +219,18 @@ function scallopBadge(g,cx,cy,r,top,bot){
   g.beginPath(); g.arc(0,0,r*0.86,0,7); g.fill();
   for(let i=0;i<n;i++){ const a=i*Math.PI*2/n; g.beginPath(); g.arc(Math.cos(a)*r*0.86,Math.sin(a)*r*0.86,bump,0,7); g.fill(); }
   g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
-  const topS=fitFont(g,top,'700','Fredoka',r*0.72,r*1.55,24);
-  g.font=FONT(700,topS,'Fredoka'); g.fillText(top,0,bot?-r*0.14:0);
-  if(bot){ const botS=fitFont(g,bot,'700','Fredoka',r*0.28,r*1.4,14); g.font=FONT(700,botS,'Fredoka'); g.fillText(bot,0,r*0.34); }
+  const hasBot=!!(bot&&String(bot).trim());
+  const topS=fitFont(g,top||'','700','Fredoka',hasBot?r*0.7:r*0.78,r*1.3,16);
+  g.font=FONT(700,topS,'Fredoka'); g.fillText(top||'',0,hasBot?-r*0.14:0);
+  if(hasBot){ const botS=fitFont(g,bot,'700','Fredoka',r*0.28,r*1.25,12); g.font=FONT(700,botS,'Fredoka'); g.fillText(bot,0,r*0.34); }
   g.restore();
 }
 function badgeCopy(spec,st){
-  if(spec.isBundle){ const n=spec.nSets||1; return {top:String(n), bot:n===1?'SET':'SETS'}; }
-  const n=(st.R||[]).filter(r=>r==='student'||r==='key'||r==='info').length||st.nStudent||1;
-  return {top:String(Math.max(n,1)), bot:(n===1?'PAGE':'PAGES')};
-}
-function cardCopy(spec,st,page,i){
-  const idx=spec.doc&&spec.doc.pages?spec.doc.pages.indexOf(page):-1;
-  const role=idx>=0&&st.R?st.R[idx]:'student';
-  let heading, sub;
-  if(role==='key'){ heading=has(TX(spec),'keyLabel')&&TX(spec).keyLabel?TX(spec).keyLabel:'ANSWER KEY'; sub=skillsOf(spec)||'ANSWERS'; }
-  else if(role==='cover'){ heading='COVER'; sub=(spec.prod&&spec.prod.title)||'PREVIEW'; }
-  else if(role==='info'){ heading='DIRECTIONS'; sub='HOW TO USE'; }
-  else if(spec.isBundle&&spec.doc&&spec.doc.sets){
-    const set=spec.doc.sets.find(s=>idx>=s.from&&idx<s.to);
-    heading=(set&&set.prod&&set.prod.title)||(spec.prod&&spec.prod.title)||'PREVIEW';
-    sub=set?skillsLine(BUNDLE.skillsOf([set.sec.label])): (skillsOf(spec)||('PAGE '+(i+1)));
-  } else {
-    heading=(spec.prod&&spec.prod.title)||'PREVIEW';
-    sub=skillsOf(spec)||('PAGE '+(i+1));
-  }
-  return {heading:up(heading), sub:up(sub)};
-}
-function makePageCard(page,heading,sub,band){
-  const im=pageImg(page,700,560);
-  const headH=108, bandH=68, pad=16;
-  const w=im.width+pad*2, h=headH+bandH+im.height+pad;
-  const c=document.createElement('canvas'); c.width=w; c.height=h;
-  const g=c.getContext('2d');
-  g.fillStyle='#fff'; g.fillRect(0,0,w,h);
-  g.fillStyle='#000'; g.fillRect(0,0,w,headH);
-  g.fillStyle='#fff'; g.textAlign='center'; g.textBaseline='middle';
-  const hs=fitFont(g,heading,'700','Fredoka',70,w-28,24);
-  g.font=FONT(700,hs,'Fredoka'); g.fillText(heading,w/2,headH/2+2);
-  g.fillStyle=band; g.fillRect(0,headH,w,bandH);
-  g.fillStyle='#000';
-  const ss=fitFont(g,sub,'700','Andika',34,w-28,16);
-  g.font=FONT(700,ss,'Andika'); g.fillText(sub,w/2,headH+bandH/2+2);
-  g.drawImage(im,pad,headH+bandH,im.width,im.height);
-  const dot=18, dx=w-26, dy=headH+bandH+26;
-  g.beginPath(); g.arc(dx,dy,dot,0,7); g.fillStyle=band; g.fill(); g.lineWidth=5; g.strokeStyle='#000'; g.stroke();
-  return c;
+  let autoTop,autoBot;
+  if(spec.isBundle){ const n=spec.nSets||1; autoTop=String(n); autoBot=n===1?'SET':'SETS'; }
+  else { const n=(st&&st.R||[]).filter(r=>r==='student'||r==='key'||r==='info').length||(st&&st.nStudent)||1; autoTop=String(Math.max(n,1)); autoBot=n===1?'PAGE':'PAGES'; }
+  const o=spec.opts||{}, top=cleanTxt(o.burstTop), bot=cleanTxt(o.burstBot);
+  return {top:top?up(top):autoTop, bot:bot?up(bot):autoBot};
 }
 function scaleCard(card,maxW,maxH){
   const s=Math.min(maxW/card.width,maxH/card.height,2.2);
@@ -275,34 +241,53 @@ function scaleCard(card,maxW,maxH){
 function boldPicks(spec,st){
   const pages=spec.doc&&spec.doc.pages||[];
   const seen=new Set(), out=[];
-  const add=p=>{ if(!p||seen.has(p)||out.length>=3) return; seen.add(p); out.push(p); };
-  (spec.picks&&spec.picks.length?spec.picks:st.defaultPicks||[]).forEach(add);
-  pages.forEach((p,i)=>{ if(st.R&&st.R[i]==='key') add(p); });
+  const add=p=>{ if(!p||seen.has(p)||out.length>=6) return; seen.add(p); out.push(p); };
+  if(spec.picks&&spec.picks.length){ spec.picks.forEach(add); return out; }
+  (st.defaultPicks||[]).forEach(add);
   pages.forEach((p,i)=>{ if(st.R&&st.R[i]==='student') add(p); });
+  pages.forEach((p,i)=>{ if(st.R&&st.R[i]==='key') add(p); });
   pages.forEach((p,i)=>{ if(st.R&&st.R[i]==='info') add(p); });
-  pages.forEach((p,i)=>{ if(st.R&&st.R[i]!=='terms') add(p); });
+  pages.forEach((p,i)=>{ if(st.R&&st.R[i]!=='terms'&&st.R[i]!=='cover') add(p); });
   return out;
 }
 function drawCollage(g,cards,top,bot){
-  const areaH=bot-top, midY=top+areaH*0.5;
-  if(cards.length===1){
-    const sc=scaleCard(cards[0],1320,areaH*0.94);
-    paper(g,sc,S/2,midY,0.02,1.1);
-    return {cx:S/2+sc.width*0.36, cy:midY+sc.height*0.22, r:Math.min(240,Math.round(sc.height*0.26))};
+  const n=cards.length, fw=BOLD.fw, gap=40;
+  if(!n) return {cx:S/2,cy:(top+bot)/2,r:180};
+  const areaL=fw+40, areaR=S-fw-40, areaW=areaR-areaL, areaH=Math.max(200,bot-top);
+  const rowCounts=n<=1?[1]:n===2?[2]:n===3?[3]:n===4?[2,2]:n===5?[3,2]:[3,3];
+  const maxCols=Math.max(...rowCounts);
+  const cellW=(areaW-(maxCols-1)*gap)/maxCols;
+  const cellH=(areaH-(rowCounts.length-1)*gap)/rowCounts.length;
+  const totalH=rowCounts.length*cellH+(rowCounts.length-1)*gap;
+  let y=top+(areaH-totalH)/2+cellH/2;
+  const placed=[]; let idx=0;
+  for(const count of rowCounts){
+    const row=cards.slice(idx,idx+count).map(c=>scaleCard(c,cellW,cellH)); idx+=count;
+    const rowW=row.reduce((s,c)=>s+c.width,0)+(row.length-1)*gap;
+    let x=areaL+(areaW-rowW)/2;
+    for(const sc of row){
+      const cx=x+sc.width/2, cy=y;
+      paper(g,sc,cx,cy,0,1);
+      placed.push({cx,cy,w:sc.width,h:sc.height});
+      x+=sc.width+gap;
+    }
+    y+=cellH+gap;
   }
-  if(cards.length===2){
-    const sc=cards.map(c=>scaleCard(c,860,areaH*0.88));
-    paper(g,sc[0],S/2-400,midY,-0.1,1.05);
-    paper(g,sc[1],S/2+400,midY-12,0.09,1.05);
-    return {cx:S/2, cy:midY, r:230};
+  // starburst overlaps a lower-right corner, or fills the empty slot when there are 5 pages
+  const last=placed[placed.length-1];
+  let cx,cy,rad;
+  if(n===5){
+    cx=areaL+areaW-cellW*0.45; cy=y-cellH-gap; rad=Math.min(220,Math.round(Math.min(cellW,cellH)*0.48));
+  } else {
+    rad=Math.min(200,Math.round(Math.min(last.w,last.h)*0.4));
+    cx=last.cx+last.w/2-rad*0.35;
+    cy=last.cy+last.h/2-rad*0.45;
   }
-  const sc=cards.map(c=>scaleCard(c,880,areaH*0.6));
-  const topY=top+sc[0].height*0.5+12;
-  const botY=bot-sc[2].height*0.5-28;
-  paper(g,sc[0],S/2-330,topY,-0.1,1.05);
-  paper(g,sc[1],S/2+410,topY+10,0.09,1.05);
-  paper(g,sc[2],S/2-250,botY,-0.04,1.08);
-  return {cx:S/2+360, cy:topY*0.22+botY*0.78, r:230};
+  rad=Math.max(140,rad);
+  cy=Math.min(cy,bot-rad-6);
+  cx=Math.min(cx,areaR-rad*0.25);
+  cx=Math.max(cx,areaL+rad*0.25);
+  return {cx,cy,r:rad};
 }
 async function coverBold(spec,th,L,st){
   const [c,g]=newCanvas(); g.fillStyle='#fff'; g.fillRect(0,0,S,S);
@@ -313,7 +298,7 @@ async function coverBold(spec,th,L,st){
   drawBlackBanner(g,banY,banH,bannerLine(spec,st));
   const foot=styleBFooter(210,88);
   const pics=boldPicks(spec,st);
-  const cards=pics.map((p,i)=>{ const t=cardCopy(spec,st,p,i); return makePageCard(p,t.heading,t.sub,BOLD.bands[i%BOLD.bands.length]); });
+  const cards=pics.map(p=>pageImg(p,1000,900));
   const slot=drawCollage(g,cards,banY+banH+6,foot.y-8);
   const badge=badgeCopy(spec,st);
   scallopBadge(g,slot.cx,slot.cy,slot.r,badge.top,badge.bot);
@@ -329,11 +314,10 @@ async function previewBold(spec,th,L,page,role,k,total,prodTitle,skillsTxt){
   const X=TX(spec), label=(role==='key'?(has(X,'keyLabel')?X.keyLabel:'ANSWER KEY'):(has(X,'previewLabel')?X.previewLabel:'PREVIEW'));
   const banY=Math.max(titleBot+4,390), banH=156;
   drawBlackBanner(g,banY,banH,skillsTxt||bannerLine(spec,null));
-  const sub=up(cleanTxt(skillsTxt)||(role==='key'?'ANSWERS':'STUDENT PAGE'));
-  const card=makePageCard(page,up(label||'PREVIEW'),sub,BOLD.bands[(k||0)%BOLD.bands.length]);
   const foot=styleBFooter(200,80);
-  const sc=scaleCard(card,1500,foot.y-(banY+banH)-30);
-  paper(g,sc,S/2,(banY+banH+foot.y)/2, (k%2?0.03:-0.03), 1.1);
+  const midTop=banY+banH+20, midBot=foot.y-20, midH=midBot-midTop;
+  const sc=scaleCard(pageImg(page,1500,1200),S-BOLD.fw*2-80,midH);
+  paper(g,sc,S/2,(midTop+midBot)/2,0,1.1);
   if(label) drawBlackBanner(g,foot.y,foot.h,label,Math.floor(foot.h*0.72),foot.inset);
   else g.fillStyle='#000', g.fillRect(0,foot.y,S,foot.h);
   logoBadge(g,L,foot.logoX,foot.logoY,foot.logoR);

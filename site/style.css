@@ -34,7 +34,7 @@ button:disabled{opacity:.4;cursor:default}
 .pk-body{max-height:380px;overflow:auto;margin-top:6px}.pk-sec{padding:6px 8px;font-weight:700;background:#f0f0ee;border-radius:6px;margin:3px 0;cursor:pointer;font-size:13px}
 .picker.compact{flex:1;min-width:0;margin:0}.picker.compact .pk-btn{padding:3px 6px;font-size:12px}
 
-#lsSec label{display:block;margin:6px 0}#lsSec input,#lsSec select{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
+#lsSec .two{display:flex;gap:8px}#lsSec .two label{flex:1}#lsSec label{display:block;margin:6px 0}#lsSec input,#lsSec select{width:100%;padding:7px;border:1px solid #bbb;border-radius:8px;font:inherit;margin-top:4px}
 details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:700}
 #pickPages .pset,#bpickPages .pset{margin-top:8px}.pset b{display:block;font-size:12px;margin-bottom:4px}
 .pgrid{display:flex;flex-wrap:wrap;gap:8px;max-height:320px;overflow:auto;padding:6px;border:1px solid #eee;border-radius:8px}
