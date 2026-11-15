@@ -2,6 +2,8 @@
 
 **Ask Samantha before publishing changes.** Never deploy, buy, or post on her behalf without her explicit OK. Batch changes: every re-deploy costs effort, so gather edits, test locally, and publish together when she says so. She likes to talk through ideas before anything is built ("still just talking" = don't build yet).
 
+**November 15, 2026:** Work on `feature/ufli-text-checker-listing` only. Do not merge to `main` or deploy until Samantha explicitly says to; she is conserving Netlify credits. Use `[skip netlify]` on branch commits.
+
 ## Owner & brand
 - Store: **My Side of the Classroom** (Teachers Pay Teachers). Logo: `site/assets/logo.png` (apple "TEACH ♥ LOVE ♥ INSPIRE").
 - Every product: cover, directions/how-to page, product pages, Terms of Use page (store's standard terms text + logo), footer "© My Side of the Classroom".
@@ -21,11 +23,13 @@
 - Samantha edits odd words herself in the PPTX; don't add explanations of why words were chosen or "fewer than 36 words" warnings to the documents.
 
 ## Reading skills & words (Mega Word Bank)
-- **Only source of reading words: Samantha's Mega Word Bank** (`data-src/phonics_words.csv`, G1 Units 1-7 of the Amplify CKLA 3rd ed. scope & sequence). The old audited list, K, G2 and Dolch/Fry are gone. Regenerate with `python3 spec/build_from_megabank.py` (writes `site/data/skills.js` + `data-src/bank_index.json`). Never add words by hand to the generated files.
+- **Only source of reading words: Samantha's Mega Word Bank** (`data-src/phonics_words.csv`, G1 Units 1-7 of the Amplify CKLA 3rd ed. scope & sequence, plus the uploaded UFLI lesson/heart-word tags). The old audited list, K, G2 and Dolch/Fry are gone. Regenerate with `python3 spec/build_from_megabank.py` (writes `site/data/skills.js` + `data-src/bank_index.json`). Never add words by hand to the generated files.
 - Default pull: `form=base`, `tricky=no`, `is_name=no`. Decodable for a skill = its pool words with unit end <= the skill's placement; words from later units are **Challenge** words. Cutoffs are **unit level** (the bank has per-word lesson numbers, but skills use the end of the unit), so Mystery Picture background pools and Word Maze `pos` filters are unit level too.
 - Options in the picker: **Unit 1-7** (words new in that unit), **Through Unit 1-7** (cumulative), **Categories** (pooled groups: Short Vowel CVC, FLOSS, blends, digraphs, Magic e, long vowel teams, r-controlled incl. "ar, or, er", etc.), and **Single Skills**. No "G1" in names. No unit options outside 1-7.
 - **Display names:** K/G1 skills have no example words in names (menus, bubbles, covers, dividers, keys). Exception: **oo (look)**, **oo (soon)**. Minimum disambiguators where dropping would collide: th (thin)/th (this), -s (/s/)/-s (/z/)/s (/z/ inside a word), -ed (/t/)/(/d/)/(/ed/); blends are "CVCC ending blends", "CCVC beginning blends", "3-letter blends". Change labels only (`disp` field), never internal ids or word data. Bubble style is "/ou/", "short a", etc. The skill "s (/z/ inside a word)" is tiny (his, has, as).
 - **Decodable sentences** (`data-src/sentences/u1..u7.txt`, checked and compiled by `python3 spec/build_sentences.py` into `site/data/sentences.js`): every word must be a bank word (any form) from that unit or earlier, a unit-introduced tricky word, or an approved character name (Beth, Nat | Gran, Josh, Jen | Vern | Kate, Max | Grace, Jill, Pepper | Kay, Martez; earlier names may appear later; Unit 3 uses fable animals as plain common nouns, no new names). Each sentence needs at least one word new in its unit. The script fails on any violation; keep it at 0.
+
+The November 15 update also generates `site/data/wordbank.js` for the Text Checker. UFLI Lessons / UFLI Cumulative use independent UFLI lesson ordering and no future-word challenge pool; see README. Browser-tagged additions are local storage plus portable JSON/CSV exports, not an automatic GitHub write. `site/checker.html` checks exact before/after lesson cutoffs, with a Unit 1 review option and separate heart-word handling. Listing images now offer Classic or Bold Spotlight, in ten palettes.
 
 ## Math skills (js/math.js)
 Add/subtract/mixed within 5, 10, 20; 10 more/10 less; tens ± tens (40+20); two-digit ± tens (43±20); two-digit ± two-digit no regrouping (43±25); two-digit addition with regrouping within 100 (43+28); addition facts +0..+10; subtraction facts −0..−10; multiplication by factor ×0..×12; mixed single-digit multiplication; division by divisor; doubles; near doubles; making 10; missing addends; ×10 and ×100. Every math product has an **answer key**.

@@ -8,6 +8,7 @@ const S=()=>window.SENTENCES||[];
 const unitOf=sk=>Math.floor((sk.pos||0)/100);
 function matcher(sk){
   let m;
+  if(sk.curriculum==='ufli')return s=>s.w.every(w=>['decodable','heart'].includes(BANK.state(w,{curriculum:'ufli',lesson:sk.lesson,hearts:true}).status))&&(sk.cumulative||s.w.some(w=>(sk.decodable||[]).some(x=>x[0]===w)));
   if(sk.group==='CKLA Units'&&(m=sk.name.match(/^Unit (\d)$/))) return s=>s.u===+m[1];
   if(sk.group==='Through Unit'&&(m=sk.name.match(/^Through Unit (\d)$/))) return s=>s.u<=+m[1];
   const set=new Set((sk.decodable||[]).map(x=>x[0].toLowerCase())), u=unitOf(sk);

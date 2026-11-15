@@ -145,13 +145,16 @@ T.products.push({
       const os=SK.find(s=>s.name===cfg.opts.otherSkill);
       if(os) otherList=pools(os).reg;
     }
-    if(!otherList.length) otherList=priorWords(SK, sk.pos||9999);
-    if(!otherList.length) otherList=['the','and','for','was','you','are'];
+    if(sk.curriculum==='ufli'){
+      const target=new Set(matchList);otherList=[...new Set(BANK.rows().filter(r=>r.is_name==='no'&&BANK.lesson(r)&&BANK.lesson(r)<=sk.lesson&&!target.has(r.word)).map(r=>r.word))];
+    }else if(!otherList.length) otherList=priorWords(SK, sk.pos||9999);
+    const noDistractors=sk.curriculum==='ufli'&&!otherList.length;
+    if(!otherList.length) otherList=noDistractors?['?']:['the','and','for','was','you','are'];
     const path=randomSimplePath(rows,cols,r);
     const grid=fillWords(path,rows,cols,matchList,otherList,r);
     const label=cfg.label||display(sk);
     const pages=[mazePage(grid,path,label,false), mazePage(grid,path,label,true)];
-    const info=`<b>${label}</b><br>${rows}×${cols} · ${path.length} steps`;
+    const info=`<b>${label}</b><br>${rows}×${cols} · ${path.length} steps`+(noDistractors?'<br><span class="warn">No other decodable words are available at this UFLI level. Unmatched squares show ?. Pick a lesson with a narrower word pool.</span>':'');
     return {label,pages,preview:pages[0],info,chal:false};
   },
   directions(){ return [howTo()]; },

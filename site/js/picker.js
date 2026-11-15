@@ -1,12 +1,12 @@
 // Searchable, grouped, collapsible skill picker (combobox). SkillPicker({list, selected:()=>[skills], onPick(skill), multi:()=>bool, compact})
 (function(){
-const READ_SECTIONS=[['CKLA Units',s=>s.group==='CKLA Units'],['Through Unit',s=>s.group==='Through Unit'],['Categories',s=>s.group==='Categories'],['Single Skills',s=>!s.category]];
+const READ_SECTIONS=[['UFLI Lessons',s=>s.group==='UFLI Lessons'],['UFLI Cumulative',s=>s.group==='UFLI Cumulative'],['CKLA Units',s=>s.group==='CKLA Units'],['Through Unit',s=>s.group==='Through Unit'],['Categories',s=>s.group==='Categories'],['My Added Words',s=>s.group==='My Added Words'],['Single Skills',s=>!s.category]];
 let open=null; document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open){open.classList.remove('open');open=null;}}); document.addEventListener('pointerdown',e=>{if(open&&!open.contains(e.target)){open.classList.remove('open');open=null;}});
 window.SkillPicker=function(o){
   const root=document.createElement('div'); root.className='picker'+(o.compact?' compact':'');
   const btn=document.createElement('button'); btn.type='button'; btn.className='pk-btn';
   const panel=document.createElement('div'); panel.className='pk-panel';
-  const q=document.createElement('input'); q.placeholder='Search (e.g. unit 4, short a, sh, add within 10)'; q.className='pk-q';
+  const q=document.createElement('input'); q.placeholder='Search (e.g. ufli lesson 56, unit 4, short a, sh)'; q.className='pk-q';
   const body=document.createElement('div'); body.className='pk-body'; panel.append(q,body); root.append(btn,panel);
   const collapsed={};
   function sections(){const L=o.list(); if(L[0]&&L[0].decodable) return READ_SECTIONS.map(([n,f])=>[n,L.filter(f)]);

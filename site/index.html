@@ -1,6 +1,6 @@
 <!doctype html><html lang="en"><head><link rel="icon" href="data:,"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TpT Product Maker · My Side of the Classroom</title><link rel="stylesheet" href="style.css"></head><body>
-<header><img src="assets/logo.png" alt=""><div><h1>TpT Product Maker</h1><p>My Side of the Classroom</p></div><a href="listing.html" style="margin-left:auto;color:#B71F2B;font-size:14px;font-weight:700;text-decoration:none" title="Make TpT listing images from any PDF, PowerPoint, or pictures">Listing Image Maker →</a></header>
+<header><img src="assets/logo.png" alt=""><div><h1>TpT Product Maker</h1><p>My Side of the Classroom</p></div><a href="checker.html" style="margin-left:auto;color:#B71F2B;font-size:14px;font-weight:700;text-decoration:none">Text Checker →</a><a href="listing.html" style="margin-left:auto;color:#B71F2B;font-size:14px;font-weight:700;text-decoration:none" title="Make TpT listing images from any PDF, PowerPoint, or pictures">Listing Image Maker →</a></header>
 <main>
 <aside>
   <section><h2>1. Product</h2><div id="products"></div><div id="kinds" class="seg"></div></section>
@@ -15,7 +15,7 @@
   </section>
   <section id="skillSec"><h2>2. Skill</h2>
     <label id="mixWrap" class="small" hidden><input type="checkbox" id="mix"> Mix several skills on one game (click to add or remove)</label>
-    <div id="skillPick"></div></section>
+    <div id="skillPick"></div><p class="small">UFLI lesson counts reflect the words tagged in your bank. “Through” includes earlier lessons.</p></section>
   <section id="wsOpt" hidden><h2>Sort style</h2>
   <label class="blk"><input type="radio" name="ws" id="wsCut" checked> Cut-and-paste (word cards to glue)</label>
   <label class="blk"><input type="radio" name="ws" id="wsWrite"> Write-in (word bank + writing boxes)</label>
@@ -66,7 +66,8 @@
   <section id="lsSec"><h2>4. TpT listing images</h2>
     <p class="small">Bold, colorful cover image plus preview images. The pages you pick below are the ones that get screen-grabbed.</p>
     <label>Grade callout <input id="lsGrade" value="1st Grade" placeholder="Leave blank for none"></label>
-    <label>Colors <select id="lsTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option></select></label>
+    <label>Listing style <select id="lsStyle"><option value="classic">Classic colorful</option><option value="spotlight">Bold Spotlight · stacked pages</option></select></label>
+    <label>Colors <select id="lsTheme"><option value="apple">Apple red</option><option value="sky">Sky blue</option><option value="sunny">Sunny yellow</option><option value="grape">Grape purple</option><option value="mint">Mint green</option><option value="lime">Highlighter lime</option><option value="teal">Deep teal</option><option value="coral">Coral</option><option value="rose">Rose pink</option><option value="peach">Peach</option></select></label>
     <details id="pickDet"><summary>Choose the pages for the images (optional)</summary><div id="pickPages"></div><div class="row small"><span id="pickInfo"></span><button id="pickClear">Clear picks</button></div></details>
   </section>
   <section><h2>5. Bundle <span class="small">(optional)</span></h2>
@@ -81,7 +82,7 @@
 <div><p id="status">Loading fonts…</p><div id="preview"></div></div>
 </main>
 <script src="vendor/jspdf.umd.min.js"></script><script src="vendor/pptxgen.bundle.js"></script>
-<script src="data/skills.js"></script><script src="data/sentences.js"></script><script src="data/wordinfo.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
+<script src="data/skills.js"></script><script src="data/sentences.js"></script><script src="data/wordinfo.js"></script><script src="data/wordbank.js"></script><script src="js/wordbank.js"></script><script src="data/pixels.js"></script><script src="js/core.js"></script><script src="js/math.js"></script><script src="js/picker.js"></script>
 <script src="js/products/rollread.js"></script><script src="js/products/rollsolve.js"></script><script src="js/products/taskcards.js"></script><script src="js/products/bingo.js"></script><script src="js/products/mystery.js"></script><script src="js/products/wordsort.js"></script><script src="js/products/wordmaze.js"></script><script src="js/products/coldread.js"></script><script src="data/images.js"></script><script src="js/products/picturewrite.js"></script><script src="js/products/readdraw.js"></script><script src="js/products/wordwork.js"></script><script src="vendor/jszip.min.js"></script><script src="js/listing.js"></script><script src="js/bundle.js"></script>
 <script src="js/app.js"></script>
 </body></html>

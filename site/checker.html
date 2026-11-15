@@ -1,0 +1,20 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><link rel="icon" href="data:,"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Text Checker · My Side of the Classroom</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="checker.css"></head><body>
+<header><img src="assets/logo.png" alt=""><div><h1>Text Checker</h1><p>Check a story against your Mega Word Bank · <a href="index.html">← Product Maker</a> · <a href="listing.html">Listing Image Maker</a></p></div></header>
+<main><aside>
+<section><h2>1. Your text</h2><label for="story">Paste a story or word list</label><textarea id="story" rows="12" placeholder="Paste your text here…"></textarea>
+<label class="blk">Or upload a file <input id="storyFile" type="file" accept=".txt,.md,.csv,.pdf,.docx,.pptx"></label><p class="small">TXT, Markdown, CSV, PDF with selectable text, DOCX or PPTX. Files are read in your browser.</p><p id="fileStatus" role="status"></p></section>
+<section><h2>2. Reading level</h2><label>Curriculum <select id="curriculum"><option value="ckla">CKLA Grade 1 Skills</option><option value="ufli">UFLI Foundations</option></select></label>
+<label id="unitWrap">Unit <select id="unit"></select></label><label>Lesson <input id="lesson" type="number" min="1" max="99" value="8" required></label>
+<label>Check at <select id="timing"><option value="before">Before this lesson</option><option value="after">After this lesson</option></select></label>
+<label class="blk" id="reviewWrap"><input id="unit1Review" type="checkbox" checked> Use all Unit 1 review patterns during Unit 1</label>
+<label class="blk" id="heartsWrap" hidden><input id="hearts" type="checkbox" checked> Accept previously introduced UFLI heart words</label>
+<p class="small">Uses each word’s lesson tags in your bank. A match means tagged as available at this level; pronunciation and untagged words are not guessed.</p><button id="check" class="primary">Check text</button></section>
+<section><h2>Your word-bank additions</h2><p class="small">Add words from the “Not in word bank” list with the tags you choose. Additions are saved in this browser and are available in Product Maker here. Export a backup to transfer them to another device. A CSV export includes the complete bank for a future repository update.</p>
+<p id="savedCount"></p><div class="btns"><button id="exportBank">Export complete bank (CSV)</button><button id="exportCustom">Export additions (JSON)</button></div><label class="blk">Restore additions <input type="file" id="importCustom" accept=".json"></label><p id="saveStatus" role="status"></p></section>
+</aside><div class="results"><p id="summary" role="status">Paste text and choose a level to begin.</p>
+<div id="report" hidden><h2>Word-by-word check</h2><p class="legend"><span class="later">Later lesson / no level tag</span> <span class="unknown">Not in bank</span> <span class="heart">Learned tricky / heart word</span></p><div id="marked"></div>
+<h2>Not yet available at this level</h2><div id="flagged"></div><h2>Not in word bank</h2><div id="unknown"></div>
+<details id="allWords"><summary>Complete word list, sorted by phonics skill (no duplicates)</summary><p class="small">Each word appears once with all its skill tags. Words without a skill tag sort last.</p><div class="btns"><button id="copyList">Copy list</button><button id="exportList">Download list (CSV)</button></div><div id="wordList"></div></details></div>
+<form id="addForm" hidden><h2>Add a word</h2><p class="small">Assign the tags you know. Leave a curriculum’s lessons blank when unknown; that word will be marked “no lesson tag” for that curriculum.</p><div id="tagFields"></div><div class="btns"><button class="primary" type="submit">Save word</button><button type="button" id="cancelAdd">Cancel</button></div><p id="addError" role="alert"></p></form>
+</div></main>
+<script src="data/wordbank.js"></script><script src="js/wordbank.js"></script><script src="vendor/jszip.min.js"></script><script src="js/text-files.js"></script><script src="js/checker.js"></script></body></html>

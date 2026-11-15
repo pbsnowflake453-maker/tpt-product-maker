@@ -55,7 +55,8 @@ T.products.push({id:'mystery',name:'Mystery Picture',title:'Mystery Picture',ori
         const toks=sks.flatMap(sk=>(sk.members?SKILLS.filter(s=>sk.members.includes(s.name)):[sk]).map(s=>T.readLabel(s))).map(l=>l.replace(/\//g,'')).filter(t=>/^[a-z_]+$/.test(t)&&!t.includes('_'));
         const vow=sks.flatMap(sk=>(sk.members||[sk.name]).map(n=>(n.match(/^Short ([aeiou]) CVC/)||[])[1]).filter(Boolean));
         const maxPos=Math.max(...sks.map(sk=>sk.pos||0)); const src=SKILLS.filter(s=>!s.category&&!['Tricky Words','Dolch Sight Words','Fry Sight Words'].includes(s.group)&&s.pos<=maxPos&&!sks.includes(s));
-        let pool=[...new Set(src.flatMap(s=>T.readPools(s).reg))].filter(w=>!bad.has(w)&&!toks.some(t=>w.includes(t))&&!vow.some(v=>w.includes(v)));
+        const ufli=sks.filter(s=>s.curriculum==='ufli'), ufliMax=Math.max(...ufli.map(s=>s.lesson));
+        let pool=[...new Set(src.flatMap(s=>T.readPools(s).reg))].filter(w=>(!ufli.length||BANK.state(w,{curriculum:'ufli',lesson:ufliMax,hearts:false}).status==='decodable')&&!bad.has(w)&&!toks.some(t=>w.includes(t))&&!vow.some(v=>w.includes(v)));
         lists['.']=pool; bgInfo=pool.length?`Background: ${pool.length} earlier-taught words not on the key (e.g. ${pool.slice(0,6).join(', ')})`:'';}
       if(!lists['.'].length){lists['.']=['?']; bgInfo='<span class="warn">⚠ No earlier-taught words are left for the background with these skills, so background squares show "?". Pick later skills or turn off "Don\'t color the background".</span>';}
       else if(lists['.'].length<10&&!bgInfo.includes('warn')) bgInfo+=` <span class="warn">(only ${lists['.'].length} background words, so they repeat)</span>`;}

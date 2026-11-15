@@ -34,6 +34,11 @@ const THEMES={
   sky:{p:'#1F7FD6',d:'#0F4C8A',l:'#E3F1FF',a:'#FFD23F',dot:'#3E96E8'},
   sunny:{p:'#F5A90F',d:'#A86B00',l:'#FFF4D6',a:'#C62833',dot:'#FFBC3A'},
   grape:{p:'#7A3FB0',d:'#4B2073',l:'#F1E6FB',a:'#FFD23F',dot:'#9157C6'},
+  lime:{p:'#D8EE26',d:'#5F6E00',l:'#FBFDDC',a:'#D8EE26',dot:'#BCCF21'},
+  teal:{p:'#087E8B',d:'#03515C',l:'#E2F5F3',a:'#70E5D0',dot:'#169CA6'},
+  coral:{p:'#F26555',d:'#93382D',l:'#FFEAE4',a:'#FFB9A0',dot:'#DF5143'},
+  rose:{p:'#C95082',d:'#7A294C',l:'#FCE9F0',a:'#F7B4CF',dot:'#DA769D'},
+  peach:{p:'#EAA268',d:'#855228',l:'#FFF1E5',a:'#FFD5AD',dot:'#D88C54'},
   mint:{p:'#12A079',d:'#0B6B50',l:'#DDF7EE',a:'#FFD23F',dot:'#33B891'}};
 let logo=null; async function getLogo(){ if(logo) return logo; logo=new Image(); logo.src='assets/logo-brand.png'; await logo.decode(); return logo; }
 const FONT=(w,s,f)=>`${w} ${s}px ${f}`;
@@ -176,18 +181,59 @@ function stats(spec){
   included.push('Print and go');
   return {R,student,keys,nStudent,defaultPicks,hasKey,included};
 }
+// Bold Spotlight: high-contrast type bands, real page fan, highlighter callouts.
+function blockText(g,text,x,y,w,h,color,max=160){
+  const value=String(text||'').toUpperCase();if(!value)return;
+  let size=max,lines;
+  do{lines=wrapText(g,value,'700','Fredoka',size,w);g.font=FONT(700,size,'Fredoka');if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
+  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(700,size,'Fredoka');
+  const top=y+h/2-(lines.length-1)*size*1.08/2;lines.forEach((l,i)=>g.fillText(l,x+w/2,top+i*size*1.08));
+}
+function spotlightBars(g,spec,th){
+  g.fillStyle='#101010';g.fillRect(0,0,S,340);blockText(g,spec.title,90,30,S-180,280,'#fff',180);
+  g.fillStyle='#fff';g.fillRect(14,354,S-28,170);g.strokeStyle='#111';g.lineWidth=12;g.strokeRect(14,354,S-28,170);
+  const sub=TX(spec).subtitle||skillsOf(spec)||spec.opts.grade||'PRINT • PRACTICE • PLAY';blockText(g,sub,65,365,S-130,145,'#111',98);
+  g.fillStyle='#101010';g.fillRect(0,1820,S,180);blockText(g,TX(spec).store||STORE,50,1835,S-100,140,'#fff',86);
+}
+function marker(g,th,text,x,y,w){g.save();g.translate(x,y);g.rotate(-0.09);g.fillStyle=th.a;g.strokeStyle='#111';g.lineWidth=9;g.beginPath();g.moveTo(0,0);g.lineTo(w-50,0);g.quadraticCurveTo(w+50,65,w-50,130);g.lineTo(0,130);g.closePath();g.fill();g.stroke();blockText(g,text,12,8,w-55,110,'#111',73);g.restore();}
+async function spotlightCover(spec,th,L,st){
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,spec,th);
+  const pics=(spec.picks.length?spec.picks:st.defaultPicks).slice(0,3);
+  const ims=pics.map(p=>pageImg(p,1130,1100));
+  if(ims.length>1)paper(g,ims[1],1370,1190,0.12);
+  if(ims.length>2)paper(g,ims[2],650,1210,-0.13);
+  if(ims.length)paper(g,ims[0],1040,1120,-0.018);
+  const X=TX(spec), labels=(X.included||st.included).slice(0,3);
+  labels.forEach((txt,i)=>marker(g,th,txt,20,1110+i*170,660));
+  if(spec.opts.grade){pill(g,1370,560,560,115,'#111','#111',4);blockText(g,spec.opts.grade,1390,565,520,100,'#fff',68);}
+  if(has(X,'keyBurst')?X.keyBurst:st.hasKey){pill(g,1300,700,630,110,th.a,'#111',7);blockText(g,(X.keyTop??'ANSWER')+' '+(X.keyBot??'KEY'),1320,708,590,90,'#111',65);}
+  const rb=defaults(spec,st).ribbon;if(rb){g.fillStyle=th.p;g.strokeStyle='#111';g.lineWidth=10;g.fillRect(470,1635,1510,155);g.strokeRect(470,1635,1510,155);blockText(g,rb,500,1650,1450,120,th.d==='#A86B00'||['lime','sunny','peach'].includes(spec.opts.theme)?'#111':'#fff',78);}
+  logoBadge(g,L,180,1690,108);return c;
+}
+async function spotlightPreview(spec,th,L,page,role,k,total,title,skills){
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,{...spec,title,text:{...TX(spec),subtitle:skills}},th);
+  const im=pageImg(page,1660,1170);paper(g,im,1000,1155,0);
+  const label=role==='key'?(TX(spec).keyLabel??'ANSWER KEY'):(TX(spec).previewLabel??'PREVIEW');if(label)marker(g,th,label,18,1575,670);logoBadge(g,L,1825,1685,105);return c;
+}
+async function spotlightIncluded(spec,th,L,st){
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,{...spec,title:"What's Included",text:{...TX(spec),subtitle:spec.title}},th);
+  const items=defaults(spec,st).included,top=600,h=1120/Math.max(1,items.length);
+  items.forEach((text,i)=>{const y=top+i*h;g.fillStyle=th.a;g.fillRect(100,y+10,110,h-25);blockText(g,String(i+1),100,y+10,110,h-25,'#111',65);blockText(g,text,240,y+10,1630,h-25,'#111',84);});return c;
+}
+
 async function build(spec){
   spec.opts=spec.opts||{}; spec.picks=spec.picks||[];
   const th=THEMES[spec.opts.theme]||THEMES.apple, L=await getLogo(), st=stats(spec), out=[];
   spec.title=spec.title||(spec.isBundle?(spec.prods.map(p=>p.title).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' Bundle'):spec.prod.title);
   const skillsTxt=skillsOf(spec), X=TX(spec);
-  out.push(['01-cover.png',await cover(spec,th,L,st)]);
+  const spotlight=spec.opts.style==='spotlight';
+  out.push(['01-cover.png',await (spotlight?spotlightCover:cover)(spec,th,L,st)]);
   const picks=spec.picks.length?spec.picks:[...st.defaultPicks.slice(0,3)].concat(st.keys.length?[spec.doc.pages[st.keys[0]]]:[]);
   const prodFor=(pg)=>{ // bundles: name the product the page belongs to
     if(!spec.isBundle||!spec.doc.sets) return has(X,'previewTitle')&&X.previewTitle?X.previewTitle:spec.prod.title; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?s.prod.title:spec.prod.title;};
   const labFor=(pg)=>{ if(!spec.isBundle||!spec.doc.sets) return has(X,'previewPill')?X.previewPill:skillsTxt; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?skillsLine(BUNDLE.skillsOf([s.sec.label])):skillsTxt;};
-  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await preview(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
-  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await included(spec,th,L,st)]);
+  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await (spotlight?spotlightPreview:preview)(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
+  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await (spotlight?spotlightIncluded:included)(spec,th,L,st)]);
   const first=spec.prod, label=skillsTxt, grade=spec.opts.grade;
   const title=`${spec.title}${label?' - '+label:''}${grade?' - '+grade:''}`.replace(/\u2014/g,'-');
   const prods=[...new Set((spec.prods||[spec.prod]).map(p=>p.id))];

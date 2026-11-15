@@ -90,7 +90,7 @@ function specNow(){
   const pages=allPages(), pk=effectivePicks();
   const text={}; for(const k of Object.keys(FIELD)){ if(['title','grade'].includes(k)) continue; let v=val(k); if(k==='included') v=v.split('\n').map(x=>x.trim()).filter(Boolean); text[k]=v; }
   text.keyBurst=$('fKey').checked; if(!text.previewTitle) delete text.previewTitle;
-  return {prod:{id:'dropin',title:val('title')},prods:[{id:'dropin',title:val('title')}],title:val('title')||'Listing',skills:[],opts:{grade:val('grade').trim(),theme:$('fTheme').value},doc:{pages},picks:pk,isBundle:false,nSets:1,text};
+  return {prod:{id:'dropin',title:val('title')},prods:[{id:'dropin',title:val('title')}],title:val('title')||'Listing',skills:[],opts:{grade:val('grade').trim(),theme:$('fTheme').value,style:$('fStyle').value},doc:{pages},picks:pk,isBundle:false,nSets:1,text};
 }
 // ---------- live preview
 let timer=null; function schedule(){ clearTimeout(timer); timer=setTimeout(render,250); $('dl').disabled=true; }
@@ -118,7 +118,7 @@ for(const ev of ['dragleave','drop']) document.addEventListener(ev,e=>{ if(ev===
 document.addEventListener('drop',e=>{ if(e.dataTransfer&&e.dataTransfer.files.length){ e.preventDefault(); addFiles(e.dataTransfer.files); } });
 document.addEventListener('paste',e=>{ const fs=[...(e.clipboardData?e.clipboardData.files:[])]; if(fs.length) addFiles(fs); });
 for(const [k,id] of Object.entries(FIELD)) $(id).addEventListener('input',()=>{ touched[k]=true; if(k==='title'||k==='skills'||k==='grade') autoText(); schedule(); });
-$('fKey').onchange=()=>{touched.keyBurst=true; schedule();}; $('fTheme').onchange=schedule;
+$('fKey').onchange=()=>{touched.keyBurst=true; schedule();}; $('fTheme').onchange=schedule; $('fStyle').onchange=schedule;
 $('pickClear').onclick=()=>{picks=[]; badges(); autoText(); schedule();}; $('dl').onclick=download;
 $(FIELD.store).value=TPT.STORE; $(FIELD.store).placeholder=TPT.STORE;
 (async()=>{ await TPT.init(); status('Drop a file to get started.'); autoText(); })();
