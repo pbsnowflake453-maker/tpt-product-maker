@@ -181,18 +181,19 @@ function stats(spec){
   included.push('Print and go');
   return {R,student,keys,nStudent,defaultPicks,hasKey,included};
 }
-// Bold Spotlight: GelPenSerif Heavy (chunky gel-pen handwritten serif); shared title border; overlapping page fan and footer logo.
-// GelPenSerif Heavy is loaded only for this listing style. Place GelPenSerifHeavy.ttf in site/fonts/.
+// Bold Spotlight: Samantha’s supplied GelPenSerif; shared title border; overlapping page fan and footer logo.
+// The supplied GelPenSerif Medium face is bundled and loaded before this listing style renders.
+const SPOTLIGHT_FONT='GelPenSerif, Andika, sans-serif';
 let spotlightFont=null;
 async function loadSpotlightFont(){
-  if(!spotlightFont){const face=new FontFace('GelPenSerif','url(fonts/GelPenSerifHeavy.ttf)',{weight:'800'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
+  if(!spotlightFont){const face=new FontFace('GelPenSerif','url(fonts/GelPenSerif.ttf)',{weight:'500'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
   return spotlightFont;
 }
 function blockText(g,text,x,y,w,h,color,max=160){
   const value=String(text||'');if(!value)return;
   let size=max,lines;
-  do{lines=wrapText(g,value,'800','GelPenSerif',size,w);g.font=FONT(800,size,'GelPenSerif');if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
-  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(800,size,'GelPenSerif');
+  do{lines=wrapText(g,value,'500',SPOTLIGHT_FONT,size,w);g.font=FONT(500,size,SPOTLIGHT_FONT);if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
+  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(500,size,SPOTLIGHT_FONT);
   const top=y+h/2-(lines.length-1)*size*1.08/2;lines.forEach((l,i)=>g.fillText(l,x+w/2,top+i*size*1.08));
 }
 function spotlightBars(g,spec,th){
@@ -240,6 +241,9 @@ async function spotlightIncluded(spec,th,L,st){
   items.forEach((text,i)=>{const y=top+i*h;g.fillStyle=th.a;g.fillRect(100,y+10,110,h-25);blockText(g,String(i+1),100,y+10,110,h-25,'#111',65);blockText(g,text,240,y+10,1630,h-25,'#111',84);});spotlightLogo(g,L);return c;
 }
 async function build(spec){
+  spec.opts=spec.opts||{};spec.picks=spec.picks||[];
+  spec.title=spec.title||(spec.isBundle?(spec.prods.map(p=>p.title).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' Bundle'):spec.prod.title);
+  if(spec.opts.style==='spotlight')await loadSpotlightFont();
   const L=await getLogo(), th=THEMES[spec.opts.theme]||THEMES.apple, st=stats(spec), X=TX(spec);
   const skillsTxt=skillsOf(spec);
   const out=[[ '01-cover.png', await (spec.opts.style==='spotlight'?spotlightCover:cover)(spec,th,L,st)]];

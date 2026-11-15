@@ -4,7 +4,7 @@ const {JSDOM}=require(process.env.JSDOM||'/tmp/tpt-test-runtime/node_modules/jsd
 const fs=require('fs'), path=require('path');
 const C=require(process.env.CANVAS||(process.env.CODEX_PRIMARY_RUNTIME_NODE_MODULES+'/@napi-rs/canvas'));
 const root=process.cwd()+'/site/';
-for(const [f,fam] of [['Andika-Regular.ttf','Andika'],['Andika-Bold.ttf','Andika'],['Pacifico-Regular.ttf','Pacifico'],['Fredoka-Bold.ttf','Fredoka'],['Fraunces-Black.ttf','Fraunces']])C.GlobalFonts.registerFromPath(root+'fonts/'+f,fam);
+for(const [f,fam] of [['Andika-Regular.ttf','Andika'],['Andika-Bold.ttf','Andika'],['Pacifico-Regular.ttf','Pacifico'],['Fredoka-Bold.ttf','Fredoka'],['GelPenSerif.ttf','GelPenSerif']])C.GlobalFonts.registerFromPath(root+'fonts/'+f,fam);
 async function load(page='index.html',saved={}){
  const dom=new JSDOM(fs.readFileSync(root+page,'utf8'),{runScripts:'outside-only',url:'http://localhost/'+page,pretendToBeVisual:true});const w=dom.window;
  for(const [k,v]of Object.entries(saved))w.localStorage.setItem(k,v);
