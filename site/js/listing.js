@@ -182,10 +182,10 @@ function stats(spec){
   return {R,student,keys,nStudent,defaultPicks,hasKey,included};
 }
 // Bold Spotlight: chunky rounded display lettering (Baloo 2 ExtraBold); shared title border; overlapping page fan and footer logo.
-// Baloo 2 ExtraBold is loaded only for this listing style, leaving student-product fonts unchanged.
+// Baloo 2 ExtraBold (Google Fonts CDN, OFL) is loaded only for this listing style.
 let spotlightFont=null;
 async function loadSpotlightFont(){
-  if(!spotlightFont){const face=new FontFace('Baloo2','url(fonts/Baloo2-ExtraBold.ttf)',{weight:'800'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
+  if(!spotlightFont){const face=new FontFace('Baloo2','url(https://fonts.gstatic.com/s/baloo2/v21/wXK0E3kTposypRydzVT08TS3JnAmtdiayppm_lI.ttf)',{weight:'800'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
   return spotlightFont;
 }
 function blockText(g,text,x,y,w,h,color,max=160){
