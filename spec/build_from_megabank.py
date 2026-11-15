@@ -141,6 +141,32 @@ for name, group, rs in SK:
     if name == 'Tricky Words':   # sight words: all of them, placed where the last one is introduced
         pos = max(r['seq'] for r in rs); dec = [[r['w'], r['syl'], r['seq']] for r in rs]; ch = []
     o = {'name': name, 'group': group, 'placement': plc(first), 'pos': pos, 'decodable': dec, 'challenge': ch, 'intro': first}
+    # Declarative selectors let browser-added rows join the same tagged skill pools.
+    rule = {'tags': [name]} if name in {t for r in rs for t in r['tags']} else None
+    m = re.match(r'Short ([aeiou]) CVC$', name)
+    if m: rule = {'tags': ['short ' + m[1]], 'structure': 'cvc'}
+    mapped = {'CVCC (ending blends)': 'ending blends', 'CCVC (beginning blends)': 'beginning blends',
+              'CCCVC and CCCVCC (three-letter blends)': 'three-letter blends', 've': '-ve',
+              'oo (as in look)': 'oo (book)', 'oo (as in zoo)': 'oo (moon)', 'ou (as in out)': 'ou',
+              'Soft c (c before e, i, or y)': 'soft c', 'Soft g (g before e, i, or y)': 'soft g',
+              'Closed two-syllable words': 'closed/closed', 'Compound words': 'compound word',
+              'Contractions': 'contraction', 'Tricky Words': 'tricky word'}
+    if name in mapped: rule = {'tags': [mapped[name]]}
+    if name in ('ff', 'll', 'ss', 'zz'): rule = {'tags': ['floss rule'], 'suffix': name}
+    if name in ('ng', 'nk'): rule = {'contains': {'ending_blend': name}}
+    for prefix, suffix, tag in [('ce (', 'ce', 'ce/se'), ('se (', 'se', 'ce/se'), ('ge (', 'ge', 'soft g')]:
+        if name.startswith(prefix): rule = {'tags': [tag], 'suffix': suffix}
+    if group == 'Endings and Suffixes':
+        rule = {'forms': sorted({r['form'] for r in rs})}
+        endings = {r['ending_sound'] for r in rs}
+        changes = {r['spelling_change'] for r in rs}
+        if len(endings) == 1 and next(iter(endings)): rule['ending_sound'] = next(iter(endings))
+        if len(changes) == 1 and next(iter(changes)): rule['spelling_change'] = next(iter(changes))
+        if name == 's (says /z/ inside a word)': rule = None  # word-specific classification
+    if rule:
+        rule.setdefault('forms', sorted({r['form'] for r in rs}))
+        rule['tricky'] = 'yes' if name == 'Tricky Words' else 'no'
+        o['match'] = rule
     out_single.append(o); byname[name] = o
 
 def pool(members, cutoff=None):
@@ -178,6 +204,25 @@ for u in units:
     mem, dec, ch = unit_pool(u)
     U.append({'name': f'Through Unit {u}', 'group': 'Through Unit', 'category': True, 'members': mem, 'placement': f'Unit {u} (end)', 'pos': u * 100 + 99, 'decodable': dec, 'challenge': ch})
 
+# UFLI uses its own lesson ordering, independent of CKLA sequence numbers.
+# Heart words are excluded from phonics pools until explicitly tagged decodable.
+def ufli_dec(r):
+    value = r.get('ufli_decodable_lesson') if r.get('ufli_heart') == 'yes' else r.get('ufli_lesson')
+    return int(value) if value else None
+ufli = []
+for lesson in range(1, 129):
+    for cumulative in (False, True):
+        pool_rows = [r for r in rows if r['is_name'] == 'no' and ufli_dec(r) is not None
+                     and (ufli_dec(r) <= lesson if cumulative else ufli_dec(r) == lesson)]
+        # No invented pools for lessons absent from this bank.
+        if not pool_rows: continue
+        unique = {r['w']: r for r in sorted(pool_rows, key=lambda r: r['w'])}
+        ufli.append({'name': f"UFLI {'Through ' if cumulative else ''}Lesson {lesson}",
+                     'group': 'UFLI Cumulative' if cumulative else 'UFLI Lessons', 'category': True,
+                     'curriculum': 'ufli', 'lesson': lesson, 'cumulative': cumulative,
+                     'placement': f'Lesson {lesson}', 'pos': max(r['seq'] for r in pool_rows),
+                     'decodable': [] if cumulative else [[r['w'], r['syl'], r['seq']] for r in unique.values()], 'challenge': [], 'dynamic': cumulative})
+
 # ---- display names
 DISP = {'oo (as in look)': 'oo (look)', 'oo (as in zoo)': 'oo (soon)', 'oo (both sounds)': 'oo (both sounds)',
  'th (unvoiced, as in thin)': 'th (thin)', 'th (voiced, as in this)': 'th (this)',
@@ -192,7 +237,7 @@ allsk = U[0::2] + U[1::2]
 allsk = [x for pair in zip(U[0::2], U[1::2]) for x in pair]
 web = []
 unit_only = [x for x in U if x['group'] == 'CKLA Units']; through = [x for x in U if x['group'] == 'Through Unit']
-web = unit_only + through + cats + out_single
+web = unit_only + through + cats + out_single + ufli
 for x in web:
     x['disp'] = CAT_DISP.get(x['name'], disp(x)); x.pop('intro', None)
 seen = collections.defaultdict(list)
@@ -211,3 +256,8 @@ json.dump(words, open(os.path.join(ROOT, 'data-src/bank_index.json'), 'w'), sepa
 for x in web:
     one = sum(1 for w in x['decodable'] if w[1] == 1)
     print(f"{x['group']:<46} {x['disp']:<34} {x['placement']:<12} {len(x['decodable']):>4} dec ({one} 1-syl) {len(x['challenge']):>4} challenge")
+
+# Full, lossless browser bank for lesson checking, tagging, and CSV export.
+fields = list(csv.DictReader(open(os.path.join(ROOT, 'data-src/phonics_words.csv'), encoding='utf-8')).fieldnames)
+source_rows = [{k: r[k] for k in fields} for r in rows]
+open(os.path.join(ROOT, 'site/data/wordbank.js'), 'w').write('// GENERATED by spec/build_from_megabank.py. Do not edit.\nwindow.WORDBANK=' + json.dumps({'fields': fields, 'rows': source_rows}, ensure_ascii=False, separators=(',', ':')) + ';\n')

@@ -77,7 +77,7 @@ T.products.push({id:'rollread',name:'Roll and Read',title:'Roll and Read',orient
     const chal=pl.ch.length>=12;
     const bw=[T.fillGrid(pl.reg,r),T.fillGrid(pl.reg,r),chal?T.fillGrid(pl.ch,r):T.fillGrid(pl.reg,r)];
     const boards=bw.map((w,i)=>board(w,label,i+1,chal&&i===2));
-    const info=`<b>${sk.disp||sk.name}</b> · CKLA ${sk.placement}<br>Boards 1–${chal?2:3}: ${pl.reg.length} decodable words (${pl.base}-syllable)<br>`+
+    const info=`<b>${sk.disp||sk.name}</b> · ${sk.curriculum==='ufli'?'UFLI':'CKLA'} ${sk.placement}<br>Boards 1–${chal?2:3}: ${pl.reg.length} decodable words (${pl.base}-syllable)<br>`+
       (chal?`Board 3 Challenge: ${pl.ch.length} words`:`No Challenge board (${pl.ch.length} challenge words, needs 12)`)+(pl.note?'<br>'+pl.note:'');
     return {label,pages:[...boards,wordList(sk,label,pl,new Set(bw.flat()))],preview:boards[0],chal,info,repeats:bw.map(b=>36-new Set(b).size)};
   },

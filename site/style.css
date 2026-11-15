@@ -49,3 +49,6 @@ details{margin-top:8px}summary{cursor:pointer;font-size:13px;font-weight:700}
 #twLetters .tw-row button.hide{background:#000;color:#fff;border-color:#000}
 #twLetters .tw-row button.tw-reset{width:auto;height:26px;padding:0 8px;margin-left:6px;font-size:12px}
 #twLetters .tw-row.custom::before{content:"\25CF";font-size:9px;position:absolute;left:2px;top:50%;transform:translateY(-50%)}
+
+header{flex-wrap:wrap}
+@media(max-width:700px){main{flex-direction:column;padding:12px}aside{width:100%}#preview{grid-template-columns:minmax(0,1fr)}header{padding:10px 12px}header>a{margin-left:0!important}header>div{flex:1;min-width:180px}}

@@ -34,6 +34,11 @@ const THEMES={
   sky:{p:'#1F7FD6',d:'#0F4C8A',l:'#E3F1FF',a:'#FFD23F',dot:'#3E96E8'},
   sunny:{p:'#F5A90F',d:'#A86B00',l:'#FFF4D6',a:'#C62833',dot:'#FFBC3A'},
   grape:{p:'#7A3FB0',d:'#4B2073',l:'#F1E6FB',a:'#FFD23F',dot:'#9157C6'},
+  lime:{p:'#D8EE26',d:'#5F6E00',l:'#FBFDDC',a:'#D8EE26',dot:'#BCCF21'},
+  teal:{p:'#087E8B',d:'#03515C',l:'#E2F5F3',a:'#70E5D0',dot:'#169CA6'},
+  coral:{p:'#F26555',d:'#93382D',l:'#FFEAE4',a:'#FFB9A0',dot:'#DF5143'},
+  rose:{p:'#C95082',d:'#7A294C',l:'#FCE9F0',a:'#F7B4CF',dot:'#DA769D'},
+  peach:{p:'#EAA268',d:'#855228',l:'#FFF1E5',a:'#FFD5AD',dot:'#D88C54'},
   mint:{p:'#12A079',d:'#0B6B50',l:'#DDF7EE',a:'#FFD23F',dot:'#33B891'}};
 let logo=null; async function getLogo(){ if(logo) return logo; logo=new Image(); logo.src='assets/logo-brand.png'; await logo.decode(); return logo; }
 const FONT=(w,s,f)=>`${w} ${s}px ${f}`;
@@ -176,18 +181,78 @@ function stats(spec){
   included.push('Print and go');
   return {R,student,keys,nStudent,defaultPicks,hasKey,included};
 }
+// Bold Spotlight: Samantha’s supplied GelPenSerif; shared title border; overlapping page fan and footer logo.
+// The supplied GelPenSerif Medium face is bundled and loaded before this listing style renders.
+const SPOTLIGHT_FONT='GelPenSerif, Andika, sans-serif';
+let spotlightFont=null;
+async function loadSpotlightFont(){
+  if(!spotlightFont){const face=new FontFace('GelPenSerif','url(fonts/GelPenSerif.ttf)',{weight:'500'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
+  return spotlightFont;
+}
+function blockText(g,text,x,y,w,h,color,max=160){
+  const value=String(text||'');if(!value)return;
+  let size=max,lines;
+  do{lines=wrapText(g,value,'500',SPOTLIGHT_FONT,size,w);g.font=FONT(500,size,SPOTLIGHT_FONT);if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
+  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(500,size,SPOTLIGHT_FONT);
+  const top=y+h/2-(lines.length-1)*size*1.08/2;lines.forEach((l,i)=>g.fillText(l,x+w/2,top+i*size*1.08));
+}
+function spotlightBars(g,spec,th){
+  g.fillStyle='#101010';g.fillRect(0,0,S,320);blockText(g,spec.title,90,25,S-180,270,'#fff',190);
+  // The skill band starts on the title band's lower edge: one continuous border, no gap.
+  g.fillStyle='#fff';g.fillRect(0,320,S,180);g.strokeStyle='#111';g.lineWidth=12;g.strokeRect(0,320,S,180);
+  const sub=TX(spec).subtitle||skillsOf(spec)||spec.opts.grade||'Print • Practice • Play';blockText(g,sub,65,335,S-130,150,'#111',105);
+  // A slim brand strip leaves room for the logo to overlap it without covering the brand name.
+  g.fillStyle='#101010';g.fillRect(0,1904,S,96);blockText(g,TX(spec).store||STORE,330,1910,S-390,80,'#fff',78);
+}
+function marker(g,th,text,x,y,w){
+  g.save();g.translate(x,y);g.rotate(-0.09);g.fillStyle=th.a;g.strokeStyle='#111';g.lineWidth=9;g.beginPath();g.moveTo(0,0);g.lineTo(w-50,0);g.quadraticCurveTo(w+50,65,w-50,130);g.lineTo(0,130);g.closePath();g.fill();g.stroke();
+  // Bleed the strip off the left edge, keeping its lettering inside the image.
+  const pad=Math.max(12,-x+20);blockText(g,text,pad,8,w-pad-55,110,'#111',73);g.restore();
+}
+function spotlightLogo(g,L){logoBadge(g,L,165,1880,108);}
+async function spotlightCover(spec,th,L,st){
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,spec,th);
+  const pics=(spec.picks.length?spec.picks:st.defaultPicks).slice(0,3);
+  const ims=pics.map(p=>pageImg(p,980,860));
+  // Pages fan out from a shared base, rising behind the grade badge.
+  if(ims.length===1) paper(g,ims[0],S/2,1120,0);
+  else if(ims.length===2){paper(g,ims[0],S/2-280,1140,-0.08);paper(g,ims[1],S/2+280,1100,0.06);}
+  else {paper(g,ims[2],S/2-420,1180,-0.12);paper(g,ims[1],S/2+420,1140,0.09);paper(g,ims[0],S/2,1080,-0.01);}
+  const X=TX(spec);
+  if(spec.opts.grade){pill(g,1370,540,560,115,'#111','#111',4);blockText(g,spec.opts.grade,1390,545,520,100,'#fff',72);}
+  if(has(X,'keyBurst')?X.keyBurst:st.hasKey){pill(g,1300,690,630,110,th.a,'#111',7);blockText(g,(X.keyTop??'ANSWER')+' '+(X.keyBot??'KEY'),1320,698,590,90,'#111',65);}
+  const rb=defaults(spec,st).ribbon;if(rb){g.fillStyle=th.p;g.strokeStyle='#111';g.lineWidth=10;g.fillRect(470,1635,1510,155);g.strokeRect(470,1635,1510,155);blockText(g,rb,500,1650,1450,120,th.d==='#A86B00'||['lime','sunny','peach'].includes(spec.opts.theme)?'#111':'#fff',78);}
+  spotlightLogo(g,L);return c;
+}
+async function spotlightPreview(spec,th,L,page,role,k,total,prodTitle,skillsTxt){
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);
+  g.fillStyle='#101010';g.fillRect(0,0,S,280);blockText(g,prodTitle,80,20,S-160,240,'#fff',160);
+  if(skillsTxt){g.fillStyle='#fff';g.fillRect(0,280,S,140);g.strokeStyle='#111';g.lineWidth=10;g.strokeRect(0,280,S,140);blockText(g,skillsTxt,60,290,S-120,120,'#111',80);}
+  const im=pageImg(page,1500,1180);paper(g,im,S/2,860+(k%2?10:-10),(k%2?0.008:-0.008));
+  const X=TX(spec), label=(role==='key'?(has(X,'keyLabel')?X.keyLabel:'ANSWER KEY'):(has(X,'previewLabel')?X.previewLabel:'PREVIEW'));
+  if(label){pill(g,70,S-200,Math.min(900,g.measureText(label).width+180),120,th.a,'#111',8);blockText(g,label,90,S-185,Math.min(860,g.measureText(label).width+140),90,'#111',70);}
+  spotlightLogo(g,L);return c;
+}
+async function spotlightIncluded(spec,th,L,st){
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,spec,th);
+  g.fillStyle='#fff';g.strokeStyle='#111';g.lineWidth=12;g.fillRect(80,540,S-160,1280);g.strokeRect(80,540,S-160,1280);
+  blockText(g,"What's Included",100,560,S-200,140,'#111',110);
+  const items=defaults(spec,st).included, top=740, h=Math.min(160,(S-200-740)/items.length);
+  items.forEach((text,i)=>{const y=top+i*h;g.fillStyle=th.a;g.fillRect(100,y+10,110,h-25);blockText(g,String(i+1),100,y+10,110,h-25,'#111',65);blockText(g,text,240,y+10,1630,h-25,'#111',84);});spotlightLogo(g,L);return c;
+}
 async function build(spec){
-  spec.opts=spec.opts||{}; spec.picks=spec.picks||[];
-  const th=THEMES[spec.opts.theme]||THEMES.apple, L=await getLogo(), st=stats(spec), out=[];
+  spec.opts=spec.opts||{};spec.picks=spec.picks||[];
   spec.title=spec.title||(spec.isBundle?(spec.prods.map(p=>p.title).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' Bundle'):spec.prod.title);
-  const skillsTxt=skillsOf(spec), X=TX(spec);
-  out.push(['01-cover.png',await cover(spec,th,L,st)]);
+  if(spec.opts.style==='spotlight')await loadSpotlightFont();
+  const L=await getLogo(), th=THEMES[spec.opts.theme]||THEMES.apple, st=stats(spec), X=TX(spec);
+  const skillsTxt=skillsOf(spec);
+  const out=[[ '01-cover.png', await (spec.opts.style==='spotlight'?spotlightCover:cover)(spec,th,L,st)]];
   const picks=spec.picks.length?spec.picks:[...st.defaultPicks.slice(0,3)].concat(st.keys.length?[spec.doc.pages[st.keys[0]]]:[]);
   const prodFor=(pg)=>{ // bundles: name the product the page belongs to
     if(!spec.isBundle||!spec.doc.sets) return has(X,'previewTitle')&&X.previewTitle?X.previewTitle:spec.prod.title; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?s.prod.title:spec.prod.title;};
   const labFor=(pg)=>{ if(!spec.isBundle||!spec.doc.sets) return has(X,'previewPill')?X.previewPill:skillsTxt; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?skillsLine(BUNDLE.skillsOf([s.sec.label])):skillsTxt;};
-  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await preview(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
-  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await included(spec,th,L,st)]);
+  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await (spec.opts.style==='spotlight'?spotlightPreview:preview)(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
+  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await (spec.opts.style==='spotlight'?spotlightIncluded:included)(spec,th,L,st)]);
   const first=spec.prod, label=skillsTxt, grade=spec.opts.grade;
   const title=`${spec.title}${label?' - '+label:''}${grade?' - '+grade:''}`.replace(/\u2014/g,'-');
   const prods=[...new Set((spec.prods||[spec.prod]).map(p=>p.id))];
