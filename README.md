@@ -63,4 +63,4 @@ See **AGENTS.md** for all approved style and product rules.
 
 `node tests/features.js` uses the offline DOM/canvas harness in `tests/offline.js` (jsdom and @napi-rs/canvas, configured using the `JSDOM` and `CANVAS` module paths). It builds all offered reading skills across nine products, exports each product as PDF/PPTX/PNG, checks UFLI 56, mixed bundles, all palettes/styles, the checker/tagging UI and file extraction. This harness is functional coverage, not a replacement for browser layout testing. `node tests/pdf.js` additionally exercises the actual vendored PDF text extractor and worker cleanup. Existing Playwright suites remain the browser regression checks; use `PW` and `CHROME` as described in `tests/lib.js`.
 
-Work for this update is on `feature/ufli-text-checker-listing`. Do not merge to `main` or publish until Samantha explicitly says to. Commits on this work use `[skip netlify]` to avoid branch deploys.
+Work for this update is on `feature/ufli-text-checker-listing`. Do not merge to `main` or publish until Samantha explicitly says to. Preview deploy enabled so the free Netlify link can be checked before merging.
