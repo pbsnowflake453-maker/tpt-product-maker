@@ -181,44 +181,58 @@ function stats(spec){
   included.push('Print and go');
   return {R,student,keys,nStudent,defaultPicks,hasKey,included};
 }
-// Bold Spotlight: high-contrast type bands, real page fan, highlighter callouts.
+// Bold Spotlight: rounded, heavy serif lettering; shared title border; overlapping page fan and footer logo.
+// Fraunces is loaded only for this listing style, leaving student-product fonts unchanged.
+let spotlightFont=null;
+async function loadSpotlightFont(){
+  if(!spotlightFont){const face=new FontFace('Fraunces','url(fonts/Fraunces-Black.ttf)',{weight:'900'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
+  return spotlightFont;
+}
 function blockText(g,text,x,y,w,h,color,max=160){
-  const value=String(text||'').toUpperCase();if(!value)return;
+  const value=String(text||'');if(!value)return;
   let size=max,lines;
-  do{lines=wrapText(g,value,'700','Fredoka',size,w);g.font=FONT(700,size,'Fredoka');if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
-  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(700,size,'Fredoka');
+  do{lines=wrapText(g,value,'900','Fraunces',size,w);g.font=FONT(900,size,'Fraunces');if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
+  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(900,size,'Fraunces');
   const top=y+h/2-(lines.length-1)*size*1.08/2;lines.forEach((l,i)=>g.fillText(l,x+w/2,top+i*size*1.08));
 }
 function spotlightBars(g,spec,th){
-  g.fillStyle='#101010';g.fillRect(0,0,S,340);blockText(g,spec.title,90,30,S-180,280,'#fff',180);
-  g.fillStyle='#fff';g.fillRect(14,354,S-28,170);g.strokeStyle='#111';g.lineWidth=12;g.strokeRect(14,354,S-28,170);
-  const sub=TX(spec).subtitle||skillsOf(spec)||spec.opts.grade||'PRINT • PRACTICE • PLAY';blockText(g,sub,65,365,S-130,145,'#111',98);
-  g.fillStyle='#101010';g.fillRect(0,1820,S,180);blockText(g,TX(spec).store||STORE,50,1835,S-100,140,'#fff',86);
+  g.fillStyle='#101010';g.fillRect(0,0,S,320);blockText(g,spec.title,90,25,S-180,270,'#fff',190);
+  // The skill band starts on the title band's lower edge: one continuous border, no gap.
+  g.fillStyle='#fff';g.fillRect(0,320,S,180);g.strokeStyle='#111';g.lineWidth=12;g.strokeRect(0,320,S,180);
+  const sub=TX(spec).subtitle||skillsOf(spec)||spec.opts.grade||'Print • Practice • Play';blockText(g,sub,65,335,S-130,150,'#111',105);
+  // A slim brand strip leaves room for the logo to overlap it without covering the brand name.
+  g.fillStyle='#101010';g.fillRect(0,1904,S,96);blockText(g,TX(spec).store||STORE,330,1910,S-390,80,'#fff',78);
 }
-function marker(g,th,text,x,y,w){g.save();g.translate(x,y);g.rotate(-0.09);g.fillStyle=th.a;g.strokeStyle='#111';g.lineWidth=9;g.beginPath();g.moveTo(0,0);g.lineTo(w-50,0);g.quadraticCurveTo(w+50,65,w-50,130);g.lineTo(0,130);g.closePath();g.fill();g.stroke();blockText(g,text,12,8,w-55,110,'#111',73);g.restore();}
+function marker(g,th,text,x,y,w){
+  g.save();g.translate(x,y);g.rotate(-0.09);g.fillStyle=th.a;g.strokeStyle='#111';g.lineWidth=9;g.beginPath();g.moveTo(0,0);g.lineTo(w-50,0);g.quadraticCurveTo(w+50,65,w-50,130);g.lineTo(0,130);g.closePath();g.fill();g.stroke();
+  // Bleed the strip off the left edge, keeping its lettering inside the image.
+  const pad=Math.max(12,-x+20);blockText(g,text,pad,8,w-pad-55,110,'#111',73);g.restore();
+}
+function spotlightLogo(g,L){logoBadge(g,L,165,1880,108);}
 async function spotlightCover(spec,th,L,st){
   const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,spec,th);
   const pics=(spec.picks.length?spec.picks:st.defaultPicks).slice(0,3);
   const ims=pics.map(p=>pageImg(p,1130,1100));
-  if(ims.length>1)paper(g,ims[1],1370,1190,0.12);
-  if(ims.length>2)paper(g,ims[2],650,1210,-0.13);
-  if(ims.length)paper(g,ims[0],1040,1120,-0.018);
+  if(ims.length>1)paper(g,ims[1],1370,1075,0.12);
+  if(ims.length>2)paper(g,ims[2],650,1090,-0.13);
+  if(ims.length)paper(g,ims[0],1040,1000,-0.018);
   const X=TX(spec), labels=(X.included||st.included).slice(0,3);
-  labels.forEach((txt,i)=>marker(g,th,txt,20,1110+i*170,660));
-  if(spec.opts.grade){pill(g,1370,560,560,115,'#111','#111',4);blockText(g,spec.opts.grade,1390,565,520,100,'#fff',68);}
-  if(has(X,'keyBurst')?X.keyBurst:st.hasKey){pill(g,1300,700,630,110,th.a,'#111',7);blockText(g,(X.keyTop??'ANSWER')+' '+(X.keyBot??'KEY'),1320,708,590,90,'#111',65);}
+  labels.forEach((txt,i)=>marker(g,th,txt,-55,1080+i*170,735));
+  // Draw the grade after the page fan so it overlaps the page grabs as they move higher.
+  if(spec.opts.grade){pill(g,1370,540,560,115,'#111','#111',4);blockText(g,spec.opts.grade,1390,545,520,100,'#fff',72);}
+  if(has(X,'keyBurst')?X.keyBurst:st.hasKey){pill(g,1300,690,630,110,th.a,'#111',7);blockText(g,(X.keyTop??'ANSWER')+' '+(X.keyBot??'KEY'),1320,698,590,90,'#111',65);}
   const rb=defaults(spec,st).ribbon;if(rb){g.fillStyle=th.p;g.strokeStyle='#111';g.lineWidth=10;g.fillRect(470,1635,1510,155);g.strokeRect(470,1635,1510,155);blockText(g,rb,500,1650,1450,120,th.d==='#A86B00'||['lime','sunny','peach'].includes(spec.opts.theme)?'#111':'#fff',78);}
-  logoBadge(g,L,180,1690,108);return c;
+  spotlightLogo(g,L);return c;
 }
 async function spotlightPreview(spec,th,L,page,role,k,total,title,skills){
   const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,{...spec,title,text:{...TX(spec),subtitle:skills}},th);
   const im=pageImg(page,1660,1170);paper(g,im,1000,1155,0);
-  const label=role==='key'?(TX(spec).keyLabel??'ANSWER KEY'):(TX(spec).previewLabel??'PREVIEW');if(label)marker(g,th,label,18,1575,670);logoBadge(g,L,1825,1685,105);return c;
+  const label=role==='key'?(TX(spec).keyLabel??'ANSWER KEY'):(TX(spec).previewLabel??'PREVIEW');if(label)marker(g,th,label,-55,1575,735);spotlightLogo(g,L);return c;
 }
 async function spotlightIncluded(spec,th,L,st){
   const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,{...spec,title:"What's Included",text:{...TX(spec),subtitle:spec.title}},th);
   const items=defaults(spec,st).included,top=600,h=1120/Math.max(1,items.length);
-  items.forEach((text,i)=>{const y=top+i*h;g.fillStyle=th.a;g.fillRect(100,y+10,110,h-25);blockText(g,String(i+1),100,y+10,110,h-25,'#111',65);blockText(g,text,240,y+10,1630,h-25,'#111',84);});return c;
+  items.forEach((text,i)=>{const y=top+i*h;g.fillStyle=th.a;g.fillRect(100,y+10,110,h-25);blockText(g,String(i+1),100,y+10,110,h-25,'#111',65);blockText(g,text,240,y+10,1630,h-25,'#111',84);});spotlightLogo(g,L);return c;
 }
 
 async function build(spec){
@@ -226,7 +240,7 @@ async function build(spec){
   const th=THEMES[spec.opts.theme]||THEMES.apple, L=await getLogo(), st=stats(spec), out=[];
   spec.title=spec.title||(spec.isBundle?(spec.prods.map(p=>p.title).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' Bundle'):spec.prod.title);
   const skillsTxt=skillsOf(spec), X=TX(spec);
-  const spotlight=spec.opts.style==='spotlight';
+  const spotlight=spec.opts.style==='spotlight';if(spotlight)await loadSpotlightFont();
   out.push(['01-cover.png',await (spotlight?spotlightCover:cover)(spec,th,L,st)]);
   const picks=spec.picks.length?spec.picks:[...st.defaultPicks.slice(0,3)].concat(st.keys.length?[spec.doc.pages[st.keys[0]]]:[]);
   const prodFor=(pg)=>{ // bundles: name the product the page belongs to
