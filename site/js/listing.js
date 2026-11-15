@@ -181,18 +181,18 @@ function stats(spec){
   included.push('Print and go');
   return {R,student,keys,nStudent,defaultPicks,hasKey,included};
 }
-// Bold Spotlight: rounded, heavy serif lettering; shared title border; overlapping page fan and footer logo.
-// Fraunces is loaded only for this listing style, leaving student-product fonts unchanged.
+// Bold Spotlight: chunky rounded display lettering (Baloo 2 ExtraBold); shared title border; overlapping page fan and footer logo.
+// Baloo 2 ExtraBold is loaded only for this listing style, leaving student-product fonts unchanged.
 let spotlightFont=null;
 async function loadSpotlightFont(){
-  if(!spotlightFont){const face=new FontFace('Fraunces','url(fonts/Fraunces-Black.ttf)',{weight:'900'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
+  if(!spotlightFont){const face=new FontFace('Baloo2','url(fonts/Baloo2-ExtraBold.ttf)',{weight:'800'});spotlightFont=face.load().then(f=>document.fonts.add(f)).catch(e=>{spotlightFont=null;throw e;});}
   return spotlightFont;
 }
 function blockText(g,text,x,y,w,h,color,max=160){
   const value=String(text||'');if(!value)return;
   let size=max,lines;
-  do{lines=wrapText(g,value,'900','Fraunces',size,w);g.font=FONT(900,size,'Fraunces');if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
-  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(900,size,'Fraunces');
+  do{lines=wrapText(g,value,'800','Baloo2',size,w);g.font=FONT(800,size,'Baloo2');if(lines.length*size*1.08<=h&&lines.every(l=>g.measureText(l).width<=w))break;size-=2;}while(size>18);
+  g.fillStyle=color;g.textAlign='center';g.textBaseline='middle';g.font=FONT(800,size,'Baloo2');
   const top=y+h/2-(lines.length-1)*size*1.08/2;lines.forEach((l,i)=>g.fillText(l,x+w/2,top+i*size*1.08));
 }
 function spotlightBars(g,spec,th){
@@ -212,42 +212,43 @@ function spotlightLogo(g,L){logoBadge(g,L,165,1880,108);}
 async function spotlightCover(spec,th,L,st){
   const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,spec,th);
   const pics=(spec.picks.length?spec.picks:st.defaultPicks).slice(0,3);
-  const ims=pics.map(p=>pageImg(p,1130,1100));
-  if(ims.length>1)paper(g,ims[1],1370,1075,0.12);
-  if(ims.length>2)paper(g,ims[2],650,1090,-0.13);
-  if(ims.length)paper(g,ims[0],1040,1000,-0.018);
-  const X=TX(spec), labels=(X.included||st.included).slice(0,3);
-  labels.forEach((txt,i)=>marker(g,th,txt,-55,1080+i*170,735));
-  // Draw the grade after the page fan so it overlaps the page grabs as they move higher.
+  const ims=pics.map(p=>pageImg(p,980,860));
+  // Pages fan out from a shared base, rising behind the grade badge.
+  if(ims.length===1) paper(g,ims[0],S/2,1120,0);
+  else if(ims.length===2){paper(g,ims[0],S/2-280,1140,-0.08);paper(g,ims[1],S/2+280,1100,0.06);}
+  else {paper(g,ims[2],S/2-420,1180,-0.12);paper(g,ims[1],S/2+420,1140,0.09);paper(g,ims[0],S/2,1080,-0.01);}
+  const X=TX(spec);
   if(spec.opts.grade){pill(g,1370,540,560,115,'#111','#111',4);blockText(g,spec.opts.grade,1390,545,520,100,'#fff',72);}
   if(has(X,'keyBurst')?X.keyBurst:st.hasKey){pill(g,1300,690,630,110,th.a,'#111',7);blockText(g,(X.keyTop??'ANSWER')+' '+(X.keyBot??'KEY'),1320,698,590,90,'#111',65);}
   const rb=defaults(spec,st).ribbon;if(rb){g.fillStyle=th.p;g.strokeStyle='#111';g.lineWidth=10;g.fillRect(470,1635,1510,155);g.strokeRect(470,1635,1510,155);blockText(g,rb,500,1650,1450,120,th.d==='#A86B00'||['lime','sunny','peach'].includes(spec.opts.theme)?'#111':'#fff',78);}
   spotlightLogo(g,L);return c;
 }
-async function spotlightPreview(spec,th,L,page,role,k,total,title,skills){
-  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,{...spec,title,text:{...TX(spec),subtitle:skills}},th);
-  const im=pageImg(page,1660,1170);paper(g,im,1000,1155,0);
-  const label=role==='key'?(TX(spec).keyLabel??'ANSWER KEY'):(TX(spec).previewLabel??'PREVIEW');if(label)marker(g,th,label,-55,1575,735);spotlightLogo(g,L);return c;
+async function spotlightPreview(spec,th,L,page,role,k,total,prodTitle,skillsTxt){
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);
+  g.fillStyle='#101010';g.fillRect(0,0,S,280);blockText(g,prodTitle,80,20,S-160,240,'#fff',160);
+  if(skillsTxt){g.fillStyle='#fff';g.fillRect(0,280,S,140);g.strokeStyle='#111';g.lineWidth=10;g.strokeRect(0,280,S,140);blockText(g,skillsTxt,60,290,S-120,120,'#111',80);}
+  const im=pageImg(page,1500,1180);paper(g,im,S/2,860+(k%2?10:-10),(k%2?0.008:-0.008));
+  const X=TX(spec), label=(role==='key'?(has(X,'keyLabel')?X.keyLabel:'ANSWER KEY'):(has(X,'previewLabel')?X.previewLabel:'PREVIEW'));
+  if(label){pill(g,70,S-200,Math.min(900,g.measureText(label).width+180),120,th.a,'#111',8);blockText(g,label,90,S-185,Math.min(860,g.measureText(label).width+140),90,'#111',70);}
+  spotlightLogo(g,L);return c;
 }
 async function spotlightIncluded(spec,th,L,st){
-  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,{...spec,title:"What's Included",text:{...TX(spec),subtitle:spec.title}},th);
-  const items=defaults(spec,st).included,top=600,h=1120/Math.max(1,items.length);
+  const [c,g]=newCanvas();g.fillStyle=th.l;g.fillRect(0,0,S,S);spotlightBars(g,spec,th);
+  g.fillStyle='#fff';g.strokeStyle='#111';g.lineWidth=12;g.fillRect(80,540,S-160,1280);g.strokeRect(80,540,S-160,1280);
+  blockText(g,"What's Included",100,560,S-200,140,'#111',110);
+  const items=defaults(spec,st).included, top=740, h=Math.min(160,(S-200-740)/items.length);
   items.forEach((text,i)=>{const y=top+i*h;g.fillStyle=th.a;g.fillRect(100,y+10,110,h-25);blockText(g,String(i+1),100,y+10,110,h-25,'#111',65);blockText(g,text,240,y+10,1630,h-25,'#111',84);});spotlightLogo(g,L);return c;
 }
-
 async function build(spec){
-  spec.opts=spec.opts||{}; spec.picks=spec.picks||[];
-  const th=THEMES[spec.opts.theme]||THEMES.apple, L=await getLogo(), st=stats(spec), out=[];
-  spec.title=spec.title||(spec.isBundle?(spec.prods.map(p=>p.title).filter((v,i,a)=>a.indexOf(v)===i).join(', ')+' Bundle'):spec.prod.title);
-  const skillsTxt=skillsOf(spec), X=TX(spec);
-  const spotlight=spec.opts.style==='spotlight';if(spotlight)await loadSpotlightFont();
-  out.push(['01-cover.png',await (spotlight?spotlightCover:cover)(spec,th,L,st)]);
+  const L=await getLogo(), th=THEMES[spec.opts.theme]||THEMES.apple, st=stats(spec), X=TX(spec);
+  const skillsTxt=skillsOf(spec);
+  const out=[[ '01-cover.png', await (spec.opts.style==='spotlight'?spotlightCover:cover)(spec,th,L,st)]];
   const picks=spec.picks.length?spec.picks:[...st.defaultPicks.slice(0,3)].concat(st.keys.length?[spec.doc.pages[st.keys[0]]]:[]);
   const prodFor=(pg)=>{ // bundles: name the product the page belongs to
     if(!spec.isBundle||!spec.doc.sets) return has(X,'previewTitle')&&X.previewTitle?X.previewTitle:spec.prod.title; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?s.prod.title:spec.prod.title;};
   const labFor=(pg)=>{ if(!spec.isBundle||!spec.doc.sets) return has(X,'previewPill')?X.previewPill:skillsTxt; const i=spec.doc.pages.indexOf(pg); const s=spec.doc.sets.find(s=>i>=s.from&&i<s.to); return s?skillsLine(BUNDLE.skillsOf([s.sec.label])):skillsTxt;};
-  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await (spotlight?spotlightPreview:preview)(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
-  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await (spotlight?spotlightIncluded:included)(spec,th,L,st)]);
+  let k=0; for(const pg of picks.slice(0,9)){ const role=st.R[spec.doc.pages.indexOf(pg)]; k++; out.push([`${String(k+1).padStart(2,'0')}-preview.png`,await (spec.opts.style==='spotlight'?spotlightPreview:preview)(spec,th,L,pg,role,k,picks.length,prodFor(pg),labFor(pg))]); }
+  out.push([`${String(k+2).padStart(2,'0')}-whats-included.png`,await (spec.opts.style==='spotlight'?spotlightIncluded:included)(spec,th,L,st)]);
   const first=spec.prod, label=skillsTxt, grade=spec.opts.grade;
   const title=`${spec.title}${label?' - '+label:''}${grade?' - '+grade:''}`.replace(/\u2014/g,'-');
   const prods=[...new Set((spec.prods||[spec.prod]).map(p=>p.id))];
